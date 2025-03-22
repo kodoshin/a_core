@@ -35,6 +35,5 @@ def document_components (project, technology):
             r_document_r_file(file.content, file, file.name, technology)
         elif technology.name == 'Java':
             java_document_java_file(file.content, file, file.name, technology)
-        elif technology.name == 'C#':
-            get_csharp_docstring(file.content, file, file.name, technology)
+
 

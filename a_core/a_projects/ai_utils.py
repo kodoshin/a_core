@@ -15,7 +15,10 @@ def document_tech(git_repo_id) :
     technos = Technology.objects.all()
     tech_text = "; ".join([f"{tech.name}" for tech in technos if tech.description])
     #print(tech_text)
-    prompt = prompt + "I want you to analyse the structure and give me the used techno from this list [{0}]. I want the answer to be the short name inside <techno></techno> balise, example: <techno>Django</techno>".format(tech_text)
+
+    prompt = prompt + """I want you to analyse the structure and give me the used techno from this list [{0}]. 
+    This is a crucial step in my process, please make sure to select the right technology according to the files paths, any mistake can create big damage.
+    I want the answer to be the short name inside <techno></techno> balise, example: <techno>Django</techno>""".format(tech_text)
     gpt_output = get_gpt_output(prompt)
     #print(gpt_output)
     project_tech = gpt_output.split("<techno>")[-1].split("</techno>")[0]

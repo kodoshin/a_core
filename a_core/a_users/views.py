@@ -7,6 +7,10 @@ from django.contrib.auth import logout
 from .forms import EmailForm, GithubKeyForm, ProfileForm
 from a_projects.models import Project
 from django.http import HttpResponseForbidden
+import pytz
+from django.utils import timezone
+
+
 
 from .models import Profile
 
@@ -143,13 +147,28 @@ def profile_view(request):
     return render(request, 'a_users/profile_edit.html', context)
 
 
-@login_required
 def claim_credits_view(request):
     if request.method == 'POST':
         profile = request.user.profile
+
+        # Determine user's timezone (fallback if not provided)
+        try:
+            user_tz = pytz.timezone(profile.timezone) if profile.timezone else timezone.get_current_timezone()
+        except Exception:
+            user_tz = timezone.get_current_timezone()
+
+        # Get the current local date for the user
+        local_today = timezone.now().astimezone(user_tz).date()
+
+        # Reset the claimed flag if the stored claim date is not today
+        if profile.daily_credit_claim_date != local_today:
+            profile.has_claimed_credits = False
+
         if not profile.has_claimed_credits:
             profile.available_credits += 20
             profile.has_claimed_credits = True
+            profile.daily_credit_claim_date = local_today
             profile.save()
+
         return redirect(request.META.get('HTTP_REFERER', '/'))
     return HttpResponseForbidden()

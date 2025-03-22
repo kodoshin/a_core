@@ -4,7 +4,9 @@ from git_auth.views import get_github_token
 from a_users.models import Profile
 import requests
 import base64
+from git_auth.models import AllowedFile
 import re
+
 
 
 
@@ -35,6 +37,7 @@ def has_equivalent(user, git_repo_id, path,file_content):
 
 def view_modified_repo_files(request, git_repo_id, repo_name, project_id):
     #print('view repo files')
+    allowed_extensions = tuple(AllowedFile.objects.values_list('extension', flat=True))
     token = get_github_token(request.user)
     headers = {'Authorization': f'token {token}',
                "Accept": "application/vnd.github.v3+json"}
