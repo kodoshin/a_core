@@ -41,6 +41,23 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     });
+
+    // Propagate check/uncheck state from a folder to all its child checkboxes
+    const fileCheckboxes = document.querySelectorAll('.file-checkbox');
+    fileCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const li = this.closest('li.file-item');
+            if (!li) return;
+            // If the list item contains a child tree, it represents a folder
+            const childTree = li.querySelector('ul.file-tree');
+            if (childTree) {
+                const childCheckboxes = childTree.querySelectorAll('.file-checkbox');
+                childCheckboxes.forEach(childCheckbox => {
+                    childCheckbox.checked = this.checked;
+                });
+            }
+        });
+    });
 });
 </script>
 
