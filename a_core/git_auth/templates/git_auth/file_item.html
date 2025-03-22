@@ -1,0 +1,36 @@
+<li class="file-item">
+    <!-- 1) Une div .item-row pour contenir sur la même ligne l’icône, le nom et la checkbox -->
+    <div class="item-row">
+        {% if item.type == "folder" %}
+            <span class="icon">📁</span>
+            <span class="folder">{{ item.name }}</span>
+        {% else %}
+            <span class="icon">📄</span>
+            <label for="{{ item.path }}" class="file">{{ item.name }}</label>
+        {% endif %}
+
+        <!-- La checkbox -->
+        <input type="checkbox"
+               class="file-checkbox"
+               name="file-checkbox"
+               data-path="{{ item.path }}"
+               id="{{ item.path }}"
+               value="{{ item }}"
+               checked>
+    </div>
+
+    <!-- 2) Si c’est un dossier, on affiche le <ul> des enfants -->
+    {% if item.type == "folder" %}
+        <ul class="file-tree hidden">
+            {% for child in item.children %}
+                {% include 'git_auth/file_item.html' with item=child %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>
+
+
+
+
+
+

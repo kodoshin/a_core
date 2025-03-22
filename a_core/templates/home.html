@@ -1,0 +1,465 @@
+{% extends 'layouts/blank.html' %}
+
+{% block content %}
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+    table {
+        width: 60%;
+        margin: 20px auto;
+        border-collapse: collapse;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    th, td {
+        padding: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: left;
+    }
+    th {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    tr:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+</style>
+
+<style>
+  .card {
+      background-color: #1f1e23; /* Fond gris clair */
+      color: white;
+      font-family: 'DynaPuff' ;
+  }
+  .card:hover {
+      background-color: #ccc; /* Fond gris plus foncé au survol */
+      color: #aaaaaa;
+  }
+
+  .sci-fi-text {
+    font-family: 'DynaPuff', sans-serif; /* police d'écriture futuriste */
+    font-size: 4vh;
+    color: #7700ff;
+    /*background: linear-gradient(to bottom, #aaaaaa 50%, #ffffff 50%); /* dégradé de fond */
+    background: white;
+    text-align: left;
+    -webkit-background-clip: text; /* applique le dégradé au texte */
+    -webkit-text-fill-color: transparent; /* rend le texte transparent pour voir le dégradé */
+}
+  .container {
+      background-color: #1f1e23;
+  }
+</style>
+
+<style>
+/* Centrage du texte */
+.text-center {
+  text-align: center;
+}
+
+/* Marges en bas */
+.mb-20 {
+  margin-bottom: 5rem;
+}
+
+/* Style du titre */
+.title {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 2rem;
+}
+
+/* Pour les écrans moyens et supérieurs */
+@media (min-width: 768px) {
+.title {
+    font-size: 3.75rem;
+  }
+}
+
+/* Style du paragraphe */
+.description {
+  font-size: 1.25rem;
+  color: #9CA3AF;
+  margin-bottom: 2.5rem;
+  max-width: 42rem; /* équivalent à max-w-2xl */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Style du bouton */
+.cta-button {
+  padding: 1rem 2rem; /* py-4 px-8 */
+  background-color: #3B82F6; /* bg-blue-500 */
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem; /* rounded-lg */
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 600; /* font-semibold */
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* transition-colors */
+}
+
+/* Effet au survol */
+.cta-button:hover {
+  background-color: #2563EB; /* hover:bg-blue-600 */
+}
+
+
+
+    /* Conteneur de la grille */
+.features-grid {
+  display: grid;
+  gap: 2rem; /* équivalent à gap-8 */
+  margin-bottom: 5rem; /* équivalent à mb-20 */
+  max-width: 80%;
+  padding-left: 20%;
+
+}
+
+/* En mode responsive (écrans moyens et supérieurs), on affiche trois colonnes */
+@media (min-width: 768px) {
+.features-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Style de chaque carte */
+.feature-card {
+  background-color: #1F2937; /* bg-gray-800 */
+  padding: 2rem; /* p-8 */
+  border-radius: 1rem; /* rounded-xl */
+}
+
+/* Style générique pour les icônes */
+.icon {
+  height: 3rem; /* h-12 */
+  width: 3rem;  /* w-12 */
+  color: #3B82F6; /* text-blue-500 */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+/* Style du titre de la feature */
+.feature-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: bold;
+  color: #ffffff; /* text-white */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+/* Style du texte de la feature */
+.feature-text {
+  color: #9CA3AF; /* text-gray-400 */
+}
+
+
+/* Conteneur principal */
+.cta-container {
+  background-color: #2563eb; /* bg-blue-600 */
+  border-radius: 1rem;       /* rounded-2xl */
+  padding: 3rem;/* p-12 */
+  text-align: center;
+  margin: 0 20%;             /* 20 % de marge à gauche et à droite */
+  box-sizing: border-box;    /* pour inclure le padding dans la largeur totale */
+}
+
+/* Titre */
+.cta-title {
+  font-size: 1.875rem;  /* text-3xl */
+  font-weight: bold;
+  color: #ffffff;       /* text-white */
+  margin-bottom: 1.5rem; /* mb-6 */
+}
+
+/* Description */
+.cta-description {
+  color: #bfdbfe;       /* text-blue-100 */
+  margin-bottom: 2rem;  /* mb-8 */
+  max-width: 42rem;     /* max-w-2xl */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Conteneur des boutons */
+.cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem; /* espace horizontal entre les boutons (équivalent à space-x-4) */
+}
+
+/* Style commun des boutons */
+.btn {
+  padding: 1rem 2rem;         /* py-4 px-8 */
+  border-radius: 0.5rem;       /* rounded-lg */
+  font-weight: 600;           /* font-semibold */
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* transition-colors */
+  font-size: 1rem;
+  border: none;
+}
+
+/* Bouton principal */
+.btn-primary {
+  background-color: #ffffff;  /* bg-white */
+  color: #2563eb;             /* text-blue-600 */
+}
+
+.btn-primary:hover {
+  background-color: #f3f4f6;  /* hover:bg-gray-100 */
+  color: #4ac1f7;
+}
+
+/* Bouton secondaire */
+.btn-secondary {
+  background-color: transparent;
+  border: 2px solid #ffffff;  /* border-2 border-white */
+  color: #ffffff;             /* text-white */
+}
+
+.btn-secondary:hover {
+  background-color: #1d4ed8;  /* hover:bg-blue-700 */
+}
+
+
+</style>
+
+{% if not user.is_authenticated %}
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<br><br><br><br>
+<div class="text-center mb-20">
+  <h1 class="title">
+    Code smarter with AI
+  </h1>
+  <p class="description">
+    Code smarter, not harder! Let AI handle the heavy lifting! Our smart assistants understand your code, provide solutions, and offer context-aware suggestions to boost your efficiency.
+  </p>
+  <button class="cta-button" onclick="window.location.href='{% url 'account_login' %}'">
+    Start For Free
+  </button>
+</div>
+
+
+<div id="features" class="features-grid">
+  <div class="feature-card">
+    <!-- Remplacez ce div par votre icône SVG ou image pour Sparkles -->
+    <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/link.png" alt="Sparkles" class="icon">
+    <h3 class="feature-title">Github integration</h3>
+    <p class="feature-text">
+      Integrate GitHub in seconds—select your repos and get AI-powered insights.
+    </p>
+  </div>
+  <div class="feature-card">
+    <!-- Remplacez ce div par votre icône SVG ou image pour Brain -->
+    <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/brain.png" alt="Sparkles" class="icon">
+    <h3 class="feature-title">Context-Aware Solutions</h3>
+    <p class="feature-text">
+      No generic responses—just AI-driven, personalized solutions tailored to your code.
+    </p>
+  </div>
+  <div class="feature-card">
+    <!-- Remplacez ce div par votre icône SVG ou image pour Zap -->
+    <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/spark.png" alt="Sparkles" class="icon">
+    <h3 class="feature-title">Growing Tech Stack</h3>
+    <p class="feature-text">
+      More languages, more frameworks, more possibilities—our AI evolves with you.
+    </p>
+  </div>
+</div>
+
+<br>
+<div class="text-center mb-20">
+  <h1 class="title">
+      Seamless Workflow
+  </h1>
+</div>
+<div style="display: flex; justify-content: center;">
+  <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/process.png" style="width: 30%; height: auto">
+</div>
+
+<br>
+
+<div style="margin: 0 20%">
+  <video controls>
+      <source src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/KODOSHIN-HOME.mp4" type="video/mp4">
+  </video>
+</div>
+<br><br>
+
+
+<div class="text-center mb-20">
+<h1 class="title">
+    AI Coding Assistants Comparison
+</h1>
+</div>
+
+<div>
+    {{ radar_chart|safe }}
+</div>
+
+
+<table>
+    <tr>
+        <th>Criteria</th>
+        <th>Kodoshin</th>
+        <th>GitHub Copilot</th>
+        <th>ChatGPT</th>
+    </tr>
+    <tr>
+        <td>Code Personalization</td>
+        <td>🎯 High - Generates code based on the repo & the prompt</td>
+        <td>📄 Medium - Based on the current file</td>
+        <td>📄 Medium - Generic code generation based on the prompt</td>
+    </tr>
+    <tr>
+        <td>GitHub Integration</td>
+        <td>✅ Native - Directly integrated with GitHub</td>
+        <td>✅ Good - Works via IDE</td>
+        <td>❌ None - No direct GitHub integration</td>
+    </tr>
+    <tr>
+        <td>Context & Project Understanding</td>
+        <td>🔍 Excellent - Analyzes the entire repo</td>
+        <td>🔍 Limited - File-by-file context</td>
+        <td>🧠 Medium - Understands chat history</td>
+    </tr>
+    <tr>
+        <td>Suggestion Accuracy</td>
+        <td>⚡ Very high - Context-aware code</td>
+        <td>⚡ Good - Inline recommendations</td>
+        <td>🔍 Variable - Depends on the prompt</td>
+    </tr>
+    <tr>
+        <td>Development Speed</td>
+        <td>🚀 Fast - Context-aware suggestions</td>
+        <td>⚡ Quick - Inline code suggestions</td>
+        <td>⏳ Slower - Requires back-and-forth interaction</td>
+    </tr>
+    <tr>
+        <td>Effort Required to Explain to AI</td>
+        <td>🟢 Minimal - Uses repo context automatically</td>
+        <td>🟡 Medium - Requires good function naming</td>
+        <td>🔴 High - Needs detailed prompts</td>
+    </tr>
+    <tr>
+        <td>User Experience</td>
+        <td>🛠️ Optimized for GitHub developers</td>
+        <td>📂 Smooth IDE integration</td>
+        <td>📝 Flexible but less optimized for devs</td>
+    </tr>
+</table>
+
+
+<br><br><br>
+
+
+<div class="cta-container">
+  <h2 class="cta-title">
+    Ready to revolutionize the way you code ?
+  </h2>
+  <p class="cta-description">
+    Join a fast growing number of developers who have already boosted their productivity.
+  </p>
+  <div class="cta-buttons">
+    <button onclick="window.location.href='{% url 'account_login' %}'" class="btn btn-primary">
+      Start Now
+    </button>
+    <button class="btn btn-secondary">
+      View Demo
+    </button>
+  </div>
+</div>
+
+
+
+
+
+{% endif %}
+
+
+{% if user.is_authenticated %}
+<div class="max-w-4xl ml-[22%] mt-[10rem]">
+<h1 class="sci-fi-text">Select AI</h1>
+</div>
+
+<div class="container">
+  <div class="row">
+  {% for persona in personas %}
+    <div class="col-md-3" style="padding-left: 10px">
+      {% if persona.status == 'active' %}
+        <a style="text-decoration: none" href="{{ request.path }}ai/{{ persona.slug }}">
+      {% endif %}
+        <div class="card mb-4" style="{% if persona.status == 'coming_soon' %}background-color: #d3d3d3; opacity: 0.6; pointer-events: none;{% endif %}">
+          <img src="{{ persona.image.url }}" class="card-img-top" alt="{{ persona.title }}">
+          <div class="card-body">
+            <h2 class="card-title">{{ persona.title }}</h2>
+            <p class="card-text">{{ persona.subtitle }}</p>
+            {% if persona.status == 'active' %}
+              <p class="text-success font-weight-bold">Active</p>
+            {% endif %}
+            {% if persona.status == 'coming_soon' %}
+              <p class="text-dark font-weight-bold">Coming Soon</p>
+            {% endif %}
+          </div>
+        </div>
+      {% if persona.status == 'active' %}
+        </a>
+      {% endif %}
+    </div>
+  {% endfor %}
+  </div>
+</div>
+
+<div class="max-w-4xl ml-[22%] py-2">
+    <h1 class="sci-fi-text">Select project</h1>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+        <a style="text-decoration: none" href="{{ request.path }}git/repos/">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h2 class="card-title">+ Create</h2>
+              <p class="card-text">New Project</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% for project in projects %}
+      <div class="col-md-3">
+        <a style="text-decoration: none" href="{{ request.path }}projects/documentation/{{ project.id }}">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h4 class="card-title">{{ project.name }}</h4>
+              <p class="card-text">{{ project.technology.name }}
+                {% if project.technology.status.code == 3 %}
+                <span style="font-family: 'Courier New', monospace; font-size: 12px; font-weight: bold; color: #aaaaaa; font-family: bold; vertical-align: top;">
+                  beta
+                </span>
+
+                {% endif %}
+              </p>
+
+            </div>
+              <img src="{{ project.technology.image.url }}" class="card-img-top" alt="{{ project.name }}" style="width: 70%">
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+
+
+
+
+
+
+
+
+
+{% endblock %}
+
+

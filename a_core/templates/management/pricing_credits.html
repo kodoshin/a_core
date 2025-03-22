@@ -1,0 +1,242 @@
+<title>Plans & Credits</title>
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block layout %}
+
+
+
+
+<div class="max-w-4xl ml-[25%] mt-[10rem]">
+<h3 style="font-weight: bold">Pay As You Go</h3>
+</div>
+
+
+<div class="pricing-columns">
+  {% for offer in credit_offers %}
+  <button style="background-color: unset;">
+    <div class="pricing-card">
+      <div class="pricing-card-header">
+        <div class="pricing-title">{{ offer.name }} Credits</div>
+        <div class="pricing-price">{{ offer.price }}</div>
+      </div>
+    </div>
+  </button>
+  {% endfor %}
+
+</div>
+
+
+
+
+
+<div class="max-w-4xl ml-[25%] mt-[10rem]">
+<h3 style="font-weight: bold">Plans (coming soon)</h3>
+</div>
+
+<!-- Ajouter muted dans class si on veut enlever un avantage -->
+<div class="pricing-columns">
+    <!-- Plan Free -->
+    <div class="pricing-card">
+      <div class="pricing-card-header">
+        <div class="pricing-title">Free</div>
+        <div class="pricing-price">$0.00</div>
+      </div>
+      <div class="pricing-table-content">
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">0 credits per month</div>
+        </div>
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">5 free credits per day</div>
+        </div>
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">1 project</div>
+        </div>
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon muted">
+          <div class="pricing-row-text muted">Automatic Github Sync.</div>
+        </div>
+        <div class="pricing-small-text">Per month, billed annually</div>
+      </div>
+    </div>
+
+
+
+    <!-- Plan Solo -->
+    <div class="pricing-card">
+      <div class="pricing-card-header">
+        <div class="pricing-title">Basic</div>
+        <div class="pricing-price">$9.99</div>
+      </div>
+      <div class="pricing-table-content">
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">200 credits per month</div>
+        </div>
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">10 free credits per day</div>
+        </div>
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">Up to 3 projects</div>
+        </div>
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">Automatic Github Sync.</div>
+        </div>
+        <div class="pricing-small-text">Per month, billed annually</div>
+      </div>
+    </div>
+
+    <!-- Plan Premium -->
+    <div class="pricing-card middle">
+      <div class="pricing-card-header">
+        <div class="pricing-title">Pro</div>
+        <div class="pricing-price">$29.99</div>
+      </div>
+      <div class="pricing-table-content">
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">1000 credits per month</div>
+        </div>
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">25 free credits per day</div>
+        </div>
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">Up to 10 projects</div>
+        </div>
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">Automatic Github Sync</div>
+        </div>
+        <div class="pricing-small-text">Per month, billed annually</div>
+      </div>
+    </div>
+
+    <!-- Plan Pro -->
+    <div class="pricing-card">
+      <div class="pricing-card-header">
+        <div class="pricing-title">Premium</div>
+        <div class="pricing-price">$59.99</div>
+      </div>
+      <div class="pricing-table-content">
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">3000 credits per month</div>
+        </div>
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">60 free credits per day</div>
+        </div>
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">Unlimited projects</div>
+        </div>
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+          <div class="pricing-row-text">Automatic Github Sync</div>
+        </div>
+        <div class="pricing-small-text">Per month, billed annually</div>
+      </div>
+    </div>
+</div>
+
+<div class="max-w-4xl ml-[25%]">
+  <label>*daily credits are not cumulative</label>
+</div>
+
+<style>
+    /* Global Styles */
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .pricing-columns {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 50px;
+    }
+
+    .pricing-card {
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+      width: 300px;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-10px);
+    }
+
+    .pricing-card-header {
+      background-color: #2a2a2a;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .pricing-title {
+      font-size: 1.8em;
+      margin: 0;
+      text-transform: uppercase;
+    }
+
+    .pricing-price {
+      font-size: 2em;
+      color: #4ac1f7;
+      margin-top: 10px;
+    }
+
+    .pricing-table-content {
+      padding: 20px;
+      border-top: 1px solid #333;
+    }
+
+    .pricing-table-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .pricing-icon {
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+    }
+
+    .pricing-row-text {
+      flex: 1;
+    }
+
+    .muted {
+      opacity: 0.6;
+    }
+
+    .pricing-small-text {
+      font-size: 0.9em;
+      text-align: center;
+      color: #aaa;
+      margin-top: 20px;
+    }
+
+    /* Mise en valeur de la carte Premium */
+    .pricing-card.middle {
+      transform: scale(1.05);
+      border: 2px solid #1a73e8;
+    }
+  </style>
+{% endblock %}

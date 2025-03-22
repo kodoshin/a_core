@@ -1,0 +1,50 @@
+<title>Load documentation</title>
+
+{% extends 'layouts/blank.html' %} {% load static %}
+
+{% block content %}
+    <h1>Chargement de la documentation...</h1>
+    <div id="progress-bar-container">
+        <div id="progress-bar" style="width: 0%;"></div>
+    </div>
+
+    <style>
+        #progress-bar-container {
+            width: 100%;
+            background-color: #f3f3f3;
+            border-radius: 25px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        #progress-bar {
+            height: 30px;
+            background-color: #4CAF50;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+        }
+    </style>
+
+    <script>
+        function updateProgressBar(progress) {
+            var elem = document.getElementById("progress-bar");
+            elem.style.width = progress + "%";
+            elem.innerHTML = progress + "%";
+        }
+
+        function simulateProgress() {
+            var progress = 0;
+            var interval = setInterval(function() {
+                progress += 10;
+                updateProgressBar(progress);
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    window.location.href = "/doc/documentation/{{ project_id }}/";
+                }
+            }, 500);  // Simule une mise à jour toutes les 0,5 secondes
+        }
+
+        simulateProgress();
+    </script>
+{% endblock %}

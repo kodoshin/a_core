@@ -1,0 +1,100 @@
+<title>Profile</title>
+
+{% extends 'layouts/blank.html' %}
+
+{% block content %}
+
+<div style="padding-left: 50px">
+    <div class="text-center flex flex-col items-left">
+        <img id="avatar" class="w-36 h-36 rounded-full object-cover my-4" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/avatar.svg" />
+        <div class="text-left max-w-md">
+            <h1 id="displayname">{{ user.profile.displayname|default:"" }}</h1>
+            <div class="text-gray-400 mb-2 -mt-3">{{ user.email }}</div>
+            <div class="text-gray-400 mb-2 -mt-3">@{{ user.username }}</div>
+        </div>
+    </div>
+    <br>
+    <div>
+        <label style="display: inline; font-size: x-large; font-style: oblique">Available Credits :
+            <span style="display: inline; font-style: normal ;">{{ profile.available_credits }} </span>
+            <img style="max-width: 25px; display: inline;" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/gold-coin.png" alt="magic"  >
+        </label>
+    </div>
+    <br>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+            </div>
+        {% endfor %}
+        <button type="submit">Save</button>
+        {% if onboarding %}
+            <a class="button button-gray ml-1" href="{% url 'home' %}">Skip</a>
+        {% else %}
+            <a class="button button-gray ml-1" href="{{ request.META.HTTP_REFERER }}">Cancel</a>
+        {% endif %}
+    </form>
+</div>
+
+
+<script>
+    // This updates the avatar preview
+    const fileInput = document.querySelector('input[type="file"]');
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        const image = document.querySelector('#avatar');
+        if (file && file.type.includes('image')) {
+            const url = URL.createObjectURL(file);
+            image.src = url;
+        }
+    });
+
+    // This updates the displayname preview
+    const display_nameInput = document.getElementById('id_displayname');
+    const display_nameOutput = document.getElementById('displayname');
+    display_nameInput.addEventListener('input', (event) => {
+        display_nameOutput.innerText = event.target.value;
+    });
+</script>
+
+<style>
+    form {
+        color: black; /* Couleur du texte noir */
+    }
+
+    /* Réduire la taille des champs d'écriture */
+    .form-control-sm {
+        width: 20vh; /* Vous pouvez ajuster la largeur selon vos besoins */
+        padding: 0.5rem; /* Vous pouvez aussi ajuster le padding si nécessaire */
+        font-size: 0.875rem; /* Taille de texte plus petite */
+    }
+
+    /* Optionnel : ajuster le style des labels si nécessaire */
+    label {
+        color: white; /* Couleur du texte noir pour les labels */
+    }
+
+    .form-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .form-group label {
+        width: 100px; /* Ajustez la largeur selon vos besoins */
+        text-align: left;
+        margin-right: 10px;
+    }
+
+    .form-group input,
+    .form-group select {
+        flex: 1;
+        padding: 5px;
+        max-width: 30vh;
+    }
+</style>
+
+
+{% endblock %}

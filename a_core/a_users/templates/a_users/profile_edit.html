@@ -1,0 +1,82 @@
+<title>Profile</title>
+
+{% extends 'layouts/box.html' %}
+
+{% block content %}
+
+{% if onboarding %}
+<h1 class="mb-4" style="color: black">Complete your Profile</h1>
+{% else %}
+<h1 class="mb-4" style="color: black">Edit your Profile</h1>
+{% endif %}
+
+<div class="text-center flex flex-col items-center">
+    <img id="avatar" class="w-36 h-36 rounded-full object-cover my-4" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/avatar.svg" />
+    <div class="text-center max-w-md">
+        <h1 id="displayname" style="color: black; font-family: 'DynaPuff';">{{ user.profile.displayname|default:"" }}</h1>
+        <div class="text-gray-400 mb-2 -mt-3">@{{ user.username }}</div>
+    </div>
+</div>
+
+<div>
+    <label style="color: dimgray; display: inline; font-family: 'DynaPuff'; font-style: oblique">
+        <span>Available Credits :</span>
+        <span style="display: inline; font-style: normal ;"> {{ profile.available_credits }} </span>
+        <img style="max-width: 20px; display: inline;" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/gold-coin.png" alt="magic"  >
+    </label>
+</div>
+<br><br>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" >Submit</button>
+    {% if onboarding %}
+    <a class="button button-gray ml-1" href="{% url 'home' %}">Skip</a>
+    {% else %}
+    <a class="button button-gray ml-1" href="{{ request.META.HTTP_REFERER }}">Cancel</a>
+    {% endif %}
+</form>
+<br><br>
+
+
+
+
+<script>
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const timezoneField = document.getElementById('id_timezone');
+        if (timezoneField) {
+            // Vérifier si l'objet Intl.DateTimeFormat est supporté
+            if (Intl && Intl.DateTimeFormat) {
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                if (timezone) {
+                    timezoneField.value = timezone;
+                    console.log("Detected Timezone:", timezone);
+                } else {
+                    console.error("Could not detect timezone.");
+                }
+            } else {
+                console.error("Intl.DateTimeFormat is not supported in this browser.");
+            }
+        } else {
+            console.error("Timezone field not found.");
+        }
+
+        const gmtOffsetField = document.getElementById('id_gmt_offset');
+        if(gmtOffsetField) {
+            var offset = new Date().getTimezoneOffset();
+            var sign = offset > 0 ? "-" : "+";
+            var absOffset = Math.abs(offset);
+            var hours = Math.floor(absOffset / 60);
+            var minutes = absOffset % 60;
+            var hStr = hours < 10 ? "0" + hours : hours;
+            var mStr = minutes < 10 ? "0" + minutes : minutes;
+            gmtOffsetField.value = sign + hStr + ":" + mStr;
+        }
+    });
+
+
+</script>
+
+{% endblock %}

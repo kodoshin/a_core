@@ -1,0 +1,33 @@
+<title>Login</title>
+
+{% extends "account/base_entrance.html" %}
+
+{% block content %}
+
+{% load i18n %}
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% trans "Sign In Via GitHub" %}{% endblock %}</title>
+</head>
+<body>
+<h1>{% trans "Sign In Via GitHub" %}</h1>
+
+<p>
+    {% block description %}
+        {% trans "You are about to sign in using a third-party account from GitHub." %}
+    {% endblock %}
+</p>
+
+
+<form method="POST">
+    {% csrf_token %}
+    <br>
+    <button type="submit">{% trans "Continue" %}</button>
+</form>
+
+</body>
+</html>
+
+{% endblock %}
+

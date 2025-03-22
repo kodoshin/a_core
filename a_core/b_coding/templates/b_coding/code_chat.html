@@ -1,0 +1,472 @@
+<title>Kenshi</title>
+{% extends 'layouts/blank.html' %}
+
+
+{% block content %}
+
+<!-- Wrap child containers in a parent container -->
+<div class="main-container" style="margin-top: 40px;">
+
+
+    <div class="chats-list-container" style="background-color: #1f1e23;" >
+
+    <br>
+        <div class="sidebar">
+        <br>
+        <select id="project-dropdown" style="background-color: #c6cacb; width: 25vh ; color: #1f1e23; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-family: 'DynaPuff';">
+            {% for project in projects %}
+                <option value="{{ project.id }}" {% if project.id == default_project.id %}selected{% endif %}>{{ project.name }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
+
+
+
+
+
+            <!--<h3 style="font-family: 'DynaPuff'">Your Chats</h3>-->
+            <button type="submit" style="height: 2em; font-size: 0.8em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff';" onclick="window.location.href='/ai/kenshi'">New Chat</button>
+            <div class="toggle-content" id="chats-list">
+                <ul style="width: 25vh ;">
+                    {% for chat in chats %}
+                        <li>
+                            <span {% if chat.id == current_chat.id %}class="selected-chat"{% endif %}>
+                            <a href="?chat_id={{ chat.id }}" style="color: white; font-family: 'DynaPuff'; font-size: small;">{{ chat.title }}</a>
+                            </span>
+                            <span class="delete-chat" data-chat-id="{{ chat.id }}" style="cursor:pointer; color:red; margin-left:0px; float: right;">&#x1F5D1;</span>
+                            <span class="cancel-delete" data-chat-id="{{ chat.id }}" style="display:none; cursor:pointer; color:gray; margin-left:0px; float: right;">&#x274C;</span>
+                            <span class="confirm-delete" data-chat-id="{{ chat.id }}" style="display:none; cursor:pointer; color:green; margin-left:0px; float: right;">&#x2714;</span>
+
+                        </li>
+                    {% empty %}
+                        <li style="font-family: 'DynaPuff'">No Chats.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="chat-area-container">
+
+        <br>
+        <div class="chat-area">
+
+            <!-- Display the star rating only if a current chat is selected -->
+            {% if current_chat %}
+                <div class="rating-container" style="margin-bottom: 20px;">
+                    <span class="star" data-value="1" style="cursor: pointer;">&#9733;</span>
+                    <span class="star" data-value="2" style="cursor: pointer;">&#9733;</span>
+                    <span class="star" data-value="3" style="cursor: pointer;">&#9733;</span>
+                    <span class="star" data-value="4" style="cursor: pointer;">&#9733;</span>
+                    <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
+                </div>
+                <div>Category: {{ current_chat.chat_category.type }} ({{ current_chat.chat_category.price_secondary_prompt }} credits for secondary prompts)</div>
+                <br>
+
+
+            {% else %}
+
+                <!-- New dropdown for ChatCategory -->
+                <select id="chatcategory-dropdown" style="background-color: unset; max-width: 20vh; color: white; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-family: 'DynaPuff';">
+                    {% for category in chatcategories %}
+                        <option style="color: black" value="{{ category.id }}" {% if category.id == profile.default_chat_category.id %}selected{% endif %}>{{ category.type }} ({{ category.price }} credits)</option>
+                    {% endfor %}
+                </select>
+                <br><br>
+            {% endif %}
+
+            <div class="message-container" id="message-container" style="width: 80%">
+                {% for message in messages %}
+                    {% if message.type == 'prompt' %}
+                        <div class="message user">
+                            <p><strong>You :</strong> {{ message.content|linebreaksbr }}</p>
+                        </div>
+                    {% elif message.type == 'gpt-a' %}
+                        <div class="message ai">
+                            <p><img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/avatar.png" alt="IA" style="width:40px;height:58px;"></p>
+                            <!-- Display steps here -->
+                            {% if message.steps|length > 1 %}
+                            <button class="prev-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff';">Previous</button>
+                            <button class="next-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff';">Next</button>
+                            {% endif %}
+                            <div class="steps-container">
+                                {% for step in message.steps %}
+                                    <div class="step" data-step-number="{{ forloop.counter0 }}" {% if not forloop.first %}style="display:none;"{% endif %}>
+                                        {% if message.steps|length > 1 %}
+                                        <p><strong>Step {{ step.step_number }}/{{ message.steps|length }}:</strong></p>
+                                        {% endif %}
+                                        <p>{{ step.justification }}</p>
+
+                                        {% if step.file|length > 0 %}
+                                        <p><strong>Location :</strong> {{ step.file }}</p>
+                                        {% endif %}
+                                        {% if step.code %}
+                                            <div class="code-container">
+                                                <button class="copy-code-btn">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                                    </svg>
+                                                    Copy
+                                                </button>
+                                                <pre style="max-width: 170vh"><code class="language-{{ step.code.language }}">{{ step.code.content|escape }}</code></pre>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+
+
+
+
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <br>
+            <div id="loading-spinner"></div>
+            <div id="loading-text" style="display:none; color: #c6cacb; font-family: 'DynaPuff'; margin-top: 10px;"></div>
+            <br>
+            <form id="chat-form">
+                {% csrf_token %}
+                <input type="hidden" name="chat_id" value="{{ current_chat.id }}" id="chat_id">
+                <textarea name="prompt" id="prompt" rows="3" style="width: 80%; background-color: #c6cacb; color: #1f1e23; overflow:hidden;"></textarea><br><br>
+                <button type="submit" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff';">Execute</button>
+            </form>
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<script>
+$(document).ready(function() {
+    $('#prompt').on('input', function() {
+        $(this).css('height', 'auto');
+        $(this).css('height', this.scrollHeight + 'px');
+    });
+});
+</script>
+
+<script>
+$(document).ready(function() {
+    $('#prompt').on('keydown', function(e) {
+        // Si la touche "Enter" est pressée sans 'Shift'
+        if (e.keyCode === 13 && !e.shiftKey) {
+            e.preventDefault();
+            $('#chat-form').submit();
+        }
+    });
+});
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    let textarea = document.getElementById("prompt");
+
+    function setPlaceholder() {
+      if (textarea.value.trim() === "") {
+        textarea.value = "Ask anything";
+        textarea.style.color = "#777"; // Grisé pour indiquer que c'est un placeholder
+      }
+    }
+
+    function clearPlaceholder() {
+      if (textarea.value === "Ask anything") {
+        textarea.value = "";
+        textarea.style.color = "#1f1e23"; // Couleur normale du texte
+      }
+    }
+
+    textarea.addEventListener("focus", clearPlaceholder);
+    textarea.addEventListener("blur", setPlaceholder);
+
+    setPlaceholder(); // Appliquer au chargement de la page
+  });
+</script>
+
+<script>
+  $(document).ready(function() {
+      // Handle delete icon click: show confirm and cancel icons
+      $('.delete-chat').click(function() {
+          var chatId = $(this).data('chat-id');
+          $(this).hide();
+          $('span.confirm-delete[data-chat-id="' + chatId + '"]').show();
+          $('span.cancel-delete[data-chat-id="' + chatId + '"]').show();
+      });
+
+      // Handle cancel icon click: hide confirm and cancel icons, show delete icon
+      $('.cancel-delete').click(function() {
+          var chatId = $(this).data('chat-id');
+          $(this).hide();
+          $('span.confirm-delete[data-chat-id="' + chatId + '"]').hide();
+          $('span.delete-chat[data-chat-id="' + chatId + '"]').show();
+      });
+
+      // Handle confirm icon click: send AJAX request to delete the chat from the DB
+      $('.confirm-delete').click(function() {
+          var chatId = $(this).data('chat-id');
+          var $li = $(this).closest('li');
+          $.ajax({
+              url: '{% url "delete_chat" %}',
+              type: 'POST',
+              data: {
+                  'chat_id': chatId,
+                  'csrfmiddlewaretoken': '{{ csrf_token }}'
+              },
+              success: function(response) {
+                  if (response.status === 'success') {
+                      $li.remove();
+                  } else {
+                      alert('Failed to delete chat: ' + response.message);
+                      // Revert UI on failure
+                      $('span.confirm-delete[data-chat-id="' + chatId + '"]').hide();
+                      $('span.cancel-delete[data-chat-id="' + chatId + '"]').hide();
+                      $('span.delete-chat[data-chat-id="' + chatId + '"]').show();
+                  }
+              },
+              error: function() {
+                  alert('An error occurred while deleting the chat.');
+                  // Revert UI on error
+                  $('span.confirm-delete[data-chat-id="' + chatId + '"]').hide();
+                  $('span.cancel-delete[data-chat-id="' + chatId + '"]').hide();
+                  $('span.delete-chat[data-chat-id="' + chatId + '"]').show();
+              }
+          });
+      });
+  });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const stars = document.querySelectorAll(".star");
+
+        stars.forEach(star => {
+            star.addEventListener("click", function () {
+                const rating = this.getAttribute("data-value");
+                const chatId = "{{ current_chat.id }}"; // Assure-toi que cette variable est bien définie dans ton template
+
+                if (!chatId) {
+                    console.error("Chat ID non défini.");
+                    return;
+                }
+
+                fetch("{% url 'code_chat_view' %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams({
+                        "rate": rating,
+                        "chat_id": chatId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        console.log("Note enregistrée :", data.rate);
+                        highlightStars(rating);
+                    } else {
+                        console.error("Erreur lors de l'enregistrement de la note.");
+                    }
+                })
+                .catch(error => console.error("Erreur AJAX :", error));
+            });
+        });
+
+        function highlightStars(rating) {
+            stars.forEach(star => {
+                if (parseInt(star.getAttribute("data-value")) <= rating) {
+                    star.style.color = "gold";
+                } else {
+                    star.style.color = "gray";
+                }
+            });
+        }
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('#project-dropdown').on('change', function() {
+            var selectedProjectId = $(this).val();
+
+            $.ajax({
+                url: '{% url "update_default_project" %}',
+                type: 'POST',
+                data: {
+                    'project_id': selectedProjectId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // On récupère la UL et on la vide
+                        var chatList = $('#chats-list ul');
+                        chatList.empty();
+
+                        // Si des chats sont renvoyés, on les affiche
+                        if (response.chats && response.chats.length > 0) {
+                            response.chats.forEach(function(chat) {
+                                var li = $('<li>');
+                                var link = $('<a>')
+                                    .attr('href', '?chat_id=' + chat.id)
+                                    .text(chat.title)
+                                    .css('color', 'white')
+                                    .css('font-family', 'DynaPuff');
+
+                                li.append(link);
+                                chatList.append(li);
+                            });
+                        } else {
+                            // Sinon, on affiche "No Chats."
+                            chatList.append(
+                                $('<li>')
+                                    .text('No Chats.')
+                                    .css('font-family', 'DynaPuff')
+                            );
+                        }
+                    } else {
+                        alert('Erreur lors de la mise à jour du projet par défaut.');
+                    }
+                },
+                error: function() {
+                    alert('Erreur côté serveur lors de la mise à jour.');
+                }
+            });
+        });
+
+
+        $('#chatcategory-dropdown').on('change', function() {
+            var selectedChatCategoryId = $(this).val();
+            $.ajax({
+                url: '{% url "update_default_chatcategory" %}',
+                type: 'POST',
+                data: {
+                    'chatcategory_id': selectedChatCategoryId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(data) {
+                    if(data.status === 'success') {
+                        console.log('Default c hat category updated successfully!');
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                },
+                error: function() {
+                    alert('An error has occurred while updating chat category.');
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+  $(document).ready(function() {
+    $('#chat-form').on('submit', function(e) {
+      e.preventDefault();
+
+      var prompt = $('#prompt').val().trim();
+      if (prompt === '') {
+        alert('Please enter a prompt.');
+        return;
+      }
+
+      $('#loading-spinner').show();
+      $('#loading-text').show();
+      $('#loading-text').text('reading code');
+
+      setTimeout(function() {
+          $('#loading-text').text('analyzing project components');
+      }, 10000);
+      setTimeout(function() {
+          $('#loading-text').text('analyzing code');
+      }, 20000);
+      setTimeout(function() {
+          $('#loading-text').text('generating solution');
+      }, 30000);
+      setTimeout(function() {
+          $('#loading-text').text('refining solution');
+      }, 40000);
+      setTimeout(function() {
+          $('#loading-text').text('please wait...');
+      }, 55000);
+
+      $.ajax({
+        url: '{% url "code_chat_view" %}',
+        type: 'POST',
+        data: $(this).serialize(),
+        success: function(data) {
+          $('#loading-spinner').hide();
+          // Rediriger vers la nouvelle page de chat
+          window.location.href = '?chat_id=' + data.chat_id;
+        },
+        error: function() {
+          $('#loading-spinner').hide();
+          alert('An error has occured.');
+        }
+      });
+    });
+});
+
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Handle step navigation
+        $('.next-step-btn').click(function() {
+            var $stepsContainer = $(this).siblings('.steps-container');
+            var $currentStep = $stepsContainer.find('.step:visible');
+            var $nextStep = $currentStep.next('.step');
+            if ($nextStep.length) {
+                $currentStep.hide();
+                $nextStep.show();
+            }
+        });
+        $('.prev-step-btn').click(function() {
+            var $stepsContainer = $(this).siblings('.steps-container');
+            var $currentStep = $stepsContainer.find('.step:visible');
+            var $prevStep = $currentStep.prev('.step');
+            if ($prevStep.length) {
+                $currentStep.hide();
+                $prevStep.show();
+            }
+        });
+
+        // Handle "Copy Code" button
+        document.querySelectorAll(".copy-code-btn").forEach(button => {
+            button.addEventListener("click", () => {
+                const codeElement = button.nextElementSibling.querySelector("code");
+                const text = codeElement.innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    button.innerText = "Copied!";
+                    setTimeout(() => {
+                        button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg> Copy`;
+                    }, 2000);
+                });
+            });
+        });
+
+    });
+</script>
+
+
+{% endblock %}

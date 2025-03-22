@@ -1,0 +1,66 @@
+<title>Update project</title>
+
+{% extends 'layouts/blank.html' %}
+{% load static %}
+
+
+<link rel="stylesheet" type="text/css" href="{% static 'git_auth/css/styles.css' %}">
+
+{% block content %}
+
+
+<form method="POST" action="{% url 'process_selected_files' git_repo_id=file_tree.git_repo_id repo_name=file_tree.repo_name %}">
+    {% csrf_token %}
+    <input type="hidden" name="project_id" value="{{ project.id }}">
+    <div class="container">
+        <h1 class="repo-name" style="color: black">{{ file_tree.repo_name }}</h1>
+        <ul class="file-tree">
+            {% for item in file_tree.file_tree %}
+                {% include 'git_auth/file_item.html' with item=item %}
+            {% endfor %}
+        </ul>
+
+
+        <h4 style="color: darkred">Deleted Files</h4>
+        <ul>
+            {% for deleted_file in deleted_files %}
+            <li style="color:#444d56"> {{ deleted_file }}</li>
+            <input type="hidden" name="deleted_file" value="{{ deleted_file }}">
+            {% endfor %}
+        </ul>
+
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Sélection de tous les dossiers
+    const folders = document.querySelectorAll('.folder');
+
+    folders.forEach(folder => {
+        folder.addEventListener('click', function() {
+            console.log("Clique sur le dossier :", folder.innerText);
+            const parentLi = folder.closest('li.file-item');
+            if (!parentLi) return;
+
+            const subUl = parentLi.querySelector('ul.file-tree');
+            if (subUl) {
+                subUl.classList.toggle('hidden');
+            }
+        });
+    });
+});
+</script>
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+

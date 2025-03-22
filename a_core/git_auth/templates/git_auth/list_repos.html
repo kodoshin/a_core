@@ -1,0 +1,111 @@
+<title>Repositories</title>
+
+{% extends 'layouts/blank.html' %}
+
+{% block content %}
+<div class="content-wrapper">
+    <br> <br> <br>
+    <h1>Select a Repository</h1>
+    <p>Your current plan allows you to work with the main branch</p>
+    <br>
+    <form method="get" id="repo-form">
+        <label for="repo">Select a Repository:</label>
+        <select name="repo" id="repo" style="color: black">
+            <option value="" disabled selected>Select a repository</option>
+            {% for repo in repos %}
+                <option style="color: black;"
+                        value="{{ repo.name }}"
+                        data-id="{{ repo.id }}"
+                        data-name="{{ repo.name }}"
+                        data-created="{{ repo.created_at }}"
+                        data-title="{{ repo.description }}"
+                        data-url="{{ repo.html_url }}">
+                    {{ repo.name }}
+                </option>
+            {% endfor %}
+        </select>
+        {% if repos_status == 0 %}
+        <p style="color: indianred">Your github token is invalid, please follow this <a href="/">tutorial</a> to solve this issue</p>
+        {% endif %}
+
+
+
+        <div id="branch-container" style="display:none; margin-top:10px;">
+            <label for="branch">Select a Branch:</label>
+            <select name="branch" id="branch">
+                <option value="" disabled selected>Select a branch</option>
+            </select>
+        </div>
+
+
+        <div id="repo-details" style="margin-top: 20px; display: none;">
+            <h2>Repository Details:</h2>
+            <p><strong>Name:</strong> <span id="repo-name"></span></p>
+            <p><strong>Description:</strong> <span id="repo-title"></span></p>
+            <p><strong>Created at:</strong> <span id="repo-created"></span></p>
+            <p><strong>URL:</strong> <a id="repo-url" href="#" target="_blank">View Repository</a></p>
+        </div>
+
+        <br> <br>
+        <button type="button" class="select-button" onclick="redirectToRepo()">Continue</button>
+    </form>
+</div>
+
+
+
+    <style>
+      .content-wrapper {
+        margin-left: 50px; /* Applique une marge de 50px à gauche */
+      }
+      .select-button {
+        height: 30px;
+        display: flex;
+        align-items: center; /* Centre verticalement */
+        justify-content: center; /* Centre horizontalement */
+        padding: 0 10px;
+        border: none;
+      }
+    </style>
+
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            console.log("DOM fully loaded and parsed");
+            const repoSelector = document.getElementById('repo');
+
+            repoSelector.addEventListener('change', function() {
+                const selectedRepo = repoSelector.options[repoSelector.selectedIndex];
+                console.log("Selected Repo:", selectedRepo);
+
+                if (selectedRepo.value) {
+                    console.log("Create date:");
+                    console.log(selectedRepo.dataset);
+                    document.getElementById('repo-name').textContent = selectedRepo.dataset.name;
+                    document.getElementById('repo-title').textContent = selectedRepo.dataset.title || 'No description available';
+                    document.getElementById('repo-url').href = selectedRepo.dataset.url;
+                    document.getElementById('repo-created').textContent =  selectedRepo.dataset.created;
+                    document.getElementById('repo-details').style.display = 'block';
+                } else {
+                    document.getElementById('repo-details').style.display = 'none';
+                }
+            });
+        });
+
+        function redirectToRepo() {
+            var selectElement = document.getElementById('repo');
+            var selectedOption = selectElement.options[selectElement.selectedIndex];
+            var repoName = selectedOption.getAttribute('data-name');
+            var repoId = selectedOption.getAttribute('data-id');
+
+            if (repoName && repoId) {
+                // Assurez-vous que l'URL ici correspond à la route dans votre urls.py
+                var url = '/git/repos/' + repoId + '/' + repoName + '/';
+                window.location.href = url;
+            } else {
+                alert("Please select a repository.");
+            }
+        }
+    </script>
+
+{% endblock %}

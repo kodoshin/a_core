@@ -1,0 +1,14 @@
+venv/
+Backups/
+files/
+.idea/
+__pycache__/
+migrations/
+staticfiles/
+*.svg
+*.png
+*.jpg
+*.mp4
+*.ico
+.env
+

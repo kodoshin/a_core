@@ -1,0 +1,25 @@
+{% extends 'layouts/blank.html' %}
+{% load static %}
+
+{% block content %}
+    <h1>My Projects</h1>
+
+    {% if projects %}
+        <table>
+            <tr>
+                <th>Project Name</th>
+                <th>Actions</th>
+            </tr>
+            {% for project in projects %}
+            <tr>
+                <td>{{ project.name }}</td>
+                <td>
+                    <a href="{% url 'view_documentation' project_id=project.id %}">See Documentation</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>You don't have any projects yet.</p>
+    {% endif %}
+{% endblock %}

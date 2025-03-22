@@ -1,0 +1,13 @@
+
+{% load static %}
+{% load socialaccount %}
+<link rel="stylesheet" href="{% static 'css/custom_login.css' %}">
+<ul>
+
+            <li>
+                <a href="{% provider_login_url provider.id %}" class="github-login-button">
+                    <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/github-white-logo.png" alt="GitHub Logo" class="github-logo">
+                    Sign in with GitHub
+                </a>
+            </li>
+</ul>
