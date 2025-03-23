@@ -36,6 +36,7 @@ def code_chat_view(request):
             chat_id = request.POST.get('chat_id')
             if chat_id:
                 chat = CodingChat.objects.get(id=chat_id, user=user)
+                default_chat_category = chat.chat_category
                 is_first_prompt = False
             else:
                 chat = CodingChat.objects.create(user=user, project=default_project)
