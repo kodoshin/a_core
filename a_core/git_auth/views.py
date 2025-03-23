@@ -194,13 +194,18 @@ def process_selected_files (request, git_repo_id, repo_name):
                     print(f"File '{file_name}' updated successfully.")
         #documenter la technologie :
         deleted_files = request.POST.getlist('deleted_file')
-        print('DELETED FILES')
-        print(deleted_files)
+        #print('DELETED FILES')
+        #print(deleted_files)
         if len(deleted_files)>0:
             for path in deleted_files:
                 File.objects.filter(project=project, path=path).delete()
 
-        document_tech(git_repo_id)
+        if project.technology == None :
+            print('Documenting Tech')
+            document_tech(git_repo_id)
+        else :
+            print('Tech already documented')
+            pass
         status = Status.objects.get(code=1)
         project = get_object_or_404(Project, git_repo_id=git_repo_id)
         document_components(project, project.technology)
@@ -210,4 +215,4 @@ def process_selected_files (request, git_repo_id, repo_name):
         profile.default_project = project
         profile.save()
         return redirect('home')
-    return HttpResponse("Aucun fichier sélectionné")
+    return HttpResponse("No files are selected")

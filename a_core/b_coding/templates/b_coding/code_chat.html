@@ -253,53 +253,64 @@ $(document).ready(function() {
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const stars = document.querySelectorAll(".star");
+  document.addEventListener("DOMContentLoaded", function () {
+      const stars = document.querySelectorAll(".star");
 
-        stars.forEach(star => {
-            star.addEventListener("click", function () {
-                const rating = this.getAttribute("data-value");
-                const chatId = "{{ current_chat.id }}"; // Assure-toi que cette variable est bien définie dans ton template
+      // Définir la couleur par défaut de toutes les étoiles en gris
+      stars.forEach(star => {
+          star.style.color = "gray";
+      });
 
-                if (!chatId) {
-                    console.error("Chat ID non défini.");
-                    return;
-                }
+      // Fonction pour mettre en surbrillance les étoiles jusqu'au rang donné
+      function highlightStars(rating) {
+          stars.forEach(star => {
+              if (parseInt(star.getAttribute("data-value")) <= rating) {
+                  star.style.color = "gold";
+              } else {
+                  star.style.color = "gray";
+              }
+          });
+      }
 
-                fetch("{% url 'code_chat_view' %}", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}",
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },
-                    body: new URLSearchParams({
-                        "rate": rating,
-                        "chat_id": chatId
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        console.log("Note enregistrée :", data.rate);
-                        highlightStars(rating);
-                    } else {
-                        console.error("Erreur lors de l'enregistrement de la note.");
-                    }
-                })
-                .catch(error => console.error("Erreur AJAX :", error));
-            });
-        });
+      // Récupérer la note enregistrée depuis le contexte et mettre en surbrillance les étoiles si la note > 0
+      var currentChatRating = parseInt("{{ current_chat.rate|default:'0' }}");
+      if (currentChatRating > 0) {
+          highlightStars(currentChatRating);
+      }
 
-        function highlightStars(rating) {
-            stars.forEach(star => {
-                if (parseInt(star.getAttribute("data-value")) <= rating) {
-                    star.style.color = "gold";
-                } else {
-                    star.style.color = "gray";
-                }
-            });
-        }
-    });
+      // Gestion du clic sur une étoile pour envoyer la note via AJAX
+      stars.forEach(star => {
+          star.addEventListener("click", function () {
+              const rating = this.getAttribute("data-value");
+              const chatId = "{{ current_chat.id }}";
+              if (!chatId) {
+                  console.error("Chat ID non défini.");
+                  return;
+              }
+              fetch("{% url 'code_chat_view' %}", {
+                  method: "POST",
+                  headers: {
+                      "X-CSRFToken": "{{ csrf_token }}",
+                      "Content-Type": "application/x-www-form-urlencoded"
+                  },
+                  body: new URLSearchParams({
+                      "rate": rating,
+                      "chat_id": chatId
+                  })
+              })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.status === "success") {
+                      console.log("Note enregistrée :", data.rate);
+                      highlightStars(rating);
+                  } else {
+                      console.error("Erreur lors de l'enregistrement de la note.");
+                  }
+              })
+              .catch(error => console.error("Erreur AJAX :", error));
+          });
+      });
+  });
 </script>
 
 <script>
