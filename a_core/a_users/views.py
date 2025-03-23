@@ -9,6 +9,8 @@ from a_projects.models import Project
 from django.http import HttpResponseForbidden
 import pytz
 from django.utils import timezone
+from .models import CreditClaim
+
 
 
 
@@ -169,6 +171,8 @@ def claim_credits_view(request):
             profile.has_claimed_credits = True
             profile.daily_credit_claim_date = local_today
             profile.save()
+            # Enregistrer la traçabilité du claim
+            CreditClaim.objects.create(profile=profile, credits=20)
 
         return redirect(request.META.get('HTTP_REFERER', '/'))
     return HttpResponseForbidden()

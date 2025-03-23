@@ -77,4 +77,11 @@ class Profile(models.Model):
         return static("images/avatar.svg")
 
 
+class CreditClaim(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='credit_claims')
+    credits = models.PositiveIntegerField(default=20)
+    claimed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.profile.user.username} claimed {self.credits} credits on {self.claimed_at}"
 
