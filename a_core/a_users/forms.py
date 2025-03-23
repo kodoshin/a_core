@@ -27,7 +27,7 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['role', 'country', 'marketing_channel', 'accept_marketing_communication','timezone', 'gmt_offset']
+        fields = ['role', 'country', 'marketing_channel', 'accept_marketing_communication', 'accept_data_usage_policy','timezone', 'gmt_offset']
         widgets = {
             'role': forms.Select(attrs={'style': "color: black; font-weight: bold; font-family: 'DynaPuff';"}),
             'country': forms.Select(attrs={'style': "color: black; font-weight: bold; font-family: 'DynaPuff';"}),
@@ -35,10 +35,20 @@ class ProfileForm(forms.ModelForm):
             'accept_marketing_communication': forms.CheckboxInput(attrs={'style': "width: 20px;"}),
             'timezone': forms.HiddenInput(),
             'gmt_offset': forms.HiddenInput(),
+            'accept_data_usage_policy': forms.CheckboxInput(attrs={'style': 'width: 20px;'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Si le profil a déjà été rempli, on retire le champ de la politique
+        if self.instance and self.instance.pk and self.instance.profile_is_filled:
+            self.fields.pop('accept_data_usage_policy', None)
+        else:
+            self.fields['accept_data_usage_policy'].label = mark_safe(
+                "I accept the <a href='#' id='policy-link'>data usage policy</a>"
+            )
+
         label_width = '250px'
         # On modifie le label de chaque champ pour inclure du style en ligne
         for field_name, field in self.fields.items():

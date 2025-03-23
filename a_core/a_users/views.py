@@ -9,7 +9,7 @@ from a_projects.models import Project
 from django.http import HttpResponseForbidden
 import pytz
 from django.utils import timezone
-from .models import CreditClaim
+from .models import CreditClaim, Policy
 
 
 
@@ -143,7 +143,8 @@ def profile_view(request):
     context = {
         'form': form,
         'onboarding': onboarding,
-        'profile': profile
+        'profile': profile,
+        'data_policy': Policy.objects.filter(name='Data Usage Policy').first().content
     }
 
     return render(request, 'a_users/profile_edit.html', context)

@@ -39,6 +39,7 @@ class Profile(models.Model):
     accept_marketing_communication = models.BooleanField(default=False) #S'il accepts de recevoir les nouveautés marketing
     profile_is_filled = models.BooleanField(default=False)
     has_claimed_credits = models.BooleanField(default=False)
+    accept_data_usage_policy = models.BooleanField(default=False)
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
@@ -60,6 +61,7 @@ class Profile(models.Model):
     gmt_offset = models.CharField(max_length=10, blank=True, null=True, help_text="Difference between GMT and user timezone (e.g., GMT+01:00).")
 
     daily_credit_claim_date = models.DateField(null=True, blank=True)
+
 
     def __str__(self):
         return str(self.user)
@@ -84,4 +86,12 @@ class CreditClaim(models.Model):
 
     def __str__(self):
         return f"{self.profile.user.username} claimed {self.credits} credits on {self.claimed_at}"
+
+
+class Policy (models.Model):
+    name = models.CharField(max_length=50, null=True, blank=True)
+    content = models.TextField()
+
+    def __str__(self):
+        return self.name
 

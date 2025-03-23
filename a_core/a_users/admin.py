@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Country, CreditClaim
+from .models import Profile, Country, CreditClaim, Policy
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 
@@ -21,3 +21,5 @@ class CountryAdmin(ImportExportModelAdmin):
 admin.site.register(Profile)
 
 admin.site.register(CreditClaim)
+
+admin.site.register(Policy)
