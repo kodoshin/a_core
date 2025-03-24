@@ -65,6 +65,8 @@ def sync_with_github(request, project_id):
     response = requests.post(api_url, json=payload, headers=headers)
     print(response.text)
     if response.status_code in (200, 201):
+        project.github_sync = True
+        project.save()
         messages.success(request, "Webhook created successfully.")
     else:
         messages.error(request, f"Failed to create webhook: {response.text}")

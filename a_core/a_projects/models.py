@@ -29,10 +29,10 @@ class Project(models.Model):
     git_repo_name = models.CharField(max_length=255)
     git_repo_url = models.URLField()
     status = models.ForeignKey(Status, on_delete=models.CASCADE, null=True, blank=True)
+    github_sync = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
-
 
 
 
