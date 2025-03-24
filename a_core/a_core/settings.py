@@ -30,6 +30,8 @@ SECRET_KEY = 'django-insecure-+0n(2jhp%ys2aa(ezw9obo)jx2w1e0&jgit(46qo19c-po68u+
 DEBUG = True
 
 ALLOWED_HOSTS = []
+#ALLOWED_HOSTS = ['fc8d-206-176-138-38.ngrok-free.app','http://127.0.0.1:8000']
+#CSRF_TRUSTED_ORIGINS = ['https://fc8d-206-176-138-38.ngrok-free.app','http://127.0.0.1:8000']
 
 
 # Application definition
@@ -85,7 +87,8 @@ SOCIALACCOUNT_PROVIDERS = {
         'APP': {
             'client_id': 'Ov23liw9AoK39xGtiPSj',
             'secret': '8adf0e0159c92e584fe721c057e4a4dc9c171fba',
-            'key': ''
+            'key': '',
+            #'redirect_uri': 'https://fc8d-206-176-138-38.ngrok-free.app//accounts/github/login/callback'
         }
     }
 }
@@ -203,3 +206,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ENCRYPTION_KEY = "wj67r5s6sxIHe5tkqvC6ZJ7L6ekr61S5lS3CXXjXXgA="
+
+
+GITHUB_WEBHOOK_URL = "https://fc8d-206-176-138-38.ngrok-free.app"

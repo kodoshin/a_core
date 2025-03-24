@@ -10,6 +10,10 @@
 
     <button type="button" class="select-button" onclick="redirectToRepo()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff';">Reload Source Code</button>
     <button type="button" class="delete-button" onclick="redirectToDelete()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff'; background-color: red; color: white;">Delete</button>
+
+
+    <button type="button" class="sync-button" onclick="redirectToSyncGithub()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff'; background-color: green; color: white;">Sync with Github</button>
+
     <br><br>
     <table>
         <tr>
@@ -92,6 +96,16 @@
                     var url = '/projects/documentation/delete/' + projectId + '/';
                     window.location.href = url;
                 }
+            } else {
+                alert("Project ID not found.");
+            }
+        }
+
+        function redirectToSyncGithub() {
+            let projectId = document.getElementById("project-id").textContent;
+            if (projectId) {
+                var url = '/projects/documentation/sync/' + projectId + '/';
+                window.location.href = url;
             } else {
                 alert("Project ID not found.");
             }

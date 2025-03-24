@@ -5,6 +5,10 @@ from a_users.models import Profile
 import requests
 import base64
 from git_auth.models import AllowedFile
+from django.contrib import messages
+from urllib.parse import urlparse
+from django.conf import settings
+
 import re
 
 
@@ -24,6 +28,49 @@ def view_documentation(request, project_id):
     }
 
     return render(request, 'a_projects/view_documentation.html', context)
+
+
+def sync_with_github(request, project_id):
+    print('creating webhook')
+    project = get_object_or_404(Project, id=project_id, user=request.user)
+    token = get_github_token(request.user)
+    if not token:
+        messages.error(request, "GitHub access token not found. Please connect your GitHub account.")
+        return redirect('view_documentation', project_id=project_id)
+
+    parsed = urlparse(project.git_repo_url)
+    path_parts = parsed.path.strip('/').split('/')
+    if len(path_parts) < 2:
+        messages.error(request, "Invalid GitHub repository URL.")
+        return redirect('view_documentation', project_id=project_id)
+    owner = path_parts[0]
+    repo = path_parts[1].replace('.git', '')
+
+    api_url = f"https://api.github.com/repos/{owner}/{repo}/hooks"
+    webhook_url = getattr(settings, "GITHUB_WEBHOOK_URL", "https://yourdomain.com/github/webhook")
+    payload = {
+        "name": "web",
+        "active": True,
+        "events": ["push"],
+        "config": {
+            "url": webhook_url,
+            "content_type": "json"
+        }
+    }
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+    print('calling webhook request')
+    response = requests.post(api_url, json=payload, headers=headers)
+    print(response.text)
+    if response.status_code in (200, 201):
+        messages.success(request, "Webhook created successfully.")
+    else:
+        messages.error(request, f"Failed to create webhook: {response.text}")
+
+    return redirect('view_documentation', project_id=project_id)
+
 
 
 def has_equivalent(user, git_repo_id, path,file_content):
