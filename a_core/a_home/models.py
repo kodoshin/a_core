@@ -27,7 +27,7 @@ class AiToolEvaluation(models.Model):
     context_understanding = models.PositiveSmallIntegerField(default=0)
     suggestion_accuracy = models.PositiveSmallIntegerField(default=0)
     development_speed = models.PositiveSmallIntegerField(default=0)
-    effort_explanation = models.PositiveSmallIntegerField(default=0)
+    explanation_effort = models.PositiveSmallIntegerField(default=0)
     user_experience = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):

@@ -14,7 +14,7 @@ def create_ai_tools_radar_chart():
         'Context Understanding',
         'Suggestion Accuracy',
         'Development Speed',
-        'Effort Explanation',
+        'Explanation Effort',
         'User Experience'
     ]
 
@@ -29,7 +29,7 @@ def create_ai_tools_radar_chart():
             evaluation.context_understanding,
             evaluation.suggestion_accuracy,
             evaluation.development_speed,
-            evaluation.effort_explanation,
+            evaluation.explanation_effort,
             evaluation.user_experience
         ]
         # Pour fermer le polygone, on répète le premier score et la première catégorie

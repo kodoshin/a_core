@@ -61,9 +61,9 @@ def sync_with_github(request, project_id):
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json"
     }
-    print('calling webhook request')
+    #print('calling webhook request')
     response = requests.post(api_url, json=payload, headers=headers)
-    print(response.text)
+    #print(response.text)
     if response.status_code in (200, 201):
         project.github_sync = True
         project.save()
@@ -72,6 +72,57 @@ def sync_with_github(request, project_id):
         messages.error(request, f"Failed to create webhook: {response.text}")
 
     return redirect('view_documentation', project_id=project_id)
+
+
+def delete_github_sync(request, project_id):
+    project = get_object_or_404(Project, id=project_id, user=request.user)
+    token = get_github_token(request.user)
+    if not token:
+        messages.error(request, 'GitHub access token not found. Please connect your GitHub account.')
+        return redirect('view_documentation', project_id=project_id)
+
+    parsed = urlparse(project.git_repo_url)
+    path_parts = parsed.path.strip('/').split('/')
+    if len(path_parts) < 2:
+        messages.error(request, 'Invalid GitHub repository URL.')
+        return redirect('view_documentation', project_id=project_id)
+
+    owner = path_parts[0]
+    repo = path_parts[1].replace('.git', '')
+    webhook_url = getattr(settings, 'GITHUB_WEBHOOK_URL', 'https://yourdomain.com/github/webhook')
+    api_url = f'https://api.github.com/repos/{owner}/{repo}/hooks'
+    headers = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github.v3+json'}
+
+    # Retrieve existing webhooks for the repository
+    response = requests.get(api_url, headers=headers)
+    print(response.text)
+    if response.status_code != 200:
+        messages.error(request, f'Failed to retrieve webhooks: {response.text}')
+        return redirect('view_documentation', project_id=project_id)
+
+    hooks = response.json()
+    hook_id = None
+    for hook in hooks:
+        if hook.get("config", {}).get("url") == webhook_url:
+            hook_id = hook.get("id")
+            break
+
+    if not hook_id:
+        messages.error(request, 'Webhook not found.')
+        return redirect('view_documentation', project_id=project_id)
+
+    # Delete the identified webhook
+    delete_url = f'https://api.github.com/repos/{owner}/{repo}/hooks/{hook_id}'
+    delete_response = requests.delete(delete_url, headers=headers)
+    if delete_response.status_code == 204:
+        project.github_sync = False
+        project.save()
+        messages.success(request, 'Webhook deleted successfully.')
+    else:
+        messages.error(request, f'Failed to delete webhook: {delete_response.text}')
+
+    return redirect('view_documentation', project_id=project_id)
+
 
 
 
