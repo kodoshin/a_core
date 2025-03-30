@@ -1,10 +1,11 @@
-from management.ai_bases import get_response_ai_1, get_response_ai_2
+from management.ai_bases import async_get_response_ai_1, async_get_response_ai_2 #get_response_ai_1, get_response_ai_2
 from .prompts_variables import pe_components_xml, pe_final_answer, pe_final_answer_format, none_answer, no_components_answer
 from .models import CodingChatMessage, ProcessingStep, ChatCategory
 import xml.etree.ElementTree as ET
 import re
 from django.db.models import Max
 
+from asgiref.sync import sync_to_async
 
 
 def generate_components_xml(components):
@@ -50,28 +51,50 @@ def generate_components_string(components):
     return "\n".join(component_strings)  # Séparation par des retours à la ligne
 
 
-def ai_processing(prompt, components, chat, is_first_prompt):
-    chat_category_id = ChatCategory.objects.get(type='regular')
-    processing_steps = {f"{chat_category_id} : {step.order}": step for step in ProcessingStep.objects.filter(chat_category=chat_category_id)}
+async def ai_processing(prompt, components, chat, is_first_prompt):
+    chat_category = await sync_to_async(ChatCategory.objects.get)(type='regular')
+    processing_steps = await sync_to_async(lambda: {f'{chat_category} : {step.order}': step
+                                                    for step in
+                                                    ProcessingStep.objects.filter(chat_category=chat_category)})()
+
     if is_first_prompt:
-        save_prompt(chat, prompt, chat_category_id, processing_steps)
-        engineered_prompt_1 = build_engineered_prompt_1(pe_components_xml, components, prompt, chat, chat_category_id, processing_steps)
-        ai_answer_1 = get_related_components(engineered_prompt_1, components, chat, chat_category_id, processing_steps)  #returns related components in XML or JSON format
-        engineered_prompt_2 = build_engineered_prompt_2(pe_final_answer, pe_final_answer_format, ai_answer_1, prompt, chat, chat_category_id, processing_steps) #ai_answer_1 est les related_components string
-        ai_answer_2 = get_final_solution(engineered_prompt_2, chat, chat_category_id, processing_steps)
+        await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps)
+        engineered_prompt_1 = build_engineered_prompt_1(pe_components_xml, components, prompt, chat, chat_category,
+                                                        processing_steps)
+        ai_answer_1 = await async_get_response_ai_1(engineered_prompt_1, chat)
+        match = re.search(r'<components>[\s\S]*?</components>', ai_answer_1)
+        if match:
+            related_components_xml = match.group(0)
+            related_components = filter_components_from_xml(related_components_xml, components)
+        else:
+            related_components = []
+        await sync_to_async(CodingChatMessage.objects.create)(
+            chat=chat, type='ai', content=ai_answer_1, order=3, api_key=None,
+            processing_step=processing_steps.get(f'{chat_category} : 3')
+        )
+        engineered_prompt_2 = build_engineered_prompt_2(pe_final_answer, pe_final_answer_format, related_components,
+                                                        prompt, chat, chat_category, processing_steps)
+        ai_answer_2 = await async_get_response_ai_2(engineered_prompt_2, chat)
+        await sync_to_async(CodingChatMessage.objects.create)(
+            chat=chat, type='gpt-a', content=ai_answer_2, order=5, api_key=None,
+            processing_step=processing_steps.get(f'{chat_category} : 5')
+        )
         return ai_answer_2
     else:
-        save_prompt(chat, prompt, chat_category_id, processing_steps)
-        last_engineered_prompt = CodingChatMessage.objects.filter(chat=chat, type='r-prompt').last().content.replace(pe_final_answer_format,"")
-        print("LAST EP")
-        print(last_engineered_prompt)
-        last_ai_answer = CodingChatMessage.objects.filter(chat=chat, type='gpt-a').last().content
-        print("LAST AI ANSWER")
-        print(last_ai_answer)
-        engineered_adjustment_prompt = build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer, prompt, chat_category_id, processing_steps)
-        print(engineered_adjustment_prompt)
-        ai_adjustment_answer = get_adjusted_solution(chat, engineered_adjustment_prompt, chat_category_id, processing_steps)
-        print(ai_adjustment_answer)
+        await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps)
+        last_prompt_obj = await sync_to_async(
+            lambda: CodingChatMessage.objects.filter(chat=chat, type='r-prompt').last())()
+        last_engineered_prompt = last_prompt_obj.content.replace(pe_final_answer_format, '')
+        last_ai_answer_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='gpt-a').last())()
+        last_ai_answer = last_ai_answer_obj.content
+        engineered_adjustment_prompt = build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer, prompt, chat_category, processing_steps)
+        ai_adjustment_answer = await async_get_response_ai_2(engineered_adjustment_prompt, chat)
+        max_order = await sync_to_async(
+            lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
+        await sync_to_async(CodingChatMessage.objects.create)(
+            chat=chat, type='gpt-a', content=ai_adjustment_answer, order=max_order + 1, api_key=None,
+            processing_step=processing_steps.get(f'{chat_category} : 7')
+        )
         return ai_adjustment_answer
 
 def save_prompt(chat, prompt, chat_category_id, processing_steps):

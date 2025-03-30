@@ -11,146 +11,114 @@ from .ai_regular_processing_utils import ai_processing as regular_ai_processing
 from .ai_super_processing_utils import ai_processing as super_ai_processing
 from django.views.decorators.csrf import csrf_exempt
 
+from asgiref.sync import sync_to_async
+import asyncio
 
 
-@login_required
-def code_chat_view(request):
+async def code_chat_view(request):
     user = request.user
-    # Récupérer le profil de l'utilisateur
-    profile = Profile.objects.get(user=request.user)
+    #profile = await sync_to_async(Profile.objects.get)(user=user)
+    profile = await sync_to_async(lambda: Profile.objects.select_related('default_project', 'default_chat_category').get(user=user))()
 
-    # Récupérer le projet par défaut du profil
     default_project = profile.default_project
     default_chat_category = profile.default_chat_category
     available_credits = profile.available_credits
+    components = await sync_to_async(lambda: Component.objects.filter(file__project=default_project))()
+    #files = await sync_to_async(lambda: File.objects.filter(project=default_project))()
+    files = await sync_to_async(list)(File.objects.filter(project=default_project))
 
-    components = Component.objects.filter(file__project=default_project)
-    files = File.objects.filter(project=default_project)
-    projects = Project.objects.filter(user=user).exclude(technology__name='Other')
+    #projects = await sync_to_async(lambda: Project.objects.filter(user=user).exclude(technology__name='Other'))()
+    projects = await sync_to_async(lambda: list(Project.objects.filter(user=user).exclude(technology__name='Other')))()
+
     if request.method == 'POST':
-        # Handle chat prompts
         if 'prompt' in request.POST:
             prompt = request.POST.get('prompt')
-            #processing_step = ProcessingStep.objects.get(short_name = 'u1')
-            # Créer ou récupérer le chat en cours
             chat_id = request.POST.get('chat_id')
             if chat_id:
-                chat = CodingChat.objects.get(id=chat_id, user=user)
+                chat = await sync_to_async(CodingChat.objects.get)(id=chat_id, user=user)
                 default_chat_category = chat.chat_category
                 is_first_prompt = False
             else:
-                chat = CodingChat.objects.create(user=user, project=default_project)
+                chat = await sync_to_async(CodingChat.objects.create)(user=user, project=default_project)
                 is_first_prompt = True
             if available_credits >= default_chat_category.price:
-                # Assez de crédits disponibles
-                #credits = True
-                # Génerer le titre de la discussion avec l'IA
-                #title_prompt = "This is my request : \n" + prompt + "\nI need you to give me a title to hilight this request in less than 25 characters, with no use of any special characters"
-                #ai_title_response = get_gpt_output(title_prompt)
-                #chat.title = ai_title_response
-                chat.title = prompt[:25] + "..." if len(prompt)>=28 else prompt
-                chat.save()
-                # Obtenir la réponse de l'IA sur le prompt
-                ######################################################################### PROCESSING À FAIRE #######################################################################################################
-                if default_chat_category.type == 'regular' :
-                    ai_response = regular_ai_processing(prompt, components, chat, is_first_prompt)
-                elif default_chat_category.type == 'super' :
-                    #print('super ai processing')
-                    ai_response = super_ai_processing(prompt, files, components, chat, is_first_prompt)
-                if is_first_prompt :
+                chat.title = prompt[:25] + '...' if len(prompt) >= 28 else prompt
+                await sync_to_async(chat.save)()
+                if default_chat_category.type == 'regular':
+                    ai_response = await regular_ai_processing(prompt, components, chat, is_first_prompt)
+                elif default_chat_category.type == 'super':
+                    ai_response = await super_ai_processing(prompt, files, components, chat, is_first_prompt)
+                if is_first_prompt:
                     profile.available_credits = available_credits - default_chat_category.price
-                    profile.save()
                 else:
                     profile.available_credits = available_credits - default_chat_category.price_secondary_prompt
-                    profile.save()
-                # Parse the AI response
+                await sync_to_async(profile.save)()
                 steps = parse_steps(ai_response)
-            else :
-                #credits = False
-                processing_steps = {f"{step.order} : {step.name}": step for step in ProcessingStep.objects.all()}
-                chat.title = prompt[:25] + "..." if len(prompt)>=28 else prompt
-                chat.save()
-                CodingChatMessage.objects.create(
-                    chat=chat,
-                    type='prompt',
-                    processing_step=processing_steps.get('1 : user prompt 1'),
-                    content=prompt,
-                    order=1,
-                    api_key=None
+                return JsonResponse({
+                    'user_message': prompt,
+                    'ai_response': ai_response,
+                    'ai_message': ai_response,
+                    'chat_id': chat.id,
+                    'steps': steps
+                })
+            else:
+                processing_steps = await sync_to_async(lambda: {f'{step.order} : {step.name}': step
+                                                                for step in ProcessingStep.objects.all()})()
+                chat.title = prompt[:25] + '...' if len(prompt) >= 28 else prompt
+                await sync_to_async(chat.save)()
+                await sync_to_async(CodingChatMessage.objects.create)(
+                    chat=chat, type='prompt', processing_step=processing_steps.get('1 : user prompt 1'),
+                    content=prompt, order=1, api_key=None
                 )
-                ai_response = "<step1><Justifications>Please come back tomorrow to claim your free credits or buy more credits! </Justifications></step1>"
+                ai_response = '<step1><Justifications>Please come back tomorrow to claim your free credits or buy more credits! </Justifications></step1>'
                 steps = parse_steps(ai_response)
-
-                CodingChatMessage.objects.create(
-                    chat=chat,
-                    type='gpt-a',
-                    content=ai_response,
-                    order=5,
-                    api_key=None,
-                    processing_step=processing_steps.get("5 : ai answer 2")
+                await sync_to_async(CodingChatMessage.objects.create)(
+                    chat=chat, type='gpt-a', content=ai_response, order=5, api_key=None,
+                    processing_step=processing_steps.get('5 : ai answer 2')
                 )
-            # Retourner les messages en JSON
-            return JsonResponse({
-                'user_message': prompt,
-                'ai_response':ai_response,
-                'ai_message': ai_response,
-                'chat_id': chat.id,
-                'steps': steps  # Include steps in the JSON response
-            })
-
-
-        # Handle rating updates
+                return JsonResponse({
+                    'user_message': prompt,
+                    'ai_response': ai_response,
+                    'ai_message': ai_response,
+                    'chat_id': chat.id,
+                    'steps': steps
+                })
         elif 'rate' in request.POST:
             chat_id = request.POST.get('chat_id')
             if chat_id:
                 rating_value = int(request.POST.get('rate'))
-                chat = CodingChat.objects.get(id=chat_id, user=user)
+                chat = await sync_to_async(CodingChat.objects.get)(id=chat_id, user=user)
                 chat.rate = rating_value
-                chat.save()
+                await sync_to_async(chat.save)()
                 return JsonResponse({'status': 'success', 'rate': chat.rate})
-
-
     else:
-        # GET request: afficher la page avec les chats précédents
-        chats = CodingChat.objects.filter(user=user, project=profile.default_project).order_by('-created_on')
+        chats = await sync_to_async(
+            lambda: list(CodingChat.objects.filter(user=user, project=profile.default_project).order_by('-created_on')))()
         chat_id = request.GET.get('chat_id')
         if chat_id:
-            current_chat = CodingChat.objects.get(id=chat_id, user=user)
-            #messages = current_chat.messages.all().order_by('id')
-            messages = current_chat.messages.filter(type__in=['prompt', 'gpt-a', 'gpt-q']).order_by('id')
+            #current_chat = await sync_to_async(CodingChat.objects.get)(id=chat_id, user=user)
+            current_chat = await sync_to_async(lambda: CodingChat.objects.select_related('chat_category').get(id=chat_id, user=user))()
+            messages = await sync_to_async(lambda: list(current_chat.messages.filter(type__in=['prompt', 'gpt-a', 'gpt-q']).order_by('id')))()
         else:
             current_chat = None
             messages = []
-        # Process messages to include parsed steps
         processed_messages = []
         for message in messages:
             if message.type == 'gpt-a':
                 steps = parse_steps(message.content)
-                processed_messages.append({
-                    'type': message.type,
-                    'steps': steps
-                })
+                processed_messages.append({'type': message.type, 'steps': steps})
             else:
-                processed_messages.append({
-                    'type': message.type,
-                    'content': message.content
-                })
-        #try:
-        #    count_steps = len(steps)
-        #except:
-        #    count_steps = 0
-
-        chatcategories = ChatCategory.objects.all()
+                processed_messages.append({'type': message.type, 'content': message.content})
+        chatcategories = await sync_to_async(lambda: list(ChatCategory.objects.all()))()
         context = {
-            'chats':chats,
-            'components':components,
-            'messages':processed_messages,
-            #'count_steps':count_steps,
-            'default_project':default_project,
-            'projects':projects,
-            'current_chat':current_chat,
-            'profile':profile,
-            'chatcategories':chatcategories
+            'chats': chats,
+            'components': components,
+            'messages': processed_messages,
+            'default_project': default_project,
+            'projects': projects,
+            'current_chat': current_chat,
+            'profile': profile,
+            'chatcategories': chatcategories
         }
         return render(request, 'b_coding/code_chat.html', context)
 
