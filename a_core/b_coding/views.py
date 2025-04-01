@@ -46,8 +46,9 @@ async def code_chat_view(request):
                 chat = await sync_to_async(CodingChat.objects.create)(user=user, project=default_project)
                 is_first_prompt = True
             if available_credits >= default_chat_category.price:
-                chat.title = prompt[:25] + '...' if len(prompt) >= 28 else prompt
-                await sync_to_async(chat.save)()
+                if chat.title is None :
+                    chat.title = prompt[:25] + '...' if len(prompt) >= 28 else prompt
+                    await sync_to_async(chat.save)()
                 if default_chat_category.type == 'regular':
                     ai_response = await regular_ai_processing(prompt, components, chat, is_first_prompt)
                 elif default_chat_category.type == 'super':
@@ -68,8 +69,9 @@ async def code_chat_view(request):
             else:
                 processing_steps = await sync_to_async(lambda: {f'{step.order} : {step.name}': step
                                                                 for step in ProcessingStep.objects.all()})()
-                chat.title = prompt[:25] + '...' if len(prompt) >= 28 else prompt
-                await sync_to_async(chat.save)()
+                if chat.title is None:
+                    chat.title = prompt[:25] + '...' if len(prompt) >= 28 else prompt
+                    await sync_to_async(chat.save)()
                 await sync_to_async(CodingChatMessage.objects.create)(
                     chat=chat, type='prompt', processing_step=processing_steps.get('1 : user prompt 1'),
                     content=prompt, order=1, api_key=None

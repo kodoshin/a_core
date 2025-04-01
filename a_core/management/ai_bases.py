@@ -117,6 +117,7 @@ async def async_get_response_ai_1(prompt, chat):
     }
     body = {
         'model': model,
+        'reasoning_effort': 'high',
         'messages': [{'role': 'user', 'content': prompt}]
     }
     try:
