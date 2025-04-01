@@ -417,6 +417,12 @@ $(document).ready(function() {
       setTimeout(function() {
           $('#loading-text').text('please wait...');
       }, 55000);
+      setTimeout(function() {
+          $('#loading-text').text("this may take few minutes, please don't close the window");
+      }, 70000);
+      setTimeout(function() {
+          $('#loading-text').text('');
+      }, 180000);
 
       $.ajax({
         url: '{% url "code_chat_view" %}',

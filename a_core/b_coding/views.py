@@ -14,6 +14,10 @@ from django.views.decorators.csrf import csrf_exempt
 from asgiref.sync import sync_to_async
 import asyncio
 
+def fix_response_format(response):
+    response = response.replace(", ')", ",'')")
+    response = response.replace(",')", ",'')")
+    return response
 
 async def code_chat_view(request):
     user = request.user
@@ -36,7 +40,7 @@ async def code_chat_view(request):
             chat_id = request.POST.get('chat_id')
             if chat_id:
                 chat = await sync_to_async(CodingChat.objects.get)(id=chat_id, user=user)
-                default_chat_category = chat.chat_category
+                default_chat_category = await sync_to_async(lambda: chat.chat_category)()
                 is_first_prompt = False
             else:
                 chat = await sync_to_async(CodingChat.objects.create)(user=user, project=default_project)
@@ -53,7 +57,7 @@ async def code_chat_view(request):
                 else:
                     profile.available_credits = available_credits - default_chat_category.price_secondary_prompt
                 await sync_to_async(profile.save)()
-                steps = parse_steps(ai_response)
+                steps = parse_steps(fix_response_format(ai_response))
                 return JsonResponse({
                     'user_message': prompt,
                     'ai_response': ai_response,
@@ -71,7 +75,7 @@ async def code_chat_view(request):
                     content=prompt, order=1, api_key=None
                 )
                 ai_response = '<step1><Justifications>Please come back tomorrow to claim your free credits or buy more credits! </Justifications></step1>'
-                steps = parse_steps(ai_response)
+                steps = parse_steps(fix_response_format(ai_response))
                 await sync_to_async(CodingChatMessage.objects.create)(
                     chat=chat, type='gpt-a', content=ai_response, order=5, api_key=None,
                     processing_step=processing_steps.get('5 : ai answer 2')
@@ -105,7 +109,7 @@ async def code_chat_view(request):
         processed_messages = []
         for message in messages:
             if message.type == 'gpt-a':
-                steps = parse_steps(message.content)
+                steps = parse_steps(fix_response_format(message.content))
                 processed_messages.append({'type': message.type, 'steps': steps})
             else:
                 processed_messages.append({'type': message.type, 'content': message.content})

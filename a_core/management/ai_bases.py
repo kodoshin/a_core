@@ -120,7 +120,8 @@ async def async_get_response_ai_1(prompt, chat):
         'messages': [{'role': 'user', 'content': prompt}]
     }
     try:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(120.0)) as client:
+        limits = httpx.Limits(max_connections=50, max_keepalive_connections=20)
+        async with httpx.AsyncClient(timeout=httpx.Timeout(120.0), limits=limits) as client:
             response = await client.post(url, headers=headers, data=json.dumps(body))
     except httpx.ReadTimeout:
         print("Request expired, AI API is not available.")
@@ -157,7 +158,8 @@ async def async_get_response_ai_2(prompt, chat):
     }
 
     try:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(120.0)) as client:
+        limits = httpx.Limits(max_connections=50, max_keepalive_connections=20)
+        async with httpx.AsyncClient(timeout=httpx.Timeout(120.0), limits=limits) as client:
             response = await client.post(url, headers=headers, data=json.dumps(body))
     except httpx.ReadTimeout:
         print("Request expired, AI API is not available.")
@@ -191,7 +193,8 @@ async def async_get_gpt_output(content):
     body = {'model': model, 'messages': [{'role': 'user', 'content': content}]}
 
     try:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(120.0)) as client:
+        limits = httpx.Limits(max_connections=50, max_keepalive_connections=20)
+        async with httpx.AsyncClient(timeout=httpx.Timeout(120.0), limits=limits) as client:
             response = await client.post(url, headers=headers, data=json.dumps(body))
     except httpx.ReadTimeout:
         print("Request expired, AI API is not available.")

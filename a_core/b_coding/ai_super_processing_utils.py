@@ -145,17 +145,13 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt):
         return ai_answer_2
     else:
         await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps)
-        last_prompt_obj = await sync_to_async(
-            lambda: CodingChatMessage.objects.filter(chat=chat, type='r-prompt').last())()
+        last_prompt_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='r-prompt').last())()
         last_engineered_prompt = last_prompt_obj.content.replace(pe_final_answer_format, '')
-        last_ai_answer_obj = await sync_to_async(
-            lambda: CodingChatMessage.objects.filter(chat=chat, type='gpt-a').last())()
+        last_ai_answer_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='gpt-a').last())()
         last_ai_answer = last_ai_answer_obj.content
-        engineered_adjustment_prompt = build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer,
-                                                                          prompt, chat_category, processing_steps)
+        engineered_adjustment_prompt = await build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer,prompt, chat_category, processing_steps)
         ai_adjustment_answer = await async_get_response_ai_2(engineered_adjustment_prompt, chat)
-        max_order = await sync_to_async(
-            lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
+        max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
         await sync_to_async(CodingChatMessage.objects.create)(
             chat=chat, type='gpt-a', content=ai_adjustment_answer, order=max_order + 1, api_key=None,
             processing_step=processing_steps.get(f'{chat_category} : 7')
