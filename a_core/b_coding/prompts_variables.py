@@ -36,8 +36,8 @@ List all the components that would be useful to resolve the user's request.
 Output them in this exact XML format:
 
 <components>
-  <component><file>File of first relevant component</file><name>Name of first relevant component</Name></component>
-  <component><file>File of second relevant component</file><name>Name of second relevant component</Name></component>
+  <component><file>File of first relevant component</file><name>Name of first relevant component</name></component>
+  <component><file>File of second relevant component</file><name>Name of second relevant component</name></component>
   <!-- More component if needed -->
 </components>
 

@@ -205,7 +205,7 @@ def dj_document_python_file(file_content: str, file_instance, file_name: str, Te
                 component.description = docstring
                 component.save()
         # --- Traitement des fonctions ---
-        elif isinstance(node, ast.FunctionDef):
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             # Pour cet exemple, nous ne sauvegardons les fonctions que si le fichier est views.py
             if "views.py" in file_name:
                 docstring = ast.get_docstring(node) or ""

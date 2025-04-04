@@ -70,7 +70,7 @@ def py_document_python_file(file_content: str, file_instance, file_name: str, Te
                 component.save()
 
         # --- Traitement des fonctions ---
-        elif isinstance(node, ast.FunctionDef):
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             extracted = True
             docstring = ast.get_docstring(node) or ""
             start_line = node.lineno

@@ -61,6 +61,7 @@ def generate_components_xml(components):
 
 
 def filter_files_from_xml(xml_string, files):
+    print(xml_string)
     root = ET.fromstring(xml_string)
     filtered_files = []
     for file_element in root.findall("file"):
@@ -76,6 +77,7 @@ def filter_files_from_xml(xml_string, files):
 
 
 async def filter_components_from_xml(xml_string, components):
+    print(xml_string)
     root = ET.fromstring(xml_string)
     filtered_components = []
 

@@ -1,4 +1,4 @@
-from a_projects.models import File
+from a_projects.models import File, Component
 from a_projects.tech_doc_utils.django_doc_utils import dj_document_file
 from a_projects.tech_doc_utils.python_doc_utils import py_document_python_file
 from a_projects.tech_doc_utils.react_doc_utils import react_document_file
@@ -15,6 +15,7 @@ from a_projects.tech_doc_utils.cs_doc_utils import get_csharp_docstring
 def document_components (project, technology):
     files = File.objects.filter(project=project)
     for file in files :
+        Component.objects.filter(file=file).delete()
         if technology.name == 'Django':
             dj_document_file(file.content, file, file.name, technology)
         elif technology.name == 'Python' and file.name.endswith('.py') :

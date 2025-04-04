@@ -36,7 +36,7 @@ def get_gpt_output (content):
 
 #get_openai_response_ai_1 est pour retourner les components au bon format
 def get_response_ai_1(prompt, chat):
-    model = "o1-mini"
+    model = "o3-mini"
     url = "https://api.openai.com/v1/chat/completions"
     headers = {
         "Authorization": "Bearer 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",
@@ -81,7 +81,7 @@ def get_response_ai_2(prompt, chat):
 
     body = {
         "model": model,
-        "reasoning_effort": "high",
+        #"reasoning_effort": "high",
         "messages": [
             {
                 "role": "user",
@@ -109,7 +109,7 @@ def get_response_ai_2(prompt, chat):
 
 
 async def async_get_response_ai_1(prompt, chat):
-    model = 'o1-mini'
+    model = 'o3-mini'
     url = 'https://api.openai.com/v1/chat/completions'
     headers = {
         'Authorization': 'Bearer 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',
@@ -141,7 +141,7 @@ async def async_get_response_ai_1(prompt, chat):
         )
         return ai_answer.replace("'", "'").replace("('')", "('')")
     else:
-        print(f"Request failed with status code {response.status_code}")
+        print(f"Request failed with status code {response.status_code}, {response.text}")
         return response.text
 
 
@@ -180,7 +180,7 @@ async def async_get_response_ai_2(prompt, chat):
         )
         return ai_answer.replace("'", "'").replace("('')", "('')")
     else:
-        print(f"Request failed with status code {response.status_code}")
+        print(f"Request failed with status code {response.status_code}, {response.text}")
         return response.text
 
 
