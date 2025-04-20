@@ -68,12 +68,14 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_913834C787964A798E30A2DA256A7715 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_652478CCD181482A951BEE64AEF9DB95 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_222A6C9C9BD44204BBC5133823D631A2 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_AA070005F86044FEB8A044710C5F8EA4 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_684ECD5B204E4391A003BA8DC11417FC }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7F2F892689A5494B894AD2D1B8A38813 }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'kodoshin-app'
+          slot-name: 'Production'
+          
