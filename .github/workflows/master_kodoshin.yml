@@ -67,5 +67,4 @@ jobs:
         id: deploy-to-webapp
         with:
           app-name: 'kodoshin'
-          slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E02F8CCFB2D74DB39FFDB06BAC3BBB94 }}
