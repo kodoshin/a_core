@@ -31,9 +31,7 @@ DEBUG = False
 
 
 ALLOWED_HOSTS = [
-    'kodoshin.azurewebsites.net',
-    'kodoshin-ebaaaphdd5gdhvdg.azurewebsites.net',
-    'kodoshin-ebaaaphdd5gdhvdg.canadacentral-01.azurewebsites.net',
+    'kodoshin-app.azurewebsites.net',
 ]
 #ALLOWED_HOSTS = ['kodoshin.azurewebsites.net', 'kodoshin‑ebaaaphdd5gdhvdg.canadacentral‑01.azurewebsites.net']
 #ALLOWED_HOSTS = ['fc8d-206-176-138-38.ngrok-free.app','http://127.0.0.1:8000']
