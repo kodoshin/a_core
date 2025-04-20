@@ -128,6 +128,8 @@ if os.path.exists(env_path):
 else:
     print("Le fichier .env est manquant !")
 
+
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -136,6 +138,19 @@ DATABASES = {
         'PASSWORD': env('DB_PASSWORD'),
         'HOST': env('DB_HOST'),
         'PORT': env('DB_PORT'),
+    }
+}
+"""
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'KODOSHIN',
+        'USER': 'mahdi',
+        'PASSWORD': 'Aa25120894',
+        'HOST': 'kodoshin-dev-server.postgres.database.azure.com',
+        'PORT': '5432',
     }
 }
 
@@ -174,10 +189,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 # Lire les variables depuis .env
-AZURE_ACCOUNT_NAME = env("AZURE_ACCOUNT_NAME")
-AZURE_ACCOUNT_KEY = env("AZURE_ACCOUNT_KEY")
+#AZURE_ACCOUNT_NAME = env("AZURE_ACCOUNT_NAME")
+AZURE_ACCOUNT_NAME = 'kodoshinstaticfiles'
+#AZURE_ACCOUNT_KEY = env("AZURE_ACCOUNT_KEY")
+AZURE_ACCOUNT_KEY = 'mN/+Rts/vp6KbRjOLdmSRA3I1mCGsGH5wg9JwckK8rqKkmnCom7ija34lCIlLCPIulMAzwmfH+AB+AStS1BkMQ=='
+
 #AZURE_STATIC_CONTAINER = env("AZURE_STATIC_CONTAINER", default="staticfiles")
-AZURE_MEDIA_CONTAINER = env("AZURE_MEDIA_CONTAINER")
+#AZURE_MEDIA_CONTAINER = env("AZURE_MEDIA_CONTAINER")
+AZURE_MEDIA_CONTAINER = 'mediafiles'
 
 AZURE_CUSTOM_DOMAIN = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net"
 
