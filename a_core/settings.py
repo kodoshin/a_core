@@ -117,7 +117,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'a_core.wsgi.application'
 
-
+"""
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 env = environ.Env()
@@ -128,8 +128,6 @@ if os.path.exists(env_path):
 else:
     print("Le fichier .env est manquant !")
 
-
-"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
