@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-+0n(2jhp%ys2aa(ezw9obo)jx2w1e0&jgit(46qo19c-po68u+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-#ALLOWED_HOSTS = ['kodoshin.azurewebsites.net', 'localhost']
+ALLOWED_HOSTS = ['kodoshin.azurewebsites.net']
 #ALLOWED_HOSTS = ['fc8d-206-176-138-38.ngrok-free.app','http://127.0.0.1:8000']
 #CSRF_TRUSTED_ORIGINS = ['https://fc8d-206-176-138-38.ngrok-free.app','http://127.0.0.1:8000']
 
