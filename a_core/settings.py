@@ -27,7 +27,7 @@ Env.read_env(env_file=BASE_DIR / '.env')
 ENVIRONMENT = env('ENVIRONMENT', default='production')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = 'django-insecure-+0n(2jhp%ys2aa(ezw9obo)jx2w1e0&jgit(46qo19c-po68u+' #env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == 'development':
