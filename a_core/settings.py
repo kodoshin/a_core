@@ -124,11 +124,11 @@ WSGI_APPLICATION = 'a_core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('PGNAME'),
-        'USER': env('PGUSER'),
-        'PASSWORD': env('PGPASSWORD'),
-        'HOST': env('PGHOST'),
-        'PORT': env('PGPORT'),
+        'NAME': 'KODOSHIN', #env('PGNAME'),
+        'USER': 'mahdi', #env('PGUSER'),
+        'PASSWORD': 'Aa25120894', #env('PGPASSWORD'),
+        'HOST': 'kodoshin-dev-server.postgres.database.azure.com', #env('PGHOST'),
+        'PORT': '5432', #env('PGPORT'),
     }
 }
 
