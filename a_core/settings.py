@@ -14,27 +14,28 @@ from pathlib import Path
 import environ
 import os
 from storages.backends.azure_storage import AzureStorage
+import dj_database_url
+from environ import Env
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+env = Env()
+Env.read_env(env_file=BASE_DIR / '.env')
+ENVIRONMENT = env('ENVIRONMENT', default='production')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+0n(2jhp%ys2aa(ezw9obo)jx2w1e0&jgit(46qo19c-po68u+'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+if ENVIRONMENT == 'development':
+    DEBUG = True
+else:
+    DEBUG = False
 
 ALLOWED_HOSTS = []
-#ALLOWED_HOSTS = ['kodoshin-app.azurewebsites.net']
-#ALLOWED_HOSTS = ['fc8d-206-176-138-38.ngrok-free.app','http://127.0.0.1:8000']
-#CSRF_TRUSTED_ORIGINS = ['https://fc8d-206-176-138-38.ngrok-free.app','http://127.0.0.1:8000']
-
 
 # Application definition
 
@@ -119,40 +120,38 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'a_core.wsgi.application'
 
-"""
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-env = environ.Env()
-env_path = os.path.join(BASE_DIR, ".env")  # BASE_DIR est défini en haut de settings.py
-if os.path.exists(env_path):
-    environ.Env.read_env(env_path)
-    #print("Fichier .env chargé avec succès")
-else:
-    print("Le fichier .env est manquant !")
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT'),
+        'NAME': env('PGNAME'),
+        'USER': env('PGUSER'),
+        'PASSWORD': env('PGPASSWORD'),
+        'HOST': env('PGHOST'),
+        'PORT': env('PGPORT'),
     }
 }
+
 """
-
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'KODOSHIN',
-        'USER': 'mahdi',
-        'PASSWORD': 'Aa25120894',
-        'HOST': 'kodoshin-dev-server.postgres.database.azure.com',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'PkbwsvPQzcGbnlEaGwHLalJeqnfYDrie',
+        'HOST': 'postgres.railway.internal',
         'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
+"""
+
+POSTGRES_LOCALLY = False
+if ENVIRONMENT == 'production' or POSTGRES_LOCALLY == True:
+    DATABASES['default'] = dj_database_url.parse(env('DATABASE_URL'))
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
