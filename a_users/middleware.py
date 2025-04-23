@@ -12,7 +12,7 @@ class ProfileCompletionMiddleware:
             onboarding_url = reverse('profile-onboarding')
             if request.path != onboarding_url:
                 # If the profile is not completed, redirect to the onboarding page
-                if request.user.profile.profile_is_filled == 0:
+                if not request.user.is_superuser and request.user.profile.profile_is_filled == 0:
                     return redirect('profile-onboarding')
         response = self.get_response(request)
         return response

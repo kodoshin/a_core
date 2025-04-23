@@ -3,7 +3,7 @@ from django.utils import timezone
 
 
 def reset_daily_credits(request):
-    if request.user.is_authenticated:
+    if not request.user.is_superuser and request.user.is_authenticated:
         profile = request.user.profile
         try:
             user_tz = pytz.timezone(profile.timezone) if profile.timezone else timezone.get_current_timezone()

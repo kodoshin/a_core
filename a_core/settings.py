@@ -122,7 +122,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'a_core.wsgi.application'
 
-
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -140,16 +140,14 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'railway',
         'USER': 'postgres',
-        'PASSWORD': 'PkbwsvPQzcGbnlEaGwHLalJeqnfYDrie',
-        'HOST': 'postgres.railway.internal',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+        'PASSWORD': 'tZllmXGfGOgahDHfdBSYavOGVZsEvzwZ',
+        'HOST': 'ballast.proxy.rlwy.net',
+        'PORT': '26747',
     }
 }
 
 
+"""
 POSTGRES_LOCALLY = False
 if ENVIRONMENT == 'production' or POSTGRES_LOCALLY == True:
     DATABASES['default'] = dj_database_url.parse(env('DATABASE_URL'))
