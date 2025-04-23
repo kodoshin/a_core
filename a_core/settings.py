@@ -66,6 +66,9 @@ INSTALLED_APPS = [
 
 SITE_ID = 1
 
+if ENVIRONMENT != 'development':
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
