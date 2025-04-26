@@ -82,3 +82,14 @@ class CodingChatMessage(models.Model):
         return f"Message {self.id} - Type: {self.type}"
 
 
+class ProcessingError(models.Model):
+    coding_chat = models.ForeignKey(
+        CodingChat,
+        on_delete=models.CASCADE,
+        related_name='processing_errors'
+    )
+    error_content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Error in chat {self.coding_chat_id}: {self.error_content[:50]}"

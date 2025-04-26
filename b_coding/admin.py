@@ -7,4 +7,6 @@ admin.site.register(TokenUsage)
 admin.site.register(ProcessingStep)
 admin.site.register(CodingChatMessage)
 admin.site.register(ChatCategory)
+admin.site.register(ProcessingError)
+
 

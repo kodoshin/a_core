@@ -1,6 +1,6 @@
 from management.ai_bases import async_get_response_ai_1, async_get_response_ai_2 #get_response_ai_1, get_response_ai_2
 from .prompts_variables import pe_files_xml, pe_components_xml, pe_final_answer, pe_final_answer_format, none_answer, no_components_answer
-from .models import CodingChatMessage, ProcessingStep, ChatCategory
+from .models import CodingChatMessage, ProcessingStep, ChatCategory, ProcessingError
 import xml.etree.ElementTree as ET
 import re
 from django.db.models import Max
@@ -61,7 +61,7 @@ def generate_components_xml(components):
 
 
 def filter_files_from_xml(xml_string, files):
-    print(xml_string)
+    #print(xml_string)
     root = ET.fromstring(xml_string)
     filtered_files = []
     for file_element in root.findall("file"):
@@ -77,7 +77,7 @@ def filter_files_from_xml(xml_string, files):
 
 
 async def filter_components_from_xml(xml_string, components):
-    print(xml_string)
+    #print(xml_string)
     root = ET.fromstring(xml_string)
     filtered_components = []
 
@@ -89,7 +89,7 @@ async def filter_components_from_xml(xml_string, components):
         #matching_components = components.filter(file__path=file_path, name=name)
         matching_components = await sync_to_async(list)(components.filter(file__path=file_path, name=name))
         filtered_components.extend(matching_components)
-    print('Related components!!!!!!!!')
+    #print('Related components!!!!!!!!')
     #print(filtered_components)
     return filtered_components
 
@@ -105,61 +105,74 @@ def generate_components_string(components):
 
 
 async def ai_processing(prompt, files, components, chat, is_first_prompt):
-    chat_category = await sync_to_async(ChatCategory.objects.get)(type='super')
-    processing_steps = await sync_to_async(lambda: {f'{chat_category} : {step.order}': step
-                                                    for step in
-                                                    ProcessingStep.objects.filter(chat_category=chat_category)})()
+    try:
+        chat_category = await sync_to_async(ChatCategory.objects.get)(type='super')
+        processing_steps = await sync_to_async(lambda: {f'{chat_category} : {step.order}': step
+                                                        for step in
+                                                        ProcessingStep.objects.filter(chat_category=chat_category)})()
 
-    if is_first_prompt:
-        await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps)
-        engineered_prompt_0 = await build_engineered_prompt_0(pe_files_xml, files, prompt, chat, chat_category, processing_steps)
-        relevant_files = await get_related_files(engineered_prompt_0, files, chat, chat_category, processing_steps)
-        #print('Relevant files !!!!!!!!!!1')
-        #print(relevant_files[0])
-        files_to_use = relevant_files or []
-        relevant_files_components = await sync_to_async(lambda: components.filter(file__in=files_to_use))()
-        engineered_prompt_1 = await build_engineered_prompt_1(pe_components_xml, relevant_files_components, prompt, chat, chat_category, processing_steps)
-        print("EP1 !!!!!!!!!!!!!!!!!!!")
-        #print(engineered_prompt_1)
-        ai_answer_1 = await async_get_response_ai_1(engineered_prompt_1, chat)
-        match = re.search(r'<components>[\s\S]*?</components>', ai_answer_1)
-        if match:
-            related_components_xml = match.group(0)
-            print('Related components xml !!!!!!!')
-            #print(related_components_xml)
-            related_components = await filter_components_from_xml(related_components_xml, components)
+        if is_first_prompt:
+            await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps)
+            engineered_prompt_0 = await build_engineered_prompt_0(pe_files_xml, files, prompt, chat, chat_category, processing_steps)
+            relevant_files = await get_related_files(engineered_prompt_0, files, chat, chat_category, processing_steps)
+            #print('Relevant files !!!!!!!!!!1')
+            #print(relevant_files[0])
+            files_to_use = relevant_files or []
+            relevant_files_components = await sync_to_async(lambda: components.filter(file__in=files_to_use))()
+            engineered_prompt_1 = await build_engineered_prompt_1(pe_components_xml, relevant_files_components, prompt, chat, chat_category, processing_steps)
+            #print("EP1 !!!!!!!!!!!!!!!!!!!")
+            #print(engineered_prompt_1)
+            ai_answer_1 = await async_get_response_ai_1(engineered_prompt_1, chat)
+            match = re.search(r'<components>[\s\S]*?</components>', ai_answer_1)
+            if match:
+                related_components_xml = match.group(0)
+                #print('Related components xml !!!!!!!')
+                #print(related_components_xml)
+                related_components = await filter_components_from_xml(related_components_xml, components)
 
+            else:
+                related_components = []
+            await sync_to_async(CodingChatMessage.objects.create)(
+                chat=chat, type='ai', content=ai_answer_1, order=3, api_key=None,
+                processing_step=processing_steps.get(f'{chat_category} : 3')
+            )
+            engineered_prompt_2 = await build_engineered_prompt_2(pe_final_answer, pe_final_answer_format, related_components, prompt, chat, chat_category, processing_steps)
+            #print('EP2 !!!!!!!!!!!!!')
+            #print(engineered_prompt_2)
+            ai_answer_2 = await async_get_response_ai_2(engineered_prompt_2, chat)
+            #print('AI ANSWER 2!!!!!!')
+            #print(ai_answer_2)
+            await sync_to_async(CodingChatMessage.objects.create)(
+                chat=chat, type='gpt-a', content=ai_answer_2, order=5, api_key=None,
+                processing_step=processing_steps.get(f'{chat_category} : 7')
+            )
+            return ai_answer_2
         else:
-            related_components = []
-        await sync_to_async(CodingChatMessage.objects.create)(
-            chat=chat, type='ai', content=ai_answer_1, order=3, api_key=None,
-            processing_step=processing_steps.get(f'{chat_category} : 3')
+            await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps)
+            last_prompt_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='r-prompt').last())()
+            last_engineered_prompt = last_prompt_obj.content.replace(pe_final_answer_format, '')
+            last_ai_answer_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='gpt-a').last())()
+            last_ai_answer = last_ai_answer_obj.content
+            engineered_adjustment_prompt = await build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer,prompt, chat_category, processing_steps)
+            ai_adjustment_answer = await async_get_response_ai_2(engineered_adjustment_prompt, chat)
+            max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
+            await sync_to_async(CodingChatMessage.objects.create)(
+                chat=chat, type='gpt-a', content=ai_adjustment_answer, order=max_order + 1, api_key=None,
+                processing_step=processing_steps.get(f'{chat_category} : 7')
+            )
+            return ai_adjustment_answer
+    except Exception as e:
+        # 1) Enregistrer l’erreur en base
+        await sync_to_async(ProcessingError.objects.create)(
+            coding_chat=chat,
+            error_content=str(e)
         )
-        engineered_prompt_2 = await build_engineered_prompt_2(pe_final_answer, pe_final_answer_format, related_components, prompt, chat, chat_category, processing_steps)
-        print('EP2 !!!!!!!!!!!!!')
-        #print(engineered_prompt_2)
-        ai_answer_2 = await async_get_response_ai_2(engineered_prompt_2, chat)
-        print('AI ANSWER 2!!!!!!')
-        #print(ai_answer_2)
-        await sync_to_async(CodingChatMessage.objects.create)(
-            chat=chat, type='gpt-a', content=ai_answer_2, order=5, api_key=None,
-            processing_step=processing_steps.get(f'{chat_category} : 7')
-        )
-        return ai_answer_2
-    else:
-        await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps)
-        last_prompt_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='r-prompt').last())()
-        last_engineered_prompt = last_prompt_obj.content.replace(pe_final_answer_format, '')
-        last_ai_answer_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='gpt-a').last())()
-        last_ai_answer = last_ai_answer_obj.content
-        engineered_adjustment_prompt = await build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer,prompt, chat_category, processing_steps)
-        ai_adjustment_answer = await async_get_response_ai_2(engineered_adjustment_prompt, chat)
-        max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
-        await sync_to_async(CodingChatMessage.objects.create)(
-            chat=chat, type='gpt-a', content=ai_adjustment_answer, order=max_order + 1, api_key=None,
-            processing_step=processing_steps.get(f'{chat_category} : 7')
-        )
-        return ai_adjustment_answer
+        # 2) (Optionnel) logger en console/ fichier
+        import logging
+        logging.getLogger(__name__).error("Erreur dans ai_processing", exc_info=True)
+
+        # 3) Retour à l’utilisateur
+        return "We haven't been able to process your demand, please try again or change your prompt."
 
 
 def save_prompt(chat, prompt, chat_category_id, processing_steps):
@@ -203,7 +216,7 @@ async def get_related_files(engineered_prompt_0, files, chat, chat_category_id, 
         if match :
             related_files_xml = match.group(0)  # Extraction de la chaîne XML
             #print(related_files_xml)
-            print('getting files from XML')
+            #print('getting files from XML')
             related_files = filter_files_from_xml(related_files_xml, files)
         else:
             related_files = []
@@ -239,10 +252,10 @@ async def get_related_components(engineered_prompt_1, components, chat, chat_cat
         match = re.search(r"<components>[\s\S]*?</components>", ai_response)
         if match:
             related_components_xml = match.group(0)  # Extraction de la chaîne XML
-            print('Related components XML !!!!!!!!!!!!')
+            #print('Related components XML !!!!!!!!!!!!')
             #print(related_components_xml)
             related_components = await filter_components_from_xml(related_components_xml, components)
-            print('related components 2 !!!!!!!!!')
+            #print('related components 2 !!!!!!!!!')
             #print(related_components)
         else:
             related_components = []
@@ -260,7 +273,7 @@ async def get_related_components(engineered_prompt_1, components, chat, chat_cat
 
 
 async def build_engineered_prompt_2 (pe_final_answer, pe_final_answer_format, related_components, prompt, chat, chat_category_id, processing_steps):
-    print('Related components 2 !!!!!!!!')
+    #print('Related components 2 !!!!!!!!')
     if related_components is None:
         return "None"
     elif related_components==[]:
