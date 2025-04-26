@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
 from .models import Project, Component, File
 from git_auth.views import get_github_token
 from a_users.models import Profile
@@ -9,25 +9,23 @@ from django.contrib import messages
 from urllib.parse import urlparse
 from django.conf import settings
 
-import re
-
-
 
 
 
 def view_documentation(request, project_id):
     project = Project.objects.filter(id=project_id, user=request.user).first()
-    project_files = File.objects.filter(project_id=project_id)
-    project_components = Component.objects.filter(file_id__project_id=project_id)
-
-    context = {
-        'project_id' : project_id,
-        'project': project,
-        'project_components': project_components,
-        'project_files': project_files,
-    }
-
-    return render(request, 'a_projects/view_documentation.html', context)
+    if project :
+        project_files = File.objects.filter(project_id=project_id)
+        project_components = Component.objects.filter(file_id__project_id=project_id)
+        context = {
+            'project_id' : project_id,
+            'project': project,
+            'project_components': project_components,
+            'project_files': project_files,
+        }
+        return render(request, 'a_projects/view_documentation.html', context)
+    else :
+        return HttpResponse("Project not found")
 
 
 def sync_with_github(request, project_id):
