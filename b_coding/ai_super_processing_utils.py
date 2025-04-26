@@ -116,7 +116,8 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt):
         relevant_files = await get_related_files(engineered_prompt_0, files, chat, chat_category, processing_steps)
         #print('Relevant files !!!!!!!!!!1')
         #print(relevant_files[0])
-        relevant_files_components = await sync_to_async(lambda: components.filter(file__in=relevant_files))()
+        files_to_use = relevant_files or []
+        relevant_files_components = await sync_to_async(lambda: components.filter(file__in=files_to_use))()
         engineered_prompt_1 = await build_engineered_prompt_1(pe_components_xml, relevant_files_components, prompt, chat, chat_category, processing_steps)
         print("EP1 !!!!!!!!!!!!!!!!!!!")
         #print(engineered_prompt_1)

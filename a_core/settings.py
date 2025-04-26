@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = Env()
 Env.read_env(env_file=BASE_DIR / '.env')
 ENVIRONMENT = env('ENVIRONMENT', default='production')
-
+print(ENVIRONMENT)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-+0n(2jhp%ys2aa(ezw9obo)jx2w1e0&jgit(46qo19c-po68u+' #env('SECRET_KEY')
 
@@ -90,17 +90,28 @@ AUTHENTICATION_BACKENDS = [
 
 LOGIN_REDIRECT_URL = '/'
 
-
-SOCIALACCOUNT_PROVIDERS = {
-    'github': {
-        'APP': {
-            'client_id': 'Ov23liw9AoK39xGtiPSj',
-            'secret': '8adf0e0159c92e584fe721c057e4a4dc9c171fba',
-            'key': '',
-            #'redirect_uri': 'https://fc8d-206-176-138-38.ngrok-free.app//accounts/github/login/callback'
+if ENVIRONMENT == 'development':
+    SOCIALACCOUNT_PROVIDERS = {
+        'github': {
+            'APP': {
+                'client_id': 'Ov23liw9AoK39xGtiPSj',
+                'secret': '8adf0e0159c92e584fe721c057e4a4dc9c171fba',
+                'key': '',
+                #'redirect_uri': 'https://fc8d-206-176-138-38.ngrok-free.app//accounts/github/login/callback'
+            }
         }
     }
-}
+else :
+    SOCIALACCOUNT_PROVIDERS = {
+        'github': {
+            'APP': {
+                'client_id': 'Ov23liFGQRBpOhG2KcHl',
+                'secret': 'bb33befff734fe6fdd6ef50396701720f7a7ff6d',
+                'key': '',
+                # 'redirect_uri': 'https://fc8d-206-176-138-38.ngrok-free.app//accounts/github/login/callback'
+            }
+        }
+    }
 
 
 
