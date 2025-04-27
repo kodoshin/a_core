@@ -33,6 +33,7 @@ def view_documentation(request, project_id):
 
 @csrf_exempt
 def github_webhook(request):
+    print('starting webhook update')
     if request.method != 'POST':
         return HttpResponse(status=405)
     event = request.META.get('HTTP_X_GITHUB_EVENT', '')
