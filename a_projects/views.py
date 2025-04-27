@@ -8,7 +8,11 @@ from git_auth.models import AllowedFile
 from django.contrib import messages
 from urllib.parse import urlparse
 from django.conf import settings
-
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse, HttpResponseNotAllowed
+from .utils import update_project_files
+from django.urls import reverse
+import json
 
 
 
@@ -26,6 +30,22 @@ def view_documentation(request, project_id):
         return render(request, 'a_projects/view_documentation.html', context)
     else :
         return HttpResponse("Project not found")
+
+
+@csrf_exempt
+def github_webhook(request):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    event = request.META.get('HTTP_X_GITHUB_EVENT')
+    if event == 'push':
+        payload = json.loads(request.body)
+        repo_id = payload.get('repository', {}).get('id')
+        owner = payload.get('repository', {}).get('owner', {}).get('login')
+        name = payload.get('repository', {}).get('name')
+        project = Project.objects.filter(git_repo_id=repo_id).first()
+        if project:
+            update_project_files(project, owner, name)
+    return HttpResponse('OK')
 
 
 def sync_with_github(request, project_id):
@@ -46,6 +66,9 @@ def sync_with_github(request, project_id):
 
     api_url = f"https://api.github.com/repos/{owner}/{repo}/hooks"
     webhook_url = getattr(settings, "GITHUB_WEBHOOK_URL", "https://acore-production.up.railway.app/github/webhook")
+    #webhook_url = request.build_absolute_uri(reverse('github_webhook'))
+    print('webhook url:')
+    print(webhook_url)
     payload = {
         "name": "web",
         "active": True,

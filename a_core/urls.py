@@ -20,11 +20,15 @@ from django.conf.urls.static import static
 from django.conf import settings
 from a_users.views import profile_view
 from a_home.views import home
+from a_projects.views import github_webhook
+
 
 urlpatterns = [
     path('', home, name='home'),
     path('admin/', admin.site.urls),
     path('git/', include('git_auth.urls')),
+
+    path('github/webhook/', github_webhook, name='github_webhook'),
     path('accounts/', include('allauth.urls')),
     path('profile/', include('a_users.urls')),
     path('projects/', include('a_projects.urls')),
