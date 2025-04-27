@@ -241,4 +241,4 @@ ACCOUNT_EMAIL_REQUIRED = True
 ENCRYPTION_KEY = "wj67r5s6sxIHe5tkqvC6ZJ7L6ekr61S5lS3CXXjXXgA="
 
 
-GITHUB_WEBHOOK_URL = "https://acore-production.up.railway.app/github/webhook"
+GITHUB_WEBHOOK_URL = "https://acore-production.up.railway.app/projects/github/webhook/"

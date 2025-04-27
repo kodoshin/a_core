@@ -27,8 +27,6 @@ urlpatterns = [
     path('', home, name='home'),
     path('admin/', admin.site.urls),
     path('git/', include('git_auth.urls')),
-
-    path('github/webhook/', github_webhook, name='github_webhook'),
     path('accounts/', include('allauth.urls')),
     path('profile/', include('a_users.urls')),
     path('projects/', include('a_projects.urls')),

@@ -9,10 +9,9 @@ from django.contrib import messages
 from urllib.parse import urlparse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, HttpResponseNotAllowed
-from .utils import update_project_files
-from django.urls import reverse
+from django.http import HttpResponse
 import json
+
 
 
 
@@ -35,17 +34,61 @@ def view_documentation(request, project_id):
 @csrf_exempt
 def github_webhook(request):
     if request.method != 'POST':
-        return HttpResponseNotAllowed(['POST'])
-    event = request.META.get('HTTP_X_GITHUB_EVENT')
-    if event == 'push':
-        payload = json.loads(request.body)
-        repo_id = payload.get('repository', {}).get('id')
-        owner = payload.get('repository', {}).get('owner', {}).get('login')
-        name = payload.get('repository', {}).get('name')
-        project = Project.objects.filter(git_repo_id=repo_id).first()
-        if project:
-            update_project_files(project, owner, name)
-    return HttpResponse('OK')
+        return HttpResponse(status=405)
+    event = request.META.get('HTTP_X_GITHUB_EVENT', '')
+    if event == 'ping':
+        return HttpResponse('pong', status=200)
+    if event != 'push':
+        return HttpResponse(status=204)
+    payload = json.loads(request.body.decode('utf-8'))
+    repo_data = payload.get('repository', {})
+    repo_id = repo_data.get('id')
+    owner = repo_data.get('owner', {}).get('login')
+    name = repo_data.get('name')
+    try:
+        project = Project.objects.get(git_repo_id=repo_id)
+    except Project.DoesNotExist:
+        return HttpResponse(status=404)
+    user = project.user
+    token = get_github_token(user)
+    if not token:
+        return HttpResponse('No GitHub token', status=403)
+    allowed_exts = tuple(AllowedFile.objects.values_list('extension', flat=True))
+    headers = {
+        'Authorization': f'token {token}',
+        'Accept': 'application/vnd.github.v3+json'
+    }
+    current_files = {}
+    def fetch_dir(path=''):
+        url = f'https://api.github.com/repos/{owner}/{name}/contents/{path}'
+        resp = requests.get(url, headers=headers)
+        return resp.json() if resp.status_code == 200 else []
+    def recurse(path=''):
+        for item in fetch_dir(path):
+            if item.get('type') == 'file' and any(item.get('path','').endswith(ext) for ext in allowed_exts):
+                file_resp = requests.get(item.get('url'), headers=headers).json()
+                content = base64.b64decode(file_resp.get('content','')).decode('utf-8')
+                current_files[item['path']] = content
+            elif item.get('type') == 'dir':
+                recurse(item['path'])
+    recurse()
+    # Create or update files
+    for path, content in current_files.items():
+        filename = path.split('/')[-1]
+        ext = filename.split('.')[-1] if '.' in filename else ''
+        File.objects.update_or_create(
+            project=project,
+            path=path,
+            defaults={'name': filename, 'extension': ext, 'content': content}
+        )
+    # Delete removed files
+    existing_paths = set(File.objects.filter(project=project).values_list('path', flat=True))
+    removed = existing_paths - set(current_files.keys())
+    if removed:
+        File.objects.filter(project=project, path__in=removed).delete()
+    project.github_sync = True
+    project.save()
+    return HttpResponse('OK', status=200)
 
 
 def sync_with_github(request, project_id):
@@ -65,7 +108,7 @@ def sync_with_github(request, project_id):
     repo = path_parts[1].replace('.git', '')
 
     api_url = f"https://api.github.com/repos/{owner}/{repo}/hooks"
-    webhook_url = getattr(settings, "GITHUB_WEBHOOK_URL", "https://acore-production.up.railway.app/github/webhook")
+    webhook_url = getattr(settings, "GITHUB_WEBHOOK_URL", "https://acore-production.up.railway.app/projects/github/webhook/")
     #webhook_url = request.build_absolute_uri(reverse('github_webhook'))
     print('webhook url:')
     print(webhook_url)
