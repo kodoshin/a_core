@@ -189,8 +189,6 @@ def delete_github_sync(request, project_id):
     return redirect('view_documentation', project_id=project_id)
 
 
-
-
 def has_equivalent(user, git_repo_id, path,file_content):
     project = Project.objects.filter(git_repo_id=git_repo_id, user=user).first()
     file = File.objects.filter(project=project, path=path).first()
@@ -339,9 +337,10 @@ def view_modified_repo_files(request, git_repo_id, repo_name, project_id):
     return render(request, 'a_projects/update_repo_files.html', {'file_tree': file_tree, 'deleted_files':deleted_files, 'project':project})
 
 
-def delete_project(request, project_id):
+def delete_project(request, project_id) :
+    delete_github_sync(request, project_id)
     profile = Profile.objects.get(user=request.user)
-    profile.default_project = None
+    profile.default_project = Project.objects.filter(user=request.user).first()
     profile.save()
     project = get_object_or_404(Project, id=project_id)
     project.delete()
