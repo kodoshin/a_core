@@ -45,7 +45,7 @@ def sync_with_github(request, project_id):
     repo = path_parts[1].replace('.git', '')
 
     api_url = f"https://api.github.com/repos/{owner}/{repo}/hooks"
-    webhook_url = getattr(settings, "GITHUB_WEBHOOK_URL", "https://yourdomain.com/github/webhook")
+    webhook_url = getattr(settings, "GITHUB_WEBHOOK_URL", "https://acore-production.up.railway.app/github/webhook")
     payload = {
         "name": "web",
         "active": True,
