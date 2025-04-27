@@ -214,6 +214,15 @@ def view_modified_repo_files(request, git_repo_id, repo_name, project_id):
     #print(file_tree)
     ### This section is to create a list of the deleted files
 
+    def sort_tree(entries):
+        # Trie d’abord les dossiers (type='folder'), puis les fichiers
+        entries.sort(key=lambda item: (item['type'] != 'folder', item['name'].lower()))
+        # Pour chaque dossier, on trie aussi ses enfants
+        for item in entries:
+            if item['type'] == 'folder':
+                sort_tree(item['children'])
+    sort_tree(file_tree['file_tree'])
+
     def build_all_paths(path=''):
         contents = fetch_directory_contents(path)
         files = []

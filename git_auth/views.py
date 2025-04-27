@@ -13,7 +13,6 @@ import os
 from django.http import JsonResponse
 
 
-
 def get_github_token(user):
     try :
         profile = user.profile
@@ -135,6 +134,16 @@ def view_repo_files(request, git_repo_id, repo_name):
         }
     file_tree = build_file_tree(paths_contents)
     #print(file_tree)
+
+    def sort_tree(entries):
+        # Trie d’abord les dossiers (type='folder'), puis les fichiers
+        entries.sort(key=lambda item: (item['type'] != 'folder', item['name'].lower()))
+        # Pour chaque dossier, on trie aussi ses enfants
+        for item in entries:
+            if item['type'] == 'folder':
+                sort_tree(item['children'])
+    sort_tree(file_tree['file_tree'])
+
     response_repo = requests.get(f'https://api.github.com/repos/{request.user.username}/{repo_name}', headers=headers)
     user = request.user
     name = repo_name
@@ -216,3 +225,5 @@ def process_selected_files (request, git_repo_id, repo_name):
         profile.save()
         return redirect('home')
     return HttpResponse("No files are selected")
+
+
