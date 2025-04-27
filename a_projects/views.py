@@ -87,7 +87,7 @@ def delete_github_sync(request, project_id):
 
     owner = path_parts[0]
     repo = path_parts[1].replace('.git', '')
-    webhook_url = getattr(settings, 'GITHUB_WEBHOOK_URL', 'https://yourdomain.com/github/webhook')
+    webhook_url = getattr(settings, 'GITHUB_WEBHOOK_URL', 'https://acore-production.up.railway.app/github/webhook')
     api_url = f'https://api.github.com/repos/{owner}/{repo}/hooks'
     headers = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github.v3+json'}
 
