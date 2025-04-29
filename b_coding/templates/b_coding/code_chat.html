@@ -3,16 +3,74 @@
 
 
 {% block content %}
+<style>
+    /* Ensure main container can position the toggle button */
+    .main-container {
+        position: relative;
+    }
+
+    /* Style for the toggle button */
+    .toggle-chats-btn {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1.5em;
+        cursor: pointer;
+        z-index: 1;
+        top: 0;
+        left: 5px;
+        padding: 0;
+    }
+
+    .toggle-chats-btn:hover {
+        background-color: transparent; /* Rend le fond transparent au survol */
+    }
+
+    .new-chat-btn {
+        background-color: #c6cacb;
+        border: none;
+        color: #1f1e23;
+        font-size: 0.8em;
+        padding: 0.2em 0.5em;
+        height: 2em;
+        width: 60%;
+        line-height: 1.2em;
+        font-family: 'DynaPuff';
+        cursor: pointer;
+      }
+
+    .new-chat-btn:hover {
+        background-color: darkgray;
+      }
+
+    /* Hide sidebar when collapsed */
+    .chats-list-container.collapsed {
+        display: none;
+    }
+</style>
+
+
 
 <!-- Wrap child containers in a parent container -->
 <div class="main-container" style="margin-top: 40px;">
 
 
+    <button id="toggle-chats" class="toggle-chats-btn">&#x226A;</button>
+
+
+
     <div class="chats-list-container" style="background-color: #1f1e23;" >
+
+
+
 
     <br>
         <div class="sidebar">
-        <br>
+
+        <br> <br>
         <select id="project-dropdown" style="background-color: #c6cacb; width: 25vh ; color: #1f1e23; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-family: 'DynaPuff';">
             {% for project in projects %}
                 <option value="{{ project.id }}" {% if project.id == default_project.id %}selected{% endif %}>{{ project.name }}</option>
@@ -25,7 +83,10 @@
 
 
             <!--<h3 style="font-family: 'DynaPuff'">Your Chats</h3>-->
-            <button type="submit" style="height: 2em; font-size: 0.8em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff';" onclick="window.location.href='/ai/kenshi'">New Chat</button>
+            <button type="submit" class="new-chat-btn" onclick="window.location.href='/ai/kenshi'">
+                + new chat
+            </button>
+
             <div class="toggle-content" id="chats-list">
                 <ul style="width: 25vh ;">
                     {% for chat in chats %}
@@ -48,7 +109,7 @@
 
 
 
-    <div class="chat-area-container">
+    <div class="chat-area-container" style="margin-left: 1em">
 
         <br>
         <div class="chat-area">
@@ -104,7 +165,7 @@
                                         {% endif %}
                                         {% if step.code %}
                                             <div class="code-container">
-                                                <button class="copy-code-btn">
+                                                <button class="copy-code-btn" style="margin-left: 10px">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -152,6 +213,24 @@
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var toggleBtn = document.getElementById("toggle-chats");
+    var sidebar = document.querySelector(".chats-list-container");
+
+    toggleBtn.addEventListener("click", function() {
+        sidebar.classList.toggle("collapsed");
+        // Switch icon between ◀ and ▶
+        if (sidebar.classList.contains("collapsed")) {
+            toggleBtn.innerHTML = "&#x226B;"; // ▶
+        } else {
+            toggleBtn.innerHTML = "&#x226A;"; // ◀
+        }
+    });
+});
+</script>
 
 
 <script>

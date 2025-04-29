@@ -16,5 +16,5 @@ def create_user_profile(sender, instance, created, **kwargs):
             user=instance,
             default_chat_category=default_chat_category,
             displayname=displayname,
-            available_credits=500,
+            available_credits=0,
         )

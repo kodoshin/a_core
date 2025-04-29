@@ -4,6 +4,7 @@ from django.db import models
 class Persona(models.Model):
     STATUS_CHOICES = [
         ('active', 'active'),
+        ('inactive', 'inactive'),
         ('coming_soon', 'coming soon'),
     ]
     image = models.ImageField(upload_to='personas/')

@@ -37,115 +37,43 @@
 
 <!-- Ajouter muted dans class si on veut enlever un avantage -->
 <div class="pricing-columns">
-    <!-- Plan Free -->
+    {% for plan in subscription_plans %}
     <div class="pricing-card">
       <div class="pricing-card-header">
-        <div class="pricing-title">Free</div>
-        <div class="pricing-price">$0.00</div>
+        <div class="pricing-title">{{ plan.name }}</div>
+        <div class="pricing-price">${{ plan.original_monthly_price }}</div>
       </div>
       <div class="pricing-table-content">
         <div class="pricing-table-row">
           <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">0 credits per month</div>
+          <div class="pricing-row-text">{{ plan.monthly_credits }} credits per month</div>
         </div>
         <div class="pricing-table-row">
           <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">5 free credits per day</div>
+          <div class="pricing-row-text">{{ plan.daily_credits }} free credits per day</div>
         </div>
         <div class="pricing-table-row">
           <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">1 project</div>
+          <div class="pricing-row-text">{{ plan.project_limits }} project</div>
         </div>
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon muted">
-          <div class="pricing-row-text muted">Automatic Github Sync.</div>
-        </div>
-        <div class="pricing-small-text">Per month, billed annually</div>
-      </div>
-    </div>
-
-
-
-    <!-- Plan Solo -->
-    <div class="pricing-card">
-      <div class="pricing-card-header">
-        <div class="pricing-title">Basic</div>
-        <div class="pricing-price">$9.99</div>
-      </div>
-      <div class="pricing-table-content">
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">200 credits per month</div>
-        </div>
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">10 free credits per day</div>
-        </div>
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">Up to 3 projects</div>
-        </div>
+        {% if plan.sync_with_github == True %}
         <div class="pricing-table-row">
           <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
           <div class="pricing-row-text">Automatic Github Sync.</div>
         </div>
+        {% else %}
+        <div class="pricing-table-row">
+          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon muted">
+          <div class="pricing-row-text muted">Automatic Github Sync.</div>
+        </div>
+        {% endif %}
         <div class="pricing-small-text">Per month, billed annually</div>
       </div>
     </div>
 
-    <!-- Plan Premium -->
-    <div class="pricing-card middle">
-      <div class="pricing-card-header">
-        <div class="pricing-title">Pro</div>
-        <div class="pricing-price">$29.99</div>
-      </div>
-      <div class="pricing-table-content">
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">1000 credits per month</div>
-        </div>
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">40 free credits per day</div>
-        </div>
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">Up to 10 projects</div>
-        </div>
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">Automatic Github Sync</div>
-        </div>
-        <div class="pricing-small-text">Per month, billed annually</div>
-      </div>
-    </div>
+  {% endfor %}
 
-    <!-- Plan Pro -->
-    <div class="pricing-card">
-      <div class="pricing-card-header">
-        <div class="pricing-title">Premium</div>
-        <div class="pricing-price">$59.99</div>
-      </div>
-      <div class="pricing-table-content">
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">3000 credits per month</div>
-        </div>
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">100 free credits per day</div>
-        </div>
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">Unlimited projects</div>
-        </div>
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">Automatic Github Sync</div>
-        </div>
-        <div class="pricing-small-text">Per month, billed annually</div>
-      </div>
-    </div>
+
 </div>
 
 <div class="max-w-4xl ml-[25%]">

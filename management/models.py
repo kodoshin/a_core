@@ -35,6 +35,10 @@ class SubscriptionPlan(models.Model):
     yearly_price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     original_monthly_price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     original_yearly_price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    monthly_credits = models.PositiveIntegerField(default=0)
+    daily_credits = models.PositiveIntegerField(default=0)
+    project_limits = models.PositiveIntegerField(default=0)
+    sync_with_github = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     advantages = models.TextField(null=True, blank=True)
 
