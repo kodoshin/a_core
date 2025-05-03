@@ -32,7 +32,7 @@ urlpatterns = [
     path('projects/', include('a_projects.urls')),
     path('ai/', include('b_coding.urls')),
     path('@<username>/', profile_view, name="profile"),
-    path('pricing-credits/', include('management.urls')),
+    path('pricing/', include('management.urls')),
 ]
 
 # Only used when DEBUG=True, whitenoise can serve files when DEBUG=False

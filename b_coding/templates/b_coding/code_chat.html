@@ -214,6 +214,21 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<script> //Next & Previous buttons with right left arrows
+document.addEventListener('keydown', function(event) {
+    // Prevent interfering while typing in textarea
+    if (document.activeElement.tagName.toLowerCase() === 'textarea' || document.activeElement.isContentEditable) {
+        return;
+    }
+    if (event.key === 'ArrowRight') {
+        const nextBtn = document.querySelector('.next-step-btn');
+        if (nextBtn) nextBtn.click();
+    } else if (event.key === 'ArrowLeft') {
+        const prevBtn = document.querySelector('.prev-step-btn');
+        if (prevBtn) prevBtn.click();
+    }
+});
+</script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {

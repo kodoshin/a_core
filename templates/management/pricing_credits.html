@@ -5,7 +5,26 @@
 
 {% block layout %}
 
-
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  const stripe = Stripe('{{ stripe_public_key }}');
+  document.querySelectorAll('.buy-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const offerId = btn.dataset.offerId;
+      fetch("{% url 'create_checkout_session' 0 %}".replace('0', offerId), {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/json'
+        },
+      })
+      .then(res => res.json())
+      .then(data => stripe.redirectToCheckout({ sessionId: data.sessionId }))
+      .then(result => { if (result.error) alert(result.error.message); })
+      .catch(e => console.error(e));
+    });
+  });
+</script>
 
 
 <div class="max-w-4xl ml-[25%] mt-[10rem]">
@@ -15,7 +34,7 @@
 
 <div class="pricing-columns">
   {% for offer in credit_offers %}
-  <button style="background-color: unset;">
+  <button style="background-color: unset;" type="button" class="buy-button" data-offer-id="{{ offer.id }}">
     <div class="pricing-card">
       <div class="pricing-card-header">
         <div class="pricing-title">{{ offer.name }} Credits</div>

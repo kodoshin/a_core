@@ -23,10 +23,14 @@
 
         <h4 style="color: darkred">Deleted Files</h4>
         <ul>
-            {% for deleted_file in deleted_files %}
-            <li style="color:#444d56"> {{ deleted_file }}</li>
-            <input type="hidden" name="deleted_file" value="{{ deleted_file }}">
-            {% endfor %}
+            {% if deleted_files %}
+                {% for deleted_file in deleted_files %}
+                    <li style="color:#444d56">{{ deleted_file }}</li>
+                    <input type="hidden" name="deleted_file" value="{{ deleted_file }}">
+                {% endfor %}
+            {% else %}
+                <li style="color:#444d56">0 files</li>
+            {% endif %}
         </ul>
 
     </div>
