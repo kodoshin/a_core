@@ -41,18 +41,25 @@ def list_repos(request):
     headers = {'Authorization': f'token {token}',
                "Accept": "application/vnd.github.v3+json"}
     #print(headers)
-    repos_response = requests.get('https://api.github.com/user/repos', headers=headers)
-    if repos_response.status_code == 200:
-        repos = repos_response.json()
-        repos_status = 1
-        #print(repos)
-    else:
-        repos = []
-        repos_status = 0
+    repos = []
+    page = 1
+    while True:
+        params = {'per_page': 100, 'page': page}
+        resp = requests.get('https://api.github.com/user/repos', headers=headers, params=params)
+        if resp.status_code != 200:
+            # on arrête la boucle en cas d'erreur
+            break
 
-    print(repos_status)
+        page_repos = resp.json()
+        if not page_repos:
+            # plus de dépôts → fin de la pagination
+            break
+
+        repos.extend(page_repos)
+        page += 1
+
+    repos_status = 1 if repos else 0
     context = {'repos': repos, 'repos_status': repos_status}
-
     return render(request, 'git_auth/list_repos.html', context)
 
 
