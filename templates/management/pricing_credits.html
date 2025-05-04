@@ -32,21 +32,22 @@
 </div>
 
 
+
 <div class="pricing-columns">
   {% for offer in credit_offers %}
-  <button style="background-color: unset;" type="button" class="buy-button" data-offer-id="{{ offer.id }}">
-    <div class="pricing-card">
-      <div class="pricing-card-header">
-        <div class="pricing-title">{{ offer.name }} Credits</div>
-        <div class="pricing-price">${{ offer.price }}</div>
-      </div>
-    </div>
-  </button>
+    <form action="{% url 'create_checkout_session' offer.id %}" method="post" style="background-color: unset;">
+      {% csrf_token %}
+      <button style="background-color: unset;" type="submit" class="buy-button">
+        <div class="pricing-card">
+          <div class="pricing-card-header">
+            <div class="pricing-title">{{ offer.name }} Credits</div>
+            <div class="pricing-price">${{ offer.price }}</div>
+          </div>
+        </div>
+      </button>
+    </form>
   {% endfor %}
-
 </div>
-
-
 
 
 
@@ -56,40 +57,49 @@
 
 <!-- Ajouter muted dans class si on veut enlever un avantage -->
 <div class="pricing-columns">
-    {% for plan in subscription_plans %}
-    <div class="pricing-card">
-      <div class="pricing-card-header">
-        <div class="pricing-title">{{ plan.name }}</div>
-        <div class="pricing-price">${{ plan.original_monthly_price }}</div>
-      </div>
-      <div class="pricing-table-content">
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">{{ plan.monthly_credits }} credits per month</div>
-        </div>
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">{{ plan.daily_credits }} free credits per day</div>
-        </div>
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">{{ plan.project_limits }} project</div>
-        </div>
-        {% if plan.sync_with_github == True %}
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-          <div class="pricing-row-text">Automatic Github Sync.</div>
-        </div>
-        {% else %}
-        <div class="pricing-table-row">
-          <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon muted">
-          <div class="pricing-row-text muted">Automatic Github Sync.</div>
-        </div>
-        {% endif %}
-        <div class="pricing-small-text">Per month, billed annually</div>
-      </div>
-    </div>
 
+  {% for plan in subscription_plans %}
+  {% if plan.name != 'FREE' %}
+  <form action="{% url 'create_checkout_session_plan' plan.id %}" method="post" style="background-color: unset;">
+    {% csrf_token %}
+    <button style="background-color: unset;" type="submit" class="buy-button">
+  {% endif %}
+      <div class="pricing-card">
+        <div class="pricing-card-header">
+          <div class="pricing-title">{{ plan.name }}</div>
+          <div class="pricing-price">${{ plan.original_monthly_price }}</div>
+        </div>
+        <div class="pricing-table-content">
+          <div class="pricing-table-row">
+            <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+            <div class="pricing-row-text">{{ plan.monthly_credits }} credits per month</div>
+          </div>
+          <div class="pricing-table-row">
+            <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+            <div class="pricing-row-text">{{ plan.daily_credits }} free credits per day</div>
+          </div>
+          <div class="pricing-table-row">
+            <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+            <div class="pricing-row-text">{{ plan.project_limits }} project</div>
+          </div>
+          {% if plan.sync_with_github == True %}
+          <div class="pricing-table-row">
+            <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
+            <div class="pricing-row-text">Automatic Github Sync.</div>
+          </div>
+          {% else %}
+          <div class="pricing-table-row">
+            <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon muted">
+            <div class="pricing-row-text muted">Automatic Github Sync.</div>
+          </div>
+          {% endif %}
+          <div class="pricing-small-text">Per month, billed annually</div>
+        </div>
+      </div>
+  {% if plan.name != 'FREE' %}
+    </button>
+  </form>
+  {% endif %}
   {% endfor %}
 
 

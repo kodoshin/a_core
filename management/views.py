@@ -1,11 +1,12 @@
-from django.shortcuts import render
 from .models import SubscriptionPlan, CreditOffer
 from django.conf import settings
 
 import stripe
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.views.decorators.http import require_POST
 from a_users.models import Profile
 
 
@@ -25,29 +26,51 @@ def pricing_credits(request):
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+@require_POST
 def create_checkout_session(request, offer_id):
+    stripe.api_key = settings.STRIPE_SECRET_KEY
     offer = get_object_or_404(CreditOffer, id=offer_id)
+    success_url = f"{settings.DOMAIN}{reverse('pricing_credits')}?session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{settings.DOMAIN}{reverse('pricing_credits')}"
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
         line_items=[{
             'price_data': {
                 'currency': 'usd',
-                'product_data': {
-                    'name': f'{offer.name} Credits',
-                },
+                'product_data': {'name': f"{offer.name} Credits"},
                 'unit_amount': int(offer.price * 100),
             },
             'quantity': 1,
         }],
         mode='payment',
-        success_url=request.build_absolute_uri('/management/pricing_credits/') + '?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url=request.build_absolute_uri('/management/pricing_credits/'),
-        metadata={
-            'offer_id': str(offer.id),
-            'user_id': str(request.user.id),
-        }
+        success_url=success_url,
+        cancel_url=cancel_url,
     )
-    return JsonResponse({'sessionId': session.id})
+    return redirect(session.url, code=303)
+
+@require_POST
+def create_checkout_session_plan(request, plan_id):
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    offer = get_object_or_404(SubscriptionPlan, id=plan_id)
+    success_url = f"{settings.DOMAIN}{reverse('pricing_credits')}?session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{settings.DOMAIN}{reverse('pricing_credits')}"
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price_data': {
+                'currency': 'usd',
+                'product_data': {'name': f"{offer.name}"},
+                'unit_amount': int(offer.yearly_price * 100),
+            },
+            'quantity': 1,
+        }],
+        mode='payment',
+        success_url=success_url,
+        cancel_url=cancel_url,
+    )
+    return redirect(session.url, code=303)
+
+
 
 @csrf_exempt
 def stripe_webhook(request):
