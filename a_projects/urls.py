@@ -8,6 +8,7 @@ urlpatterns = [
     path('documentation/update/<int:project_id>/<str:git_repo_id>/<str:repo_name>/', views.view_modified_repo_files, name='view_modified_repo_files'),
     path('documentation/delete/<int:project_id>/', views.delete_project, name='delete_project'),
     path('github/webhook/', views.github_webhook, name='github_webhook'),
+    path('components/<int:project_id>/', views.view_components, name='view_components'),
     #path('load_ai_doc/<int:project_id>/', views.load_ai_doc, name='load_ai_doc'),
     #path('documentation/<int:project_id>/', views.redirect_to_doc, name='documentation'),
 ]

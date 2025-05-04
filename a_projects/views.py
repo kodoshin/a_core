@@ -31,6 +31,21 @@ def view_documentation(request, project_id):
         return HttpResponse("Project not found")
 
 
+def view_components(request, project_id):
+    project = Project.objects.filter(id=project_id, user=request.user).first()
+    if project :
+        project_files = File.objects.filter(project_id=project_id)
+        project_components = Component.objects.filter(file_id__project_id=project_id)
+        context = {
+            'project_id' : project_id,
+            'project': project,
+            'project_components': project_components,
+            'project_files': project_files,
+        }
+        return render(request, 'a_projects/view_components.html', context)
+    else :
+        return HttpResponse("Project not found")
+
 @csrf_exempt
 def github_webhook(request):
     print('starting webhook update')
