@@ -14,6 +14,7 @@
     <input type="hidden" name="project_id" value="{{ project.id }}">
     <div class="container">
         <h1 class="repo-name" style="color: black">{{ file_tree.repo_name }}</h1>
+        <h4 style="color: darkred">Modified Files</h4>
         <ul class="file-tree">
             {% for item in file_tree.file_tree %}
                 {% include 'git_auth/file_item.html' with item=item %}

@@ -483,55 +483,84 @@ $(document).ready(function() {
 
 <script>
   $(document).ready(function() {
+    var lastAiMessageId = 0;
+
+    function pollUpdates() {
+        $.ajax({
+            url: '{% url "code_chat_updates" %}',
+            data: {
+                chat_id: '{{ current_chat.id|default:"" }}',
+                last_id: lastAiMessageId
+            },
+            success: function(data) {
+                data.messages.forEach(function(msg) {
+                    // Parser le XML du message
+                    var parser = new DOMParser();
+                    var xmlDoc = parser.parseFromString(msg.content, 'application/xml');
+                    var rootTag = xmlDoc.documentElement.tagName;
+
+                    if (rootTag === 'files') {
+                        // Pour <files> : on affiche chaque <file> sur une ligne
+                        var files = xmlDoc.getElementsByTagName('file');
+                        for (var i = 0; i < files.length; i++) {
+                            $('#loading-text').append(files[i].textContent + '<br>');
+                        }
+                    }
+                    else if (rootTag === 'components') {
+                        // Pour <components> : on affiche "file : name" pour chaque <component>
+                        var comps = xmlDoc.getElementsByTagName('component');
+                        for (var i = 0; i < comps.length; i++) {
+                            var fileName = comps[i].getElementsByTagName('file')[0].textContent;
+                            var compName = comps[i].getElementsByTagName('name')[0].textContent;
+                            $('#loading-text').append(fileName + ' : ' + compName + '<br>');
+                        }
+                    }
+                    else {
+                        // Fallback : afficher brut
+                        $('#loading-text').append(msg.content + '<br>');
+                    }
+
+                    // Mettre à jour lastAiMessageId
+                    lastAiMessageId = msg.id;
+                });
+            },
+
+            
+            complete: function() {
+                // Continue polling every 2 seconds
+                setTimeout(pollUpdates, 2000);
+            }
+        });
+    }
+
     $('#chat-form').on('submit', function(e) {
-      e.preventDefault();
-
-      var prompt = $('#prompt').val().trim();
-      if (prompt === '') {
-        alert('Please enter a prompt.');
-        return;
-      }
-
-      $('#loading-spinner').show();
-      $('#loading-text').show();
-      $('#loading-text').text('reading code');
-
-      setTimeout(function() {
-          $('#loading-text').text('analyzing project components');
-      }, 10000);
-      setTimeout(function() {
-          $('#loading-text').text('analyzing code');
-      }, 20000);
-      setTimeout(function() {
-          $('#loading-text').text('generating solution');
-      }, 30000);
-      setTimeout(function() {
-          $('#loading-text').text('refining solution');
-      }, 40000);
-      setTimeout(function() {
-          $('#loading-text').text('please wait...');
-      }, 55000);
-      setTimeout(function() {
-          $('#loading-text').text("this may take few minutes, please don't close the window");
-      }, 70000);
-      setTimeout(function() {
-          $('#loading-text').text('');
-      }, 180000);
-
-      $.ajax({
-        url: '{% url "code_chat_view" %}',
-        type: 'POST',
-        data: $(this).serialize(),
-        success: function(data) {
-          $('#loading-spinner').hide();
-          // Rediriger vers la nouvelle page de chat
-          window.location.href = '?chat_id=' + data.chat_id;
-        },
-        error: function() {
-          $('#loading-spinner').hide();
-          alert('An error has occured.');
+        e.preventDefault();
+        var prompt = $('#prompt').val().trim();
+        if (prompt === '') {
+            alert('Please enter a prompt.');
+            return;
         }
-      });
+        // Show loader and clear previous notifications
+        $('#loading-spinner').show();
+        $('#loading-text').show().empty();
+        // Start polling for AI processing updates
+        pollUpdates();
+
+        // Send the main chat request
+        $.ajax({
+            url: '{% url "code_chat_view" %}',
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function(data) {
+                $('#loading-spinner').hide();
+                // Redirect to render final chat when complete
+                window.location.href = '?chat_id=' + data.chat_id;
+            },
+            error: function() {
+                $('#loading-spinner').hide();
+                alert('An error has occured.');
+            }
+        });
     });
 });
 

@@ -49,6 +49,7 @@ async def code_chat_view(request):
                 if chat.title is None :
                     chat.title = prompt[:25] + '...' if len(prompt) >= 28 else prompt
                     await sync_to_async(chat.save)()
+
                 if default_chat_category.type == 'regular':
                     ai_response = await regular_ai_processing(prompt, components, chat, is_first_prompt)
                 elif default_chat_category.type == 'super':
@@ -184,3 +185,29 @@ def delete_chat(request):
         except Chat.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Chat not found.'})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+
+async def get_processing_updates(request):
+    await asyncio.sleep(5)
+    latest_chat = await sync_to_async(
+        lambda: CodingChat.objects
+        .filter(user=request.user)
+        .order_by('-created_on')
+        .first()
+    )()
+    if not latest_chat:
+        # no chats yet → nothing to stream
+        return JsonResponse({'messages': []})
+
+    chat_id = latest_chat.id
+
+    print('CHAT ID :', chat_id)
+    last_id = int(request.GET.get('last_id', 0))
+    # Fetch all new AI messages for this chat with id greater than last_id
+    messages = await sync_to_async(lambda: list(
+        CodingChatMessage.objects
+            .filter(chat_id=chat_id, type='ai', id__gt=last_id)
+            .order_by('id')
+            .values('id', 'content')
+    ))()
+    return JsonResponse({'messages': messages})
