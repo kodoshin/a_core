@@ -4,7 +4,7 @@ Task:
 
 As an AI assistant, help me with the following:
 
-Review the provided Django project files paths.
+Review the provided {technology} project files paths.
 
 List all the files paths that would be useful to resolve the user's request.
 Output them in this exact XML format:
@@ -30,7 +30,7 @@ Task:
 
 As an AI assistant, help me with the following:
 
-Review the provided Django project components.
+Review the provided {technology} project components.
 
 List all the components that would be useful to resolve the user's request.
 Output them in this exact XML format:
@@ -54,14 +54,14 @@ Only provide the XML formatted questions or files as per the instructions.
 pe_final_answer = """
 As an AI assistant, help me with the following:
 
-Review the provided Django project resources and the request
+Review the provided {technology} project resources and the request
 
 Provide me a detailed solution using the resources to solve the request
 
 """
 
 pe_final_answer_format = """
-Develop the solution then please format the instructions in order to respect this format example
+Develop the solution then please format the instructions in order to respect this format example (this example is Django but you need to adapt it to {technology})
     <step1> 
     <Justifications> We will be creating a form to allow users to subscribe in the website. </Justifications>
     <file>app_name_1/forms.py</file>

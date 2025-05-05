@@ -104,7 +104,7 @@ def generate_components_string(components):
     return "\n".join(component_strings)  # Séparation par des retours à la ligne
 
 
-async def ai_processing(prompt, files, components, chat, is_first_prompt):
+async def ai_processing(prompt, files, components, chat, is_first_prompt, technology):
     try:
         chat_category = await sync_to_async(ChatCategory.objects.get)(type='super')
         processing_steps = await sync_to_async(lambda: {f'{chat_category} : {step.order}': step
@@ -113,13 +113,13 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt):
 
         if is_first_prompt:
             await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps)
-            engineered_prompt_0 = await build_engineered_prompt_0(pe_files_xml, files, prompt, chat, chat_category, processing_steps)
+            engineered_prompt_0 = await build_engineered_prompt_0(pe_files_xml.format(technology=technology), files, prompt, chat, chat_category, processing_steps)
             relevant_files = await get_related_files(engineered_prompt_0, files, chat, chat_category, processing_steps)
             #print('Relevant files !!!!!!!!!!1')
             #print(relevant_files[0])
             files_to_use = relevant_files or []
             relevant_files_components = await sync_to_async(lambda: components.filter(file__in=files_to_use))()
-            engineered_prompt_1 = await build_engineered_prompt_1(pe_components_xml, relevant_files_components, prompt, chat, chat_category, processing_steps)
+            engineered_prompt_1 = await build_engineered_prompt_1(pe_components_xml.format(technology=technology), relevant_files_components, prompt, chat, chat_category, processing_steps)
             #print("EP1 !!!!!!!!!!!!!!!!!!!")
             #print(engineered_prompt_1)
             ai_answer_1 = await async_get_response_ai_1(engineered_prompt_1, chat)
@@ -136,7 +136,7 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt):
                 chat=chat, type='ai', content=ai_answer_1, order=3, api_key=None,
                 processing_step=processing_steps.get(f'{chat_category} : 3')
             )
-            engineered_prompt_2 = await build_engineered_prompt_2(pe_final_answer, pe_final_answer_format, related_components, prompt, chat, chat_category, processing_steps)
+            engineered_prompt_2 = await build_engineered_prompt_2(pe_final_answer.format(technology=technology), pe_final_answer_format.replace("{technology}", technology), related_components, prompt, chat, chat_category, processing_steps)
             #print('EP2 !!!!!!!!!!!!!')
             #print(engineered_prompt_2)
             ai_answer_2 = await async_get_response_ai_2(engineered_prompt_2, chat)
@@ -150,7 +150,7 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt):
         else:
             await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps)
             last_prompt_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='r-prompt').last())()
-            last_engineered_prompt = last_prompt_obj.content.replace(pe_final_answer_format, '')
+            last_engineered_prompt = last_prompt_obj.content.replace(pe_final_answer_format.replace("{technology}", technology), '')
             last_ai_answer_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='gpt-a').last())()
             last_ai_answer = last_ai_answer_obj.content
             engineered_adjustment_prompt = await build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer,prompt, chat_category, processing_steps)

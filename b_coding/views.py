@@ -30,7 +30,8 @@ async def code_chat_view(request):
     components = await sync_to_async(lambda: Component.objects.filter(file__project=default_project))()
     #files = await sync_to_async(lambda: File.objects.filter(project=default_project))()
     files = await sync_to_async(list)(File.objects.filter(project=default_project))
-
+    technology = await sync_to_async(lambda: default_project.technology)()
+    technology_name = await sync_to_async(lambda: technology.name)()
     #projects = await sync_to_async(lambda: Project.objects.filter(user=user).exclude(technology__name='Other'))()
     projects = await sync_to_async(lambda: list(Project.objects.filter(user=user).exclude(technology__name='Other')))()
 
@@ -51,9 +52,9 @@ async def code_chat_view(request):
                     await sync_to_async(chat.save)()
 
                 if default_chat_category.type == 'regular':
-                    ai_response = await regular_ai_processing(prompt, components, chat, is_first_prompt)
+                    ai_response = await regular_ai_processing(prompt, components, chat, is_first_prompt, technology_name)
                 elif default_chat_category.type == 'super':
-                    ai_response = await super_ai_processing(prompt, files, components, chat, is_first_prompt)
+                    ai_response = await super_ai_processing(prompt, files, components, chat, is_first_prompt, technology_name )
                 if is_first_prompt:
                     profile.available_credits = available_credits - default_chat_category.price
                 else:

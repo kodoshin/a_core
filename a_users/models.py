@@ -20,7 +20,7 @@ class Profile(models.Model):
     image = models.ImageField(upload_to='avatars/', null=True, blank=True)
     displayname = models.CharField(max_length=20, null=True, blank=True)
     info = models.TextField(null=True, blank=True)
-    default_project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, related_name='profiles_with_default_project', blank=True, null=True)
+    default_project = models.ForeignKey(Project, on_delete=models.SET_NULL, related_name='profiles_with_default_project', blank=True, null=True)
     default_chat_category = models.ForeignKey(ChatCategory, on_delete=models.DO_NOTHING, related_name='profiles_with_default_chat_category', blank=True, null=True)
     github_access_key = models.CharField(max_length=255, null=True, blank=True)
     xp_points = models.IntegerField(default=0)
