@@ -1,0 +1,44 @@
+<title>Token Tuto</title>
+
+{% extends 'layouts/blank.html' %}
+
+{% block content %}
+
+<style>
+  .content-wrapper {
+    margin-left: 50px; /* Applique une marge de 50px à gauche */
+  }
+  .select-button {
+    height: 30px;
+    display: flex;
+    align-items: center; /* Centre verticalement */
+    justify-content: center; /* Centre horizontalement */
+    padding: 0 10px;
+    border: none;
+  }
+</style>
+
+
+<div class="content-wrapper">
+<br><br><br>
+<h2>Generate github token</h2>
+<br>
+<p style="color: white">1. Navigate to your Git account settings, then <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer"> Developer Settings </a>Click the Personal access tokens menu, then click Generate new token.</p>
+<br>
+<img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/tokentuto0001.png" alt="Capture 1">
+<br>
+<p style="color: white">2. Select repo as the scope. The token will be applicable for all the specified actions in your repositories.</p>
+<br>
+<img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/tokentuto0002.png" alt="Capture 2">
+<br>
+<p style="color: white">3. Click Generate Token. GitHub will display the personal access token only once. Ensure that you copy the token and store it in a safe space.</p>
+<br>
+<img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/tokentuto0003.png" alt="Capture 3">
+<br>
+<p style="color: white">We will use this token in the Integration function’s code, which will enable Catalyst to fetch necessary information about the repositories from GitHub.</p>
+
+{# ajoutez autant de <img> que nécessaire #}
+
+{% endblock %}
+
+</div>

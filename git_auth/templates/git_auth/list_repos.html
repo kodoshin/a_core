@@ -25,7 +25,7 @@
             {% endfor %}
         </select>
         {% if repos_status == 0 %}
-        <p style="color: indianred">Your github token is invalid, please follow this <a href="/">tutorial</a> to solve this issue</p>
+        <p style="color: indianred">Your github token is invalid, please follow this <a href="{% url 'token_tutorial' %}" target="_blank" rel="noopener noreferrer">tutorial</a></p>
         {% endif %}
 
 

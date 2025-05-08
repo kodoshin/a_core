@@ -123,7 +123,7 @@
                     <span class="star" data-value="4" style="cursor: pointer;">&#9733;</span>
                     <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
                 </div>
-                <div>Category: {{ current_chat.chat_category.type }} ({{ current_chat.chat_category.price_secondary_prompt }} credits for secondary prompts)</div>
+                <div>{{ current_chat.chat_category.name }} (Only {{ current_chat.chat_category.price_secondary_prompt }} credits for next prompts)</div>
                 <br>
 
 
@@ -132,7 +132,7 @@
                 <!-- New dropdown for ChatCategory -->
                 <select id="chatcategory-dropdown" style="background-color: unset; max-width: 20vh; color: white; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-family: 'DynaPuff';">
                     {% for category in chatcategories %}
-                        <option style="color: black" value="{{ category.id }}" {% if category.id == profile.default_chat_category.id %}selected{% endif %}>{{ category.type }} ({{ category.price }} credits)</option>
+                        <option style="color: black" value="{{ category.id }}" {% if category.id == profile.default_chat_category.id %}selected{% endif %}>{{ category.name }} ({{ category.price }} credits)</option>
                     {% endfor %}
                 </select>
                 <br><br>

@@ -234,4 +234,12 @@ def process_selected_files (request, git_repo_id, repo_name):
     return HttpResponse("No files are selected")
 
 
+def token_tutorial(request):
+    """
+    Affiche la page de tutoriel qui ne contient
+    que des captures d’écran d’exemples de tokens.
+    """
+    return render(request, 'token_tutorial.html')
+
+
 
