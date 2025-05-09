@@ -12,15 +12,18 @@
 <form method="POST" action="{% url 'process_selected_files' git_repo_id=file_tree.git_repo_id repo_name=file_tree.repo_name %}">
     {% csrf_token %}
     <input type="hidden" name="project_id" value="{{ project.id }}">
-    <div class="container">
-        <h1 class="repo-name" style="color: black">{{ file_tree.repo_name }}</h1>
+    <div class="container" style="background-color: unset">
+        <h1 class="repo-name" style="color: white; margin-bottom: 25px;">{{ file_tree.repo_name }}</h1>
         <ul class="file-tree">
             {% for item in file_tree.file_tree %}
                 {% include 'git_auth/file_item.html' with item=item %}
             {% endfor %}
         </ul>
     </div>
-    <button type="submit">Submit</button>
+    <div style="margin-left: 20%;">
+        <button type="submit">Submit</button>
+    </div>
+
 </form>
 
 

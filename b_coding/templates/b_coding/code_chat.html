@@ -486,10 +486,11 @@ $(document).ready(function() {
     var lastAiMessageId = 0;
 
     function pollUpdates() {
+        var chatId = $('#chat_id').val();
         $.ajax({
             url: '{% url "code_chat_updates" %}',
             data: {
-                chat_id: '{{ current_chat.id|default:"" }}',
+                chat_id: chatId,
                 last_id: lastAiMessageId
             },
             success: function(data) {

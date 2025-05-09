@@ -190,25 +190,19 @@ def delete_chat(request):
 
 async def get_processing_updates(request):
     await asyncio.sleep(5)
-    latest_chat = await sync_to_async(
-        lambda: CodingChat.objects
-        .filter(user=request.user)
-        .order_by('-created_on')
-        .first()
-    )()
+    chat_id = request.GET.get('chat_id')
+    if chat_id:
+        latest_chat = await sync_to_async(lambda: CodingChat.objects.filter(id=chat_id, user=request.user).first())()
+    else:
+        latest_chat = await sync_to_async(
+            lambda: CodingChat.objects.filter(user=request.user).order_by('-created_on').first())()
     if not latest_chat:
-        # no chats yet → nothing to stream
         return JsonResponse({'messages': []})
-
-    chat_id = latest_chat.id
-
-    print('CHAT ID :', chat_id)
     last_id = int(request.GET.get('last_id', 0))
-    # Fetch all new AI messages for this chat with id greater than last_id
     messages = await sync_to_async(lambda: list(
         CodingChatMessage.objects
-            .filter(chat_id=chat_id, type='ai', id__gt=last_id)
-            .order_by('id')
-            .values('id', 'content')
+        .filter(chat_id=latest_chat.id, type='ai', id__gt=last_id)
+        .order_by('id')
+        .values('id', 'content')
     ))()
     return JsonResponse({'messages': messages})
