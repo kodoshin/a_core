@@ -4,7 +4,69 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const carousel = document.querySelector('.tech-carousel .tech-list');
+  document.querySelector('.tech-carousel .carousel-arrow.left').addEventListener('click', function(){
+    carousel.scrollBy({ left: -200, behavior: 'smooth' });
+  });
+  document.querySelector('.tech-carousel .carousel-arrow.right').addEventListener('click', function(){
+    carousel.scrollBy({ left: 200, behavior: 'smooth' });
+  });
+});
+</script>
+
 <style>
+
+        /* Carousel technologies */
+    .tech-carousel {
+      background-color: rgba(31, 30, 35, 0.5);
+      padding: 2rem;
+      border-radius: 10px;
+      position: relative;
+      margin: 2rem 0;
+      overflow: hidden;
+    }
+    .tech-carousel .carousel-wrapper {
+      position: relative;
+    }
+    .tech-carousel .carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 50%;
+      z-index: 10;
+    }
+    .tech-carousel .carousel-arrow.left { left: 1rem; }
+    .tech-carousel .carousel-arrow.right { right: 1rem; }
+    .tech-carousel .tech-list {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      gap: 1rem;
+      padding: 1rem 3rem;
+    }
+    .tech-carousel .tech-list::-webkit-scrollbar { display: none; }
+    .tech-carousel .tech-list { -ms-overflow-style: none; scrollbar-width: none; }
+    .tech-carousel .tech-item {
+      flex: 0 0 auto;
+      text-align: center;
+    }
+    .tech-carousel .tech-item img {
+      max-width: 250px;
+      height: auto;
+      margin: 0 auto 0.5rem;
+    }
+    .tech-carousel .tech-item p {
+      color: #fff;
+    }
+
+
     table {
         width: 60%;
         margin: 20px auto;
@@ -268,6 +330,30 @@
 </div>
 
 <br>
+
+
+
+<div class="text-center mb-20">
+    <section class="tech-carousel" style="width: 80%; margin: 0 auto;">
+      <h2 class="title">Native Tech Stack</h2>
+      <br> <br>
+      <div class="carousel-wrapper">
+        <button class="carousel-arrow left">&larr;</button>
+        <div class="tech-list">
+          {% for tech in technologies %}
+            <div class="tech-item">
+              <img src="{{ tech.image.url }}" alt="{{ tech.name }}">
+            </div>
+          {% endfor %}
+        </div>
+        <button class="carousel-arrow right">&rarr;</button>
+      </div>
+    </section>
+</div>
+
+
+
+<br>
 <div class="text-center mb-20">
   <h1 class="title">
       Seamless Workflow
@@ -285,6 +371,8 @@
   </video>
 </div>
 <br><br>
+
+
 
 
 <div class="text-center mb-20">
