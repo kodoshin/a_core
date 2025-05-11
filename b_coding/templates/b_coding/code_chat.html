@@ -220,6 +220,8 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+
+
 <script> //Next & Previous buttons with right left arrows
 document.addEventListener('keydown', function(event) {
     // Prevent interfering while typing in textarea
@@ -300,7 +302,7 @@ $(document).ready(function() {
   });
 </script>
 
-<script>
+<script> //Delete chat
   $(document).ready(function() {
       // Handle delete icon click: show confirm and cancel icons
       $('.delete-chat').click(function() {
@@ -352,7 +354,7 @@ $(document).ready(function() {
   });
 </script>
 
-<script>
+<script> // Manage reviews
   document.addEventListener("DOMContentLoaded", function () {
       const stars = document.querySelectorAll(".star");
 
@@ -488,6 +490,16 @@ $(document).ready(function() {
 </script>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+    // Flag to know if a default project is selected
+    var hasDefaultProject = {% if default_project %}true{% else %}false{% endif %};
+    // Expose to global scope for other handlers
+    window.hasDefaultProject = hasDefaultProject;
+});
+</script>
+
+
+<script> //Polls management
   $(document).ready(function() {
     var lastAiMessageId = 0;
 
@@ -541,6 +553,11 @@ $(document).ready(function() {
     }
 
     $('#chat-form').on('submit', function(e) {
+        if (!window.hasDefaultProject) {
+            e.preventDefault();
+            alert('Please select a project');
+            return;
+        }
         e.preventDefault();
         var prompt = $('#prompt').val().trim();
         if (prompt === '') {
@@ -573,7 +590,8 @@ $(document).ready(function() {
 
 </script>
 
-<script>
+
+<script> //Step Navigation & copy button
     $(document).ready(function() {
         // Handle step navigation
         $('.next-step-btn').click(function() {
