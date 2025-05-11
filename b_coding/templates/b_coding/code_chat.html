@@ -429,6 +429,8 @@ $(document).ready(function() {
                 },
                 success: function(response) {
                     if (response.status === 'success') {
+                        //window.location.reload();
+                        window.hasDefaultProject = true
                         // On récupère la UL et on la vide
                         var chatList = $('#chats-list ul');
                         chatList.empty();
@@ -560,7 +562,7 @@ $(document).ready(function() {
         }
         e.preventDefault();
         var prompt = $('#prompt').val().trim();
-        if (prompt === '') {
+        if (prompt === "Ask anything" || prompt === "") {
             alert('Please enter a prompt.');
             return;
         }

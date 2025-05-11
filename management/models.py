@@ -41,6 +41,7 @@ class SubscriptionPlan(models.Model):
     sync_with_github = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     advantages = models.TextField(null=True, blank=True)
+    duration_days = models.PositiveIntegerField(default=366)
 
     def __str__(self):
         return self.name

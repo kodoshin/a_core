@@ -1,4 +1,4 @@
-from .models import SubscriptionPlan, CreditOffer
+from .models import SubscriptionPlan, CreditOffer, Subscription
 from django.conf import settings
 
 import stripe
@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from a_users.models import Profile
+from django.contrib.auth.models import User
+
 
 
 
@@ -45,13 +47,17 @@ def create_checkout_session(request, offer_id):
         mode='payment',
         success_url=success_url,
         cancel_url=cancel_url,
+        metadata={
+            'offer_id': offer.id,
+            'user_id': request.user.id
+        }
     )
     return redirect(session.url, code=303)
 
 @require_POST
 def create_checkout_session_plan(request, plan_id):
     stripe.api_key = settings.STRIPE_SECRET_KEY
-    offer = get_object_or_404(SubscriptionPlan, id=plan_id)
+    plan = get_object_or_404(SubscriptionPlan, id=plan_id)
     success_url = f"{settings.DOMAIN}{reverse('pricing_credits')}?session_id={{CHECKOUT_SESSION_ID}}"
     cancel_url = f"{settings.DOMAIN}{reverse('pricing_credits')}"
     session = stripe.checkout.Session.create(
@@ -59,14 +65,19 @@ def create_checkout_session_plan(request, plan_id):
         line_items=[{
             'price_data': {
                 'currency': 'usd',
-                'product_data': {'name': f"{offer.name}"},
-                'unit_amount': int(offer.yearly_price * 100),
+                'product_data': {'name': f"{plan.name}"},
+                'unit_amount': int(plan.yearly_price * 100),
             },
             'quantity': 1,
         }],
         mode='payment',
         success_url=success_url,
         cancel_url=cancel_url,
+        metadata={
+            'plan_id': plan.id,
+            'user_id': request.user.id
+        }
+
     )
     return redirect(session.url, code=303)
 
@@ -83,11 +94,18 @@ def stripe_webhook(request):
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-        offer_id = session['metadata']['offer_id']
-        user_id = session['metadata']['user_id']
-        offer = CreditOffer.objects.get(id=offer_id)
-        profile = Profile.objects.get(user_id=user_id)
-        profile.available_credits += offer.credits
-        profile.save()
+        metadata = session.get('metadata', {})
+        user = User.objects.get(id=metadata.get('user_id'))
+
+        if 'offer_id' in metadata:
+            offer = CreditOffer.objects.get(id=metadata['offer_id'])
+            profile = Profile.objects.get(user=user)
+            profile.available_credits += offer.credits
+            profile.save()
+
+        elif 'plan_id' in metadata:
+            plan = SubscriptionPlan.objects.get(id=metadata['plan_id'])
+            # create an annual subscription
+            Subscription.objects.create(user=user, plan=plan)
 
     return HttpResponse(status=200)

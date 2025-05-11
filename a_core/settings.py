@@ -43,7 +43,7 @@ stripe.api_key = STRIPE_SECRET_KEY
 #}
 
 FERNET_KEYS = [
-    env('FERNET_KEY'),  
+    env('FERNET_KEY'),
 ]
 #print(FERNET_KEYS)
 
