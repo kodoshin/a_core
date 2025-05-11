@@ -72,9 +72,15 @@
 
         <br> <br>
         <select id="project-dropdown" style="background-color: #c6cacb; width: 25vh ; color: #1f1e23; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-family: 'DynaPuff';">
-            {% for project in projects %}
-                <option value="{{ project.id }}" {% if project.id == default_project.id %}selected{% endif %}>{{ project.name }}</option>
-            {% endfor %}
+            <option disabled selected value>–– Select a project ––</option>
+              {% for project in projects %}
+                <option
+                  value="{{ project.id }}"
+                  {% if default_project and project.id == default_project.id %}selected{% endif %}
+                >
+                  {{ project.name }}
+                </option>
+              {% endfor %}
         </select>
         <br><br>
 

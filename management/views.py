@@ -13,8 +13,8 @@ from a_users.models import Profile
 
 
 def pricing_credits(request):
-    subscription_plans = SubscriptionPlan.objects.all()
-    credit_offers = CreditOffer.objects.all()
+    subscription_plans = SubscriptionPlan.objects.order_by('original_yearly_price')
+    credit_offers = CreditOffer.objects.order_by('original_price')
     context = {
         'subscription_plans': subscription_plans,
         'credit_offers': credit_offers,

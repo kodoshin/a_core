@@ -30,10 +30,12 @@ async def code_chat_view(request):
     components = await sync_to_async(lambda: Component.objects.filter(file__project=default_project))()
     #files = await sync_to_async(lambda: File.objects.filter(project=default_project))()
     files = await sync_to_async(list)(File.objects.filter(project=default_project))
-    technology = await sync_to_async(lambda: default_project.technology)()
-
+    try :
+        technology = await sync_to_async(lambda: default_project.technology)()
+    except :
+        technology = None
     #projects = await sync_to_async(lambda: Project.objects.filter(user=user).exclude(technology__name='Other'))()
-    projects = await sync_to_async(lambda: list(Project.objects.filter(user=user).exclude(technology__name='Other')))()
+    projects = await sync_to_async(lambda: list(Project.objects.filter(user=user).exclude(technology__name='Other').exclude(status__name='inactive')))()
 
     if request.method == 'POST':
         if 'prompt' in request.POST:

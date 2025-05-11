@@ -355,13 +355,13 @@ def view_modified_repo_files(request, git_repo_id, repo_name, project_id):
 def delete_project(request, project_id) :
     delete_github_sync(request, project_id)
     profile = Profile.objects.get(user=request.user)
-    try:
-        profile.default_project = Project.objects.get(user=request.user)
-    except Project.DoesNotExist:
-        profile.default_project = None
+    #try:
+    #    profile.default_project = Project.objects.get(user=request.user)
+    #except Project.DoesNotExist:
+    profile.default_project = None
     profile.save()
-    print('Profile Project')
-    print(profile.default_project.name)
+    #print('Profile Project')
+    #print(profile.default_project.name)
     project = get_object_or_404(Project, id=project_id)
     project.delete()
     return redirect('/')
