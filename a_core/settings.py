@@ -31,7 +31,7 @@ Env.read_env(env_file=BASE_DIR / '.env')
 
 
 
-STRIPE_SECRET_KEY = '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' #os.getenv('STRIPE_SECRET_KEY')
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
 STRIPE_PUBLIC_KEY = 'pk_test_XXXXXXXXXXXXXXXXXXXXXXXX' #os.getenv('STRIPE_PUBLISHABLE_KEY')
 STRIPE_WEBHOOK_SECRET = 'whsec_XXXXXXXXXXXXXXXXXXXXXXXX' #os.getenv('STRIPE_WEBHOOK_SECRET')
 DOMAIN = 'https://acore-production.up.railway.app'
@@ -50,7 +50,7 @@ FERNET_KEYS = [
 ENVIRONMENT = env('ENVIRONMENT', default='production')
 print(ENVIRONMENT)
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+0n(2jhp%ys2aa(ezw9obo)jx2w1e0&jgit(46qo19c-po68u+' #env('SECRET_KEY')
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == 'development':
@@ -117,8 +117,8 @@ if ENVIRONMENT == 'development':
     SOCIALACCOUNT_PROVIDERS = {
         'github': {
             'APP': {
-                'client_id': 'Ov23liw9AoK39xGtiPSj',
-                'secret': '8adf0e0159c92e584fe721c057e4a4dc9c171fba',
+                'client_id': env('DEV_SOCIAL_PROVIDER_CLIENT'),
+                'secret': env('DEV_SOCIAL_PROVIDER_SECRET'),
                 'key': '',
                 #'redirect_uri': 'https://fc8d-206-176-138-38.ngrok-free.app//accounts/github/login/callback'
             }
@@ -128,8 +128,8 @@ else :
     SOCIALACCOUNT_PROVIDERS = {
         'github': {
             'APP': {
-                'client_id': 'Ov23liFGQRBpOhG2KcHl',
-                'secret': 'bb33befff734fe6fdd6ef50396701720f7a7ff6d',
+                'client_id': env('PROD_SOCIAL_PROVIDER_CLIENT') ,
+                'secret': env('PROD_SOCIAL_PROVIDER_SECRET'),
                 'key': '',
                 # 'redirect_uri': 'https://fc8d-206-176-138-38.ngrok-free.app//accounts/github/login/callback'
             }
@@ -172,12 +172,13 @@ DATABASES = {
 }
 
 """
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'tZllmXGfGOgahDHfdBSYavOGVZsEvzwZ',
+        'NAME': env('DBNAME'),
+        'USER': env('DBUSER'),
+        'PASSWORD': env('DBPASSWORD'),
         'HOST': 'ballast.proxy.rlwy.net',
         'PORT': '26747',
     }
