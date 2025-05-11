@@ -38,8 +38,12 @@ DOMAIN = 'https://acore-production.up.railway.app'
 
 stripe.api_key = STRIPE_SECRET_KEY
 
+#FERNET_FIELDS = {
+#    "default_ttl": None,
+#}
+
 FERNET_KEYS = [
-    env('FERNET_KEY'),  # À définir dans les variables d'environnement
+    env('FERNET_KEY'),  
 ]
 #print(FERNET_KEYS)
 
