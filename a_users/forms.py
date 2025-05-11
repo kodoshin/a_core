@@ -16,11 +16,34 @@ class EmailForm(ModelForm):
 
 
 class GithubKeyForm(ModelForm):
-    github_key = forms.TextInput()
-
     class Meta:
         model = Profile
         fields = ['github_access_key']
+        widgets = {
+            'github_access_key': forms.TextInput(attrs={'autocomplete': 'off'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        original_key = ''
+        if 'instance' in kwargs and kwargs['instance']:
+            original_key = kwargs['instance'].github_access_key or ''
+        # prepare masked initial
+        initial = kwargs.get('initial', {})
+        if original_key:
+            masked = '*' * 10 + original_key[-3:]
+            initial['github_access_key'] = masked
+        kwargs['initial'] = initial
+        super().__init__(*args, **kwargs)
+        self._original_key = original_key
+
+    def clean_github_access_key(self):
+        data = self.cleaned_data.get('github_access_key', '')
+        original = getattr(self, '_original_key', '')
+        if original:
+            masked = '*' * 10 + original[-3:]
+            if data == masked:
+                return original
+        return data
 
 
 class ProfileForm(forms.ModelForm):

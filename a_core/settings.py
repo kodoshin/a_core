@@ -21,6 +21,16 @@ from environ import Env
 import os
 import stripe
 
+from django.utils.encoding import force_str
+import django.utils.encoding
+django.utils.encoding.force_text = force_str
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+env = Env()
+Env.read_env(env_file=BASE_DIR / '.env')
+
+
+
 STRIPE_SECRET_KEY = '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' #os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLIC_KEY = 'pk_test_XXXXXXXXXXXXXXXXXXXXXXXX' #os.getenv('STRIPE_PUBLISHABLE_KEY')
 STRIPE_WEBHOOK_SECRET = 'whsec_XXXXXXXXXXXXXXXXXXXXXXXX' #os.getenv('STRIPE_WEBHOOK_SECRET')
@@ -28,13 +38,11 @@ DOMAIN = 'https://acore-production.up.railway.app'
 
 stripe.api_key = STRIPE_SECRET_KEY
 
+FERNET_KEYS = [
+    env('FERNET_KEY'),  # À définir dans les variables d'environnement
+]
+#print(FERNET_KEYS)
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-env = Env()
-Env.read_env(env_file=BASE_DIR / '.env')
 ENVIRONMENT = env('ENVIRONMENT', default='production')
 print(ENVIRONMENT)
 # SECURITY WARNING: keep the secret key used in production secret!

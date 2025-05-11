@@ -18,7 +18,10 @@ class CountryAdmin(ImportExportModelAdmin):
     search_fields = ('name',)
 
 
-admin.site.register(Profile)
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    #exclude = ("github_access_key",)
+    search_fields = ('displayname',)
 
 admin.site.register(CreditClaim)
 
