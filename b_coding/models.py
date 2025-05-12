@@ -25,6 +25,7 @@ class CodingChat(models.Model):
     rate = models.PositiveSmallIntegerField(default=0, null=True, blank=True, choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')])
     prompts_count = models.IntegerField(default=0)
     chat_category = models.ForeignKey(ChatCategory, on_delete=models.DO_NOTHING, blank=True, null=True)
+    regeneration_count = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return f"CodingChat {self.id} - User: {self.user.username}"
@@ -77,6 +78,7 @@ class CodingChatMessage(models.Model):
     processing_step = models.ForeignKey(ProcessingStep, on_delete=models.CASCADE, related_name='messages', blank=True, null=True)
     created_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     ai_formatting = models.BooleanField(default=False, null=True, blank=True)
+    attempt_number = models.PositiveSmallIntegerField(default=1)
 
     def __str__(self):
         return f"Message {self.id} - Type: {self.type}"

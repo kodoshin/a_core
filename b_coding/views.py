@@ -14,6 +14,8 @@ from django.views.decorators.csrf import csrf_exempt
 from asgiref.sync import sync_to_async
 import asyncio
 
+
+MAX_REGENERATIONS = 3
 def fix_response_format(response):
     response = response.replace(", ')", ",'')")
     response = response.replace(",')", ",'')")
@@ -23,22 +25,76 @@ async def code_chat_view(request):
     user = request.user
     #profile = await sync_to_async(Profile.objects.get)(user=user)
     profile = await sync_to_async(lambda: Profile.objects.select_related('default_project', 'default_chat_category').get(user=user))()
-
     default_project = profile.default_project
     default_chat_category = profile.default_chat_category
     available_credits = profile.available_credits
     components = await sync_to_async(lambda: Component.objects.filter(file__project=default_project))()
-    #files = await sync_to_async(lambda: File.objects.filter(project=default_project))()
     files = await sync_to_async(list)(File.objects.filter(project=default_project))
     try :
         technology = await sync_to_async(lambda: default_project.technology)()
     except :
         technology = None
-    #projects = await sync_to_async(lambda: Project.objects.filter(user=user).exclude(technology__name='Other'))()
     projects = await sync_to_async(lambda: list(Project.objects.filter(user=user).exclude(technology__name='Other').exclude(status__name='inactive')))()
 
     if request.method == 'POST':
-        if 'prompt' in request.POST:
+
+        ############################################## Regenerate #########################################3
+        # Handle regeneration
+        if 'regenerate' in request.POST:
+            print('regenerating')
+            try:
+                chat_id = int(request.POST.get('chat_id'))
+                # Load chat with its category in a non-blocking way
+                chat = await sync_to_async(CodingChat.objects.select_related('chat_category').get)(id=chat_id,
+                                                                                                   user=user)
+                # Count existing messages without blocking
+                msg_count = await sync_to_async(chat.messages.count)()
+                # Enforce max 3 regenerations
+                if chat.regeneration_count < 3:
+                    # Fetch last user prompt
+                    last_prompt_obj = await sync_to_async(
+                        lambda: chat.messages.filter(type='prompt').order_by('-id').first())()
+                    prompt = last_prompt_obj.content if last_prompt_obj else ''
+                    # Next attempt number
+                    attempt_no = chat.regeneration_count + 2
+                    # Call AI based on category
+                    if chat.chat_category.type == 'regular':
+                        ai_response = await regular_ai_processing(prompt, components, chat, False, technology)
+                    else:
+                        ai_response = await super_ai_processing(prompt, files, components, chat, False, technology)
+                    # Update regeneration count
+                    chat.regeneration_count += 1
+                    await sync_to_async(chat.save)()
+                    # Prepare processing steps map
+                    steps_map = await sync_to_async(
+                        lambda: {f'{s.order} : {s.name}': s for s in ProcessingStep.objects.all()})()
+                    # Save regenerated prompt
+                    await sync_to_async(CodingChatMessage.objects.create)(
+                        chat=chat,
+                        type='prompt',
+                        content=prompt,
+                        order=msg_count + 1,
+                        attempt_number=attempt_no,
+                        processing_step=steps_map.get('1 : user prompt 1')
+                    )
+                    # Save regenerated AI answer
+                    await sync_to_async(CodingChatMessage.objects.create)(
+                        chat=chat,
+                        type='gpt-a',
+                        content=ai_response,
+                        order=msg_count + 2,
+                        attempt_number=attempt_no,
+                        processing_step=steps_map.get('5 : ai answer 2')
+                    )
+                    return JsonResponse({'status': 'success', 'chat_id': chat.id})
+                else:
+                    return JsonResponse({'status': 'error', 'message': 'Max regenerations reached'})
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+        ################################################## FIRST PROMPT #########################################3
+        if 'prompt' in request.POST and 'regenerate' not in request.POST:
+            print('PROMPT !!!')
             prompt = request.POST.get('prompt')
             chat_id = request.POST.get('chat_id')
             if chat_id:
@@ -103,32 +159,43 @@ async def code_chat_view(request):
                 return JsonResponse({'status': 'success', 'rate': chat.rate})
     else:
         chats = await sync_to_async(
-            lambda: list(CodingChat.objects.filter(user=user, project=profile.default_project).order_by('-created_on')))()
+            lambda: list(CodingChat.objects.filter(user=user, project=default_project).order_by('-created_on')))()
         chat_id = request.GET.get('chat_id')
+        selected_attempt = int(request.GET.get('attempt', '1'))
         if chat_id:
-            #current_chat = await sync_to_async(CodingChat.objects.get)(id=chat_id, user=user)
-            current_chat = await sync_to_async(lambda: CodingChat.objects.select_related('chat_category').get(id=chat_id, user=user))()
-            messages = await sync_to_async(lambda: list(current_chat.messages.filter(type__in=['prompt', 'gpt-a', 'gpt-q']).order_by('id')))()
+            current_chat = await sync_to_async(
+                lambda: CodingChat.objects.select_related('chat_category').get(id=chat_id, user=user))()
+            # total attempts = regeneration_count+1
+            total_attempts = current_chat.regeneration_count + 1
+            # clamp selected
+            if selected_attempt < 1 or selected_attempt > total_attempts:
+                selected_attempt = total_attempts
+            raw_messages = await sync_to_async(lambda: list(
+                current_chat.messages.filter(attempt_number=selected_attempt,
+                                             type__in=['prompt', 'gpt-a', 'gpt-q']).order_by('id')
+            ))()
+            messages = []
+            for msg in raw_messages:
+                msg_dict = {
+                    'type': msg.type,
+                    'attempt_number': msg.attempt_number,
+                }
+                if msg.type == 'gpt-a':
+                    msg_dict['steps'] = parse_steps(fix_response_format(msg.content))
+                else:
+                    msg_dict['content'] = msg.content
+                messages.append(msg_dict)
         else:
             current_chat = None
             messages = []
-        processed_messages = []
-        for message in messages:
-            if message.type == 'gpt-a':
-                steps = parse_steps(fix_response_format(message.content))
-                processed_messages.append({'type': message.type, 'steps': steps})
-            else:
-                processed_messages.append({'type': message.type, 'content': message.content})
+            total_attempts = 1
+            selected_attempt = 1
         chatcategories = await sync_to_async(lambda: list(ChatCategory.objects.all()))()
         context = {
-            'chats': chats,
-            'components': components,
-            'messages': processed_messages,
-            'default_project': default_project,
-            'projects': projects,
-            'current_chat': current_chat,
-            'profile': profile,
-            'chatcategories': chatcategories
+            'chats': chats, 'messages': messages, 'current_chat': current_chat,
+            'projects': projects, 'default_project': default_project, 'profile': profile,
+            'chatcategories': chatcategories,
+            'selected_attempt': selected_attempt, 'total_attempts': total_attempts
         }
         return render(request, 'b_coding/code_chat.html', context)
 

@@ -133,6 +133,21 @@
                 <br>
 
 
+
+            <div class="regeneration-controls" style="margin-bottom:10px;">
+            {% if total_attempts > 1 %}
+              <button id="prev-attempt" type="button" style="background-color: unset" {% if selected_attempt <= 1 %}disabled{% endif %}>←</button>
+              <span>Attempt {{ selected_attempt }} of {{ total_attempts }}</span>
+              <button id="next-attempt" type="button" style="background-color: unset" {% if selected_attempt >= total_attempts %}disabled{% endif %}>→</button>
+            {% endif %}
+              <button id="regenerate-btn" type="button" style="background-color: unset; padding: 0; border: none;" {% if current_chat.regeneration_count >= 3 %}disabled title="Max regenerations reached"{% endif %}>
+                <span aria-hidden="true" style="font-size: xx-large">⟳</span>
+                <span class="sr-only">Regenerate</span>
+              </button>
+            </div>
+
+
+
             {% else %}
 
                 <!-- New dropdown for ChatCategory -->
@@ -146,11 +161,13 @@
 
             <div class="message-container" id="message-container" style="width: 80%">
                 {% for message in messages %}
-                    {% if message.type == 'prompt' %}
+                    {% if message.type == 'prompt' and message.attempt_number == selected_attempt%}
+                        <div>Attempt : {{message.attempt_number}}</div>
+                        <div>{{selected_attempt}}</div>
                         <div class="message user">
                             <p><strong>You :</strong> {{ message.content|linebreaksbr }}</p>
                         </div>
-                    {% elif message.type == 'gpt-a' %}
+                    {% elif message.type == 'gpt-a' and message.attempt_number == selected_attempt %}
                         <div class="message ai">
                             <p><img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/avatar.png" alt="IA" style="width:40px;height:58px;"></p>
                             <!-- Display steps here -->
@@ -633,6 +650,61 @@ $(document).ready(function() {
         });
 
     });
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function(){
+  $('#regenerate-btn').on('click', function(e){
+    e.preventDefault();
+    // 1. Effacer les anciennes étapes et masquer les flèches
+    $('.steps-container').empty();
+    $('.prev-step-btn, .next-step-btn').hide();
+    // 2. Afficher spinner et texte
+    $('#loading-text').text('Regenerating...').show();
+    $('#loading-spinner').show();
+    // 3. Appel AJAX
+    $.ajax({
+      url: "{% url 'code_chat_view' %}",
+      method: "POST",
+      data: {
+        regenerate: 1,
+        chat_id: "{{ current_chat.id }}",
+        csrfmiddlewaretoken: "{{ csrf_token }}"
+      },
+      success: function(data){
+        if(data.status === 'success'){
+          // Redirection vers la nouvelle tentative pour recharger le chat
+          window.location.href = '?chat_id={{ current_chat.id }}&attempt=' + ({{ total_attempts }} + 1);
+        } else {
+          alert(data.message);
+        }
+      },
+      error: function(){
+        alert('Erreur lors de la régénération.');
+      },
+      complete: function(){
+        // Masquer spinner et texte si erreur ou après redirection
+        $('#loading-spinner').hide();
+        $('#loading-text').hide();
+      }
+    });
+  });
+});
+</script>
+
+<script>
+$(function(){
+  console.log('DOM ready, binding regenerate');
+  var chatId = "{{ current_chat.id }}";
+  $('#prev-attempt').on('click', function(){
+    window.location.href = '?chat_id='+chatId+'&attempt=' + ({{ selected_attempt }} - 1);
+  });
+  $('#next-attempt').on('click', function(){
+    window.location.href = '?chat_id='+chatId+'&attempt=' + ({{ selected_attempt }} + 1);
+  });
+});
 </script>
 
 
