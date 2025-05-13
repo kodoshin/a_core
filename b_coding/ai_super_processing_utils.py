@@ -104,7 +104,7 @@ def generate_components_string(components):
     return "\n".join(component_strings)  # Séparation par des retours à la ligne
 
 
-async def ai_processing(prompt, files, components, chat, is_first_prompt, technology):
+async def ai_processing(prompt, files, components, chat, is_first_prompt, technology, attempt):
     technology_name = await sync_to_async(lambda: technology.name)()
     technology_format_example = await sync_to_async(lambda: technology.prompt_example)()
     try:
@@ -114,14 +114,14 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt, techno
                                                         ProcessingStep.objects.filter(chat_category=chat_category)})()
 
         if is_first_prompt:
-            await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps)
-            engineered_prompt_0 = await build_engineered_prompt_0(pe_files_xml.format(technology=technology_name), files, prompt, chat, chat_category, processing_steps)
-            relevant_files = await get_related_files(engineered_prompt_0, files, chat, chat_category, processing_steps)
+            await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps, attempt)
+            engineered_prompt_0 = await build_engineered_prompt_0(pe_files_xml.format(technology=technology_name), files, prompt, chat, chat_category, processing_steps, attempt)
+            relevant_files = await get_related_files(engineered_prompt_0, files, chat, chat_category, processing_steps, attempt)
             #print('Relevant files !!!!!!!!!!1')
             #print(relevant_files[0])
             files_to_use = relevant_files or []
             relevant_files_components = await sync_to_async(lambda: components.filter(file__in=files_to_use))()
-            engineered_prompt_1 = await build_engineered_prompt_1(pe_components_xml.format(technology=technology_name), relevant_files_components, prompt, chat, chat_category, processing_steps)
+            engineered_prompt_1 = await build_engineered_prompt_1(pe_components_xml.format(technology=technology_name), relevant_files_components, prompt, chat, chat_category, processing_steps, attempt)
             #print("EP1 !!!!!!!!!!!!!!!!!!!")
             #print(engineered_prompt_1)
             ai_answer_1 = await async_get_response_ai_1(engineered_prompt_1, chat)
@@ -136,9 +136,9 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt, techno
                 related_components = []
             await sync_to_async(CodingChatMessage.objects.create)(
                 chat=chat, type='ai', content=ai_answer_1, order=5, api_key=None,
-                processing_step=processing_steps.get(f'{chat_category} : 5')
+                processing_step=processing_steps.get(f'{chat_category} : 5'), attempt_number=attempt
             )
-            engineered_prompt_2 = await build_engineered_prompt_2(pe_final_answer.format(technology=technology_name), pe_final_answer_format.replace("{technology}", technology_name).replace('{code_example}',technology_format_example), related_components, prompt, chat, chat_category, processing_steps)
+            engineered_prompt_2 = await build_engineered_prompt_2(pe_final_answer.format(technology=technology_name), pe_final_answer_format.replace("{technology}", technology_name).replace('{code_example}',technology_format_example), related_components, prompt, chat, chat_category, processing_steps, attempt)
             #print('EP2 !!!!!!!!!!!!!')
             #print(engineered_prompt_2)
             ai_answer_2 = await async_get_response_ai_2(engineered_prompt_2, chat)
@@ -148,21 +148,21 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt, techno
                 lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
             await sync_to_async(CodingChatMessage.objects.create)(
                 chat=chat, type='gpt-a', content=ai_answer_2, order=max_order+1, api_key=None,
-                processing_step=processing_steps.get(f'{chat_category} : 7')
+                processing_step=processing_steps.get(f'{chat_category} : 7'), attempt_number=attempt
             )
             return ai_answer_2
         else:
-            await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps)
+            await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps, attempt)
             last_prompt_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='r-prompt').last())()
             last_engineered_prompt = last_prompt_obj.content.replace(pe_final_answer_format.replace("{technology}", technology_name).replace('{code_example}',technology_format_example), '')
             last_ai_answer_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='gpt-a').last())()
             last_ai_answer = last_ai_answer_obj.content
-            engineered_adjustment_prompt = await build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer,prompt, chat_category, processing_steps)
+            engineered_adjustment_prompt = await build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer,prompt, chat_category, processing_steps, attempt)
             ai_adjustment_answer = await async_get_response_ai_2(engineered_adjustment_prompt, chat)
             max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
             await sync_to_async(CodingChatMessage.objects.create)(
                 chat=chat, type='gpt-a', content=ai_adjustment_answer, order=max_order + 1, api_key=None,
-                processing_step=processing_steps.get(f'{chat_category} : 7')
+                processing_step=processing_steps.get(f'{chat_category} : 7'), attempt_number=attempt
             )
             return ai_adjustment_answer
     except Exception as e:
@@ -179,10 +179,10 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt, techno
         return "We haven't been able to process your demand, please try again or change your prompt."
 
 
-def save_prompt(chat, prompt, chat_category_id, processing_steps):
+def save_prompt(chat, prompt, chat_category_id, processing_steps, attempt_number):
     chat.prompts_count = chat.prompts_count + 1
     chat.chat_category = chat_category_id
-    max_order = CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'] or 0
+    max_order = 7*(attempt_number-1) + 1
     chat.save()
     # Enregistrer le message utilisateur
     CodingChatMessage.objects.create(
@@ -190,15 +190,16 @@ def save_prompt(chat, prompt, chat_category_id, processing_steps):
         type='prompt',
         processing_step=processing_steps.get(f"{chat_category_id} : 1"),
         content=prompt,
-        order=max_order+1,
-        api_key=None
+        order=max_order,
+        api_key=None,
+        attempt_number=attempt_number
     )
 
 
-async def build_engineered_prompt_0(pe_files_xml, files, prompt, chat, chat_category_id, processing_steps):
+async def build_engineered_prompt_0(pe_files_xml, files, prompt, chat, chat_category_id, processing_steps, attempt_number):
     #components_str = generate_files_xml(files)
     #print('BUILDING EP0!!!!!!!!!!!!!!!!!')
-    max_order = CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'] or 0
+    max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
     components_str = await sync_to_async(generate_files_xml)(files)
     final_prompt = pe_files_xml + '\nFiles:\n' + components_str + '\nRequest:\n' + prompt
     await sync_to_async(CodingChatMessage.objects.create)(
@@ -207,15 +208,16 @@ async def build_engineered_prompt_0(pe_files_xml, files, prompt, chat, chat_cate
         content=final_prompt,
         order=max_order+1,
         api_key=None,
-        processing_step=processing_steps.get(f"{chat_category_id} : 2")
+        processing_step=processing_steps.get(f"{chat_category_id} : 2"),
+        attempt_number=attempt_number
     )
     return final_prompt
 
 
-async def get_related_files(engineered_prompt_0, files, chat, chat_category_id, processing_steps):
+async def get_related_files(engineered_prompt_0, files, chat, chat_category_id, processing_steps, attempt_number):
     #print('Engineered Prompt 0 !!!!!!!!!!')
     #print(engineered_prompt_0)
-    max_order = CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'] or 0
+    max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
     try:
         ai_response = await async_get_response_ai_1(engineered_prompt_0, chat)
         match = re.search(r"<files>[\s\S]*?</files>", ai_response)
@@ -232,30 +234,32 @@ async def get_related_files(engineered_prompt_0, files, chat, chat_category_id, 
             content=ai_response,
             order=max_order+1,
             api_key=None,
-            processing_step=processing_steps.get(f"{chat_category_id} : 3")
+            processing_step=processing_steps.get(f"{chat_category_id} : 3"),
+            attempt_number=attempt_number
         )
     except:
         related_files = None
     return related_files
 
-async def build_engineered_prompt_1(components_xml, relevant_files_components, prompt, chat, chat_category_id, processing_steps):
+async def build_engineered_prompt_1(components_xml, relevant_files_components, prompt, chat, chat_category_id, processing_steps, attempt_number):
     components_str = await sync_to_async(generate_components_xml)(relevant_files_components)
     final_prompt = components_xml + '\nComponents:\n' + components_str + '\nRequest:\n' + prompt
-    max_order = CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'] or 0
+    max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
     await sync_to_async(CodingChatMessage.objects.create)(
         chat=chat,
         type='r-prompt',
         content=final_prompt,
         order=max_order+1,
         api_key=None,
-        processing_step=processing_steps.get(f"{chat_category_id} : 4")
+        processing_step=processing_steps.get(f"{chat_category_id} : 4"),
+        attempt_number=attempt_number
     )
     return final_prompt
 
 
-async def get_related_components(engineered_prompt_1, components, chat, chat_category_id, processing_steps):
+async def get_related_components(engineered_prompt_1, components, chat, chat_category_id, processing_steps, attempt_number):
     try:
-        max_order = CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'] or 0
+        max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
         ai_response = await async_get_response_ai_1(engineered_prompt_1, chat)
         match = re.search(r"<components>[\s\S]*?</components>", ai_response)
         if match:
@@ -273,16 +277,17 @@ async def get_related_components(engineered_prompt_1, components, chat, chat_cat
             content=ai_response,
             order=max_order+1,
             api_key=None,
-            processing_step=processing_steps.get(f"{chat_category_id} : 5")
+            processing_step=processing_steps.get(f"{chat_category_id} : 5"),
+            attempt_number=attempt_number
         )
     except:
         related_components = None
     return related_components
 
 
-async def build_engineered_prompt_2 (pe_final_answer, pe_final_answer_format, related_components, prompt, chat, chat_category_id, processing_steps):
+async def build_engineered_prompt_2 (pe_final_answer, pe_final_answer_format, related_components, prompt, chat, chat_category_id, processing_steps, attempt_number):
     #print('Related components 2 !!!!!!!!')
-    max_order = CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'] or 0
+    max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
     if related_components is None:
         return "None"
     elif related_components==[]:
@@ -296,13 +301,14 @@ async def build_engineered_prompt_2 (pe_final_answer, pe_final_answer_format, re
             content=final_prompt,
             order=max_order+1,
             api_key=None,
-            processing_step=processing_steps.get(f"{chat_category_id} : 6")
+            processing_step=processing_steps.get(f"{chat_category_id} : 6"),
+            attempt_number=attempt_number
         )
         return final_prompt
 
 
-async def get_final_solution(engineered_prompt_2, chat, chat_category_id, processing_steps):
-    max_order = CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'] or 0
+async def get_final_solution(engineered_prompt_2, chat, chat_category_id, processing_steps, attempt_number):
+    max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
     if engineered_prompt_2 == "None":
         CodingChatMessage.objects.create(
             chat=chat,
@@ -311,7 +317,8 @@ async def get_final_solution(engineered_prompt_2, chat, chat_category_id, proces
             status='none',
             order=max_order+1,
             api_key=None,
-            processing_step=processing_steps.get(f"{chat_category_id} : 7")
+            processing_step=processing_steps.get(f"{chat_category_id} : 7"),
+            attempt_number=attempt_number
         )
         return none_answer
     elif engineered_prompt_2 == "No components":
@@ -322,7 +329,8 @@ async def get_final_solution(engineered_prompt_2, chat, chat_category_id, proces
             status='no-components',
             order=max_order+1,
             api_key=None,
-            processing_step=processing_steps.get(f"{chat_category_id} : 7")
+            processing_step=processing_steps.get(f"{chat_category_id} : 7"),
+            attempt_number=attempt_number
         )
         return no_components_answer
     else:
@@ -333,30 +341,29 @@ async def get_final_solution(engineered_prompt_2, chat, chat_category_id, proces
             content=ai_response,
             order=max_order+1,
             api_key=None,
-            processing_step=processing_steps.get(f"{chat_category_id} : 7")
+            processing_step=processing_steps.get(f"{chat_category_id} : 7"),
+            attempt_number=attempt_number
         )
         return ai_response
 
 
-async def build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer, prompt, chat_category_id, processing_steps):
+async def build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer, prompt, chat_category_id, processing_steps, attempt_number):
     # This is my initial prompt + ep_2 + This is your solution + ai_answer_2 + this is my next prompt to adjust the solution + prompt + formatting variable
     engineered_adjustment_prompt = "This is my initial prompt: \n\n" + last_engineered_prompt + "\n\nThis was your solution: \n\n" + last_ai_answer + "\n\nthis is my next prompt to adjust the solution: \n\n" + prompt + "\n\n" + pe_final_answer_format
-    max_order = await sync_to_async(
-        lambda: CodingChatMessage.objects.filter(chat=chat)
-        .aggregate(Max('order'))['order__max']
-    )()
+    max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
     await sync_to_async(CodingChatMessage.objects.create)(
         chat=chat,
         type='r-prompt',
         content=engineered_adjustment_prompt,
         order=max_order+1,
         api_key=None,
-        processing_step=processing_steps.get(f"{chat_category_id} : 6")
+        processing_step=processing_steps.get(f"{chat_category_id} : 6"),
+        attempt_number=attempt_number
     )
 
     return engineered_adjustment_prompt
 
-async def get_adjusted_solution(chat, engineered_adjustment_prompt, chat_category_id, processing_steps):
+async def get_adjusted_solution(chat, engineered_adjustment_prompt, chat_category_id, processing_steps, attempt_number):
     # appel à l'API IA
     ai_response = await async_get_response_ai_2(engineered_adjustment_prompt, chat)
     max_order = await sync_to_async(
@@ -369,6 +376,7 @@ async def get_adjusted_solution(chat, engineered_adjustment_prompt, chat_categor
         content=ai_response,
         order=max_order+1,
         api_key=None,
-        processing_step=processing_steps.get(f"{chat_category_id} : 7")
+        processing_step=processing_steps.get(f"{chat_category_id} : 7"),
+        attempt_number=attempt_number
     )
     return ai_response

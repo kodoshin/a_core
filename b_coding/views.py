@@ -59,33 +59,14 @@ async def code_chat_view(request):
                     attempt_no = chat.regeneration_count + 2
                     # Call AI based on category
                     if chat.chat_category.type == 'regular':
-                        ai_response = await regular_ai_processing(prompt, components, chat, False, technology)
+                        ai_response = await regular_ai_processing(prompt, components, chat, True, technology)
                     else:
-                        ai_response = await super_ai_processing(prompt, files, components, chat, False, technology)
+                        print('regenerating super prompt')
+                        ai_response = await super_ai_processing(prompt, files, components, chat, True, technology, attempt_no)
                     # Update regeneration count
                     chat.regeneration_count += 1
                     await sync_to_async(chat.save)()
                     # Prepare processing steps map
-                    steps_map = await sync_to_async(
-                        lambda: {f'{s.order} : {s.name}': s for s in ProcessingStep.objects.all()})()
-                    # Save regenerated prompt
-                    await sync_to_async(CodingChatMessage.objects.create)(
-                        chat=chat,
-                        type='prompt',
-                        content=prompt,
-                        order=msg_count + 1,
-                        attempt_number=attempt_no,
-                        processing_step=steps_map.get('1 : user prompt 1')
-                    )
-                    # Save regenerated AI answer
-                    await sync_to_async(CodingChatMessage.objects.create)(
-                        chat=chat,
-                        type='gpt-a',
-                        content=ai_response,
-                        order=msg_count + 2,
-                        attempt_number=attempt_no,
-                        processing_step=steps_map.get('5 : ai answer 2')
-                    )
                     return JsonResponse({'status': 'success', 'chat_id': chat.id})
                 else:
                     return JsonResponse({'status': 'error', 'message': 'Max regenerations reached'})
@@ -112,7 +93,7 @@ async def code_chat_view(request):
                 if default_chat_category.type == 'regular':
                     ai_response = await regular_ai_processing(prompt, components, chat, is_first_prompt, technology)
                 elif default_chat_category.type == 'super':
-                    ai_response = await super_ai_processing(prompt, files, components, chat, is_first_prompt, technology )
+                    ai_response = await super_ai_processing(prompt, files, components, chat, is_first_prompt, technology, 1)
                 if is_first_prompt:
                     profile.available_credits = available_credits - default_chat_category.price
                 else:

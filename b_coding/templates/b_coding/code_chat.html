@@ -162,8 +162,7 @@
             <div class="message-container" id="message-container" style="width: 80%">
                 {% for message in messages %}
                     {% if message.type == 'prompt' and message.attempt_number == selected_attempt%}
-                        <div>Attempt : {{message.attempt_number}}</div>
-                        <div>{{selected_attempt}}</div>
+
                         <div class="message user">
                             <p><strong>You :</strong> {{ message.content|linebreaksbr }}</p>
                         </div>
