@@ -92,23 +92,14 @@ document.addEventListener('DOMContentLoaded', function(){
   .card {
       background-color: #1f1e23; /* Fond gris clair */
       color: white;
-      font-family: 'DynaPuff' ;
+      font-weight: bold;
+      /*font-family: 'DynaPuff' ; */
   }
   .card:hover {
       background-color: #ccc; /* Fond gris plus foncé au survol */
       color: #aaaaaa;
   }
 
-  .sci-fi-text {
-    font-family: 'DynaPuff', sans-serif; /* police d'écriture futuriste */
-    font-size: 4vh;
-    color: #7700ff;
-    /*background: linear-gradient(to bottom, #aaaaaa 50%, #ffffff 50%); /* dégradé de fond */
-    background: white;
-    text-align: left;
-    -webkit-background-clip: text; /* applique le dégradé au texte */
-    -webkit-text-fill-color: transparent; /* rend le texte transparent pour voir le dégradé */
-}
   .container {
       background-color: #1f1e23;
   }
@@ -505,8 +496,8 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 {% if user.is_authenticated %}
-<div class="max-w-4xl ml-[22%] mt-[10rem]">
-<h1 class="sci-fi-text">Select AI</h1>
+<div class="max-w-4xl ml-[20%] mt-[10rem]">
+<h1 class="cta-title">Select Persona</h1>
 </div>
 
 <div class="container">
@@ -537,8 +528,8 @@ document.addEventListener('DOMContentLoaded', function(){
   </div>
 </div>
 
-<div class="max-w-4xl ml-[22%] py-2">
-    <h1 class="sci-fi-text">Select project</h1>
+<div class="max-w-4xl ml-[20%] py-2">
+    <h1 class="cta-title">Select project</h1>
 </div>
 
 <div class="container">

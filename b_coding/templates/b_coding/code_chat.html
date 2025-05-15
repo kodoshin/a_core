@@ -38,7 +38,6 @@
         height: 2em;
         width: 60%;
         line-height: 1.2em;
-        font-family: 'DynaPuff';
         cursor: pointer;
       }
 
@@ -62,7 +61,7 @@
 
 
 
-    <div class="chats-list-container" style="background-color: #1f1e23;" >
+    <div class="chats-list-container" style="background-color: #1f1e23; max-height:50em" >
 
 
 
@@ -71,7 +70,7 @@
         <div class="sidebar">
 
         <br> <br>
-        <select id="project-dropdown" style="background-color: #c6cacb; width: 25vh ; color: #1f1e23; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-family: 'DynaPuff';">
+        <select id="project-dropdown" style="background-color: #c6cacb; width: 25vh ; color: #1f1e23; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
             <option disabled selected value>–– Select a project ––</option>
               {% for project in projects %}
                 <option
@@ -88,17 +87,17 @@
 
 
 
-            <!--<h3 style="font-family: 'DynaPuff'">Your Chats</h3>-->
+            <!--<h3 style="font-weight: bold;">Your Chats</h3>-->
             <button type="submit" class="new-chat-btn" onclick="window.location.href='/ai/kenshi'">
                 + new chat
             </button>
 
             <div class="toggle-content" id="chats-list">
-                <ul style="width: 25vh ;">
+                <ul style="width: 25vh">
                     {% for chat in chats %}
-                        <li>
+                        <li style="margin-top: 10px;">
                             <span {% if chat.id == current_chat.id %}class="selected-chat"{% endif %}>
-                            <a href="?chat_id={{ chat.id }}" style="color: white; font-family: 'DynaPuff'; font-size: small;">{{ chat.title }}</a>
+                            <a href="?chat_id={{ chat.id }}" style="color: white; font-size: medium; font-weight: bold;">{{ chat.title }}</a>
                             </span>
                             <span class="delete-chat" data-chat-id="{{ chat.id }}" style="cursor:pointer; color:red; margin-left:0px; float: right;">&#x1F5D1;</span>
                             <span class="cancel-delete" data-chat-id="{{ chat.id }}" style="display:none; cursor:pointer; color:gray; margin-left:0px; float: right;">&#x274C;</span>
@@ -106,7 +105,7 @@
 
                         </li>
                     {% empty %}
-                        <li style="font-family: 'DynaPuff'">No Chats.</li>
+                        <li style="font-weight: bold;">No Chats.</li>
                     {% endfor %}
                 </ul>
             </div>
@@ -151,7 +150,7 @@
             {% else %}
 
                 <!-- New dropdown for ChatCategory -->
-                <select id="chatcategory-dropdown" style="background-color: unset; max-width: 20vh; color: white; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-family: 'DynaPuff';">
+                <select id="chatcategory-dropdown" style="background-color: unset; max-width: 20vh; color: white; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
                     {% for category in chatcategories %}
                         <option style="color: black" value="{{ category.id }}" {% if category.id == profile.default_chat_category.id %}selected{% endif %}>{{ category.name }} ({{ category.price }})</option>
                     {% endfor %}
@@ -164,20 +163,23 @@
                     {% if message.type == 'prompt' and message.attempt_number == selected_attempt%}
 
                         <div class="message user">
-                            <p><strong>You :</strong> {{ message.content|linebreaksbr }}</p>
+                            <br>
+                            <p style="font-weight: bold;"><img style="width:2.2em;height:2.2em;display: inline;" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/profile-icon.png"/> {{ message.content|linebreaksbr }}</p>
                         </div>
                     {% elif message.type == 'gpt-a' and message.attempt_number == selected_attempt %}
                         <div class="message ai">
-                            <p><img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/avatar.png" alt="IA" style="width:40px;height:58px;"></p>
+                            <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/avatar.png" alt="IA" style="width:2em;height:3em;display: inline;margin-right: 2em">
                             <!-- Display steps here -->
                             {% if message.steps|length > 1 %}
-                            <button class="prev-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff';">Previous</button>
-                            <button class="next-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff';">Next</button>
+                            <button class="prev-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-weight: bold;">Previous</button>
+                            <button class="next-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-weight: bold;">Next</button>
+
                             {% endif %}
                             <div class="steps-container">
                                 {% for step in message.steps %}
                                     <div class="step" data-step-number="{{ forloop.counter0 }}" {% if not forloop.first %}style="display:none;"{% endif %}>
                                         {% if message.steps|length > 1 %}
+                                        <br>
                                         <p><strong>Step {{ step.step_number }}/{{ message.steps|length }}:</strong></p>
                                         {% endif %}
                                         <p>{{ step.justification }}</p>
@@ -211,7 +213,7 @@
 
             <br>
             <div id="loading-spinner"></div>
-            <div id="loading-text" style="display:none; color: #c6cacb; font-family: 'DynaPuff'; margin-top: 10px;"></div>
+            <div id="loading-text" style="display:none; color: #c6cacb; font-weight: bold; margin-top: 10px;"></div>
             <br>
             <form id="chat-form">
                 {% csrf_token %}
@@ -464,7 +466,7 @@ $(document).ready(function() {
                                     .attr('href', '?chat_id=' + chat.id)
                                     .text(chat.title)
                                     .css('color', 'white')
-                                    .css('font-family', 'DynaPuff');
+                                    .css('font-weight', 'bold');
 
                                 li.append(link);
                                 chatList.append(li);
@@ -474,7 +476,7 @@ $(document).ready(function() {
                             chatList.append(
                                 $('<li>')
                                     .text('No Chats.')
-                                    .css('font-family', 'DynaPuff')
+                                    .css('font-weight', 'bold')
                             );
                         }
                     } else {

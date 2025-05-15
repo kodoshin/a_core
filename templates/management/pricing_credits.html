@@ -27,7 +27,7 @@
 </script>
 
 
-<div class="max-w-4xl ml-[25%] mt-[10rem]">
+<div class="max-w-4xl ml-[15%] mt-[5rem]">
 <h3 style="font-weight: bold">Pay As You Go</h3>
 </div>
 
@@ -56,7 +56,7 @@
 
 
 
-<div class="max-w-4xl ml-[25%] mt-[10rem]">
+<div class="max-w-4xl ml-[15%] mt-[2rem]">
 <h3 style="font-weight: bold">Plans</h3>
 </div>
 
@@ -64,12 +64,11 @@
 <div class="pricing-columns">
 
   {% for plan in subscription_plans %}
-  {% if plan.monthly_price != 0 %}
+
   <form action="{% url 'create_checkout_session_plan' plan.id %}" method="post" style="background-color: unset;">
     {% csrf_token %}
-    <button style="background-color: unset;" type="submit" class="buy-button">
-  {% endif %}
-      <div class="pricing-card">
+    <button style="background-color: unset;" type="submit" class="buy-button" {% if plan.monthly_price == 0 %} disabled style="cursor: default; opacity: 0.6;" {% endif %}>
+      <div class="pricing-card" style="font-weight: bold">
         <div class="pricing-card-header">
           <div class="pricing-title">{{ plan.name }}</div>
           {% if plan.monthly_price and plan.monthly_price != plan.original_monthly_price %}
@@ -90,12 +89,19 @@
           </div>
           <div class="pricing-table-row">
             <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-            <div class="pricing-row-text">{{ plan.project_limits }} project</div>
+            <div class="pricing-row-text">{{ plan.project_limits }} project(s)</div>
           </div>
+          {% if plan.regeneration_attempts > 0 %}
           <div class="pricing-table-row">
             <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
-            <div class="pricing-row-text">{{ plan.regeneration_attempts }} regeneration attemps</div>
+            <div class="pricing-row-text">{{ plan.regeneration_attempts }} regeneration attemps (free)</div>
           </div>
+          {% else %}
+          <div class="pricing-table-row">
+            <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon muted">
+            <div class="pricing-row-text muted">regeneration attemps</div>
+          </div>
+          {% endif %}
           {% if plan.sync_with_github == True %}
           <div class="pricing-table-row">
             <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/plans-features.png" alt="" class="pricing-icon">
@@ -110,16 +116,15 @@
           <div class="pricing-small-text">Per month, billed annually</div>
         </div>
       </div>
-  {% if plan.name != 'FREE' %}
     </button>
   </form>
-  {% endif %}
+
   {% endfor %}
 
 
 </div>
 
-<div class="max-w-4xl ml-[25%]">
+<div class="max-w-4xl ml-[15%]">
   <label>*daily credits are not cumulative</label>
 </div>
 
@@ -138,7 +143,7 @@
       justify-content: center;
       align-items: flex-start;
       gap: 20px;
-      padding: 50px;
+      padding: 30px;
     }
 
     .pricing-card {
