@@ -121,16 +121,16 @@
         <div class="chat-area">
 
             <!-- Display the star rating only if a current chat is selected -->
-            {% if current_chat %}
-                <div class="rating-container" style="margin-bottom: 20px;">
-                    <span class="star" data-value="1" style="cursor: pointer;">&#9733;</span>
-                    <span class="star" data-value="2" style="cursor: pointer;">&#9733;</span>
-                    <span class="star" data-value="3" style="cursor: pointer;">&#9733;</span>
-                    <span class="star" data-value="4" style="cursor: pointer;">&#9733;</span>
-                    <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
-                </div>
-                <div>{{ current_chat.chat_category.name }} ({{ current_chat.chat_category.price_secondary_prompt }} credits for next prompts)</div>
-                <br>
+        {% if current_chat %}
+            <div class="rating-container" style="margin-bottom: 20px;">
+                <span class="star" data-value="1" style="cursor: pointer;">&#9733;</span>
+                <span class="star" data-value="2" style="cursor: pointer;">&#9733;</span>
+                <span class="star" data-value="3" style="cursor: pointer;">&#9733;</span>
+                <span class="star" data-value="4" style="cursor: pointer;">&#9733;</span>
+                <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
+            </div>
+            <div style=" font-weight: bold; color: #cccccc;">{{ current_chat.chat_category.name }}</div>
+            <br>
 
 
 
@@ -216,6 +216,11 @@
             <form id="chat-form">
                 {% csrf_token %}
                 <input type="hidden" name="chat_id" value="{{ current_chat.id }}" id="chat_id">
+
+                {% if current_chat %}
+                    <div>({{ current_chat.chat_category.price_secondary_prompt }} credits for next prompts)</div> <br>
+                {% endif %}
+                <input type="hidden" name="attempt_no" value="{{ selected_attempt }}" id="attempt_no">
                 <textarea name="prompt" id="prompt" rows="3" style="width: 80%; background-color: #c6cacb; color: #1f1e23; overflow:hidden;"></textarea><br><br>
                 <button type="submit" style="height: 2em; width: 4em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff';">>>> </button>
             </form>

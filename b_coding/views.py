@@ -53,16 +53,16 @@ async def code_chat_view(request):
                 if chat.regeneration_count < 3:
                     # Fetch last user prompt
                     last_prompt_obj = await sync_to_async(
-                        lambda: chat.messages.filter(type='prompt').order_by('-id').first())()
+                        lambda: chat.messages.filter(type='prompt').order_by('id').first())()
                     prompt = last_prompt_obj.content if last_prompt_obj else ''
                     # Next attempt number
-                    attempt_no = chat.regeneration_count + 2
+                    attempt_count = chat.regeneration_count + 2
                     # Call AI based on category
                     if chat.chat_category.type == 'regular':
-                        ai_response = await regular_ai_processing(prompt, components, chat, True, technology)
+                        ai_response = await regular_ai_processing(prompt, components, chat, True, technology, attempt_count)
                     else:
                         print('regenerating super prompt')
-                        ai_response = await super_ai_processing(prompt, files, components, chat, True, technology, attempt_no)
+                        ai_response = await super_ai_processing(prompt, files, components, chat, True, technology, attempt_count)
                     # Update regeneration count
                     chat.regeneration_count += 1
                     await sync_to_async(chat.save)()
@@ -78,6 +78,11 @@ async def code_chat_view(request):
             print('PROMPT !!!')
             prompt = request.POST.get('prompt')
             chat_id = request.POST.get('chat_id')
+            try:
+                attempt_no = int(request.POST.get('attempt_no', '1'))
+            except ValueError:
+                attempt_no = 1
+            print(attempt_no)
             if chat_id:
                 chat = await sync_to_async(CodingChat.objects.get)(id=chat_id, user=user)
                 default_chat_category = await sync_to_async(lambda: chat.chat_category)()
@@ -91,9 +96,9 @@ async def code_chat_view(request):
                     await sync_to_async(chat.save)()
 
                 if default_chat_category.type == 'regular':
-                    ai_response = await regular_ai_processing(prompt, components, chat, is_first_prompt, technology)
+                    ai_response = await regular_ai_processing(prompt, components, chat, is_first_prompt, technology, attempt_no)
                 elif default_chat_category.type == 'super':
-                    ai_response = await super_ai_processing(prompt, files, components, chat, is_first_prompt, technology, 1)
+                    ai_response = await super_ai_processing(prompt, files, components, chat, is_first_prompt, technology, attempt_no)
                 if is_first_prompt:
                     profile.available_credits = available_credits - default_chat_category.price
                 else:

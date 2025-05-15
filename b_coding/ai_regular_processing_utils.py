@@ -51,7 +51,7 @@ def generate_components_string(components):
     return "\n".join(component_strings)  # Séparation par des retours à la ligne
 
 
-async def ai_processing(prompt, components, chat, is_first_prompt, technology):
+async def ai_processing(prompt, components, chat, is_first_prompt, technology, attempt):
     technology_name = await sync_to_async(lambda: technology.name)()
     technology_format_example = await sync_to_async(lambda: technology.prompt_example)()
     chat_category = await sync_to_async(ChatCategory.objects.get)(type='regular')
@@ -60,8 +60,8 @@ async def ai_processing(prompt, components, chat, is_first_prompt, technology):
                                                     ProcessingStep.objects.filter(chat_category=chat_category)})()
 
     if is_first_prompt:
-        await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps)
-        engineered_prompt_1 = await build_engineered_prompt_1(pe_components_xml.format(technology=technology_name), components, prompt, chat, chat_category,processing_steps)
+        await save_prompt(chat, prompt, chat_category, processing_steps, attempt)
+        engineered_prompt_1 = await build_engineered_prompt_1(pe_components_xml.format(technology=technology_name), components, prompt, chat, chat_category,processing_steps, attempt)
         ai_answer_1 = await async_get_response_ai_1(engineered_prompt_1, chat)
         match = re.search(r'<components>[\s\S]*?</components>', ai_answer_1)
         if match:
@@ -73,45 +73,46 @@ async def ai_processing(prompt, components, chat, is_first_prompt, technology):
             chat=chat, type='ai', content=ai_answer_1, order=3, api_key=None,
             processing_step=processing_steps.get(f'{chat_category} : 3')
         )
-        engineered_prompt_2 = await build_engineered_prompt_2(pe_final_answer.format(technology=technology_name), pe_final_answer_format.replace("{technology}", technology_name).replace('{code_example}',technology_format_example), related_components, prompt, chat, chat_category, processing_steps)
+        engineered_prompt_2 = await build_engineered_prompt_2(pe_final_answer.format(technology=technology_name), pe_final_answer_format.replace("{technology}", technology_name).replace('{code_example}',technology_format_example), related_components, prompt, chat, chat_category, processing_steps, attempt)
         ai_answer_2 = await async_get_response_ai_2(engineered_prompt_2, chat)
         await sync_to_async(CodingChatMessage.objects.create)(
             chat=chat, type='gpt-a', content=ai_answer_2, order=5, api_key=None,
-            processing_step=processing_steps.get(f'{chat_category} : 5')
+            processing_step=processing_steps.get(f'{chat_category} : 5'), attempt_number=attempt
         )
         return ai_answer_2
     else:
-        await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps)
+        await save_prompt(chat, prompt, chat_category, processing_steps, attempt)
         last_prompt_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='r-prompt').last())()
         last_engineered_prompt = last_prompt_obj.content.replace(pe_final_answer_format.replace("{technology}", technology_name).replace('{code_example}',technology_format_example), '')
         last_ai_answer_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='gpt-a').last())()
         last_ai_answer = last_ai_answer_obj.content
-        engineered_adjustment_prompt = await build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer, prompt, chat_category, processing_steps)
+        engineered_adjustment_prompt = await build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer, prompt, chat_category, processing_steps, attempt)
         ai_adjustment_answer = await async_get_response_ai_2(engineered_adjustment_prompt, chat)
         max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
         await sync_to_async(CodingChatMessage.objects.create)(
             chat=chat, type='gpt-a', content=ai_adjustment_answer, order=max_order + 1, api_key=None,
-            processing_step=processing_steps.get(f'{chat_category} : 7')
+            processing_step=processing_steps.get(f'{chat_category} : 7'), attempt_number=attempt
         )
         return ai_adjustment_answer
 
-def save_prompt(chat, prompt, chat_category_id, processing_steps):
+async def save_prompt(chat, prompt, chat_category_id, processing_steps, attempt_number):
     chat.prompts_count = chat.prompts_count + 1
     chat.chat_category = chat_category_id
-    chat.save()
-    max_order = CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'] or 0
+    max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])() or 0
+    await sync_to_async(chat.save, thread_sensitive=True)()
     # Enregistrer le message utilisateur
-    CodingChatMessage.objects.create(
+    await sync_to_async(CodingChatMessage.objects.create)(
         chat=chat,
         type='prompt',
         processing_step=processing_steps.get(f"{chat_category_id} : 1"),
         content=prompt,
         order=max_order+1,
-        api_key=None
+        api_key=None,
+        attempt_number=attempt_number
     )
 
 
-async def build_engineered_prompt_1(components_xml, components, prompt, chat, chat_category_id, processing_steps):
+async def build_engineered_prompt_1(components_xml, components, prompt, chat, chat_category_id, processing_steps, attempt):
     components_str = await sync_to_async(generate_components_xml)(components)
     final_prompt = components_xml + '\nComponents:\n' + components_str + '\nRequest:\n' + prompt
     await sync_to_async(CodingChatMessage.objects.create)(
@@ -120,12 +121,13 @@ async def build_engineered_prompt_1(components_xml, components, prompt, chat, ch
         content=final_prompt,
         order=2,
         api_key=None,
-        processing_step=processing_steps.get(f"{chat_category_id} : 2")
+        processing_step=processing_steps.get(f"{chat_category_id} : 2"),
+        attempt_number=attempt
     )
     return final_prompt
 
 
-async def get_related_components(engineered_prompt_1, components, chat, chat_category_id, processing_steps):
+async def get_related_components(engineered_prompt_1, components, chat, chat_category_id, processing_steps, attempt):
     try:
         ai_response = await async_get_response_ai_1(engineered_prompt_1, chat)
         match = re.search(r"<components>[\s\S]*?</components>", ai_response)
@@ -141,14 +143,15 @@ async def get_related_components(engineered_prompt_1, components, chat, chat_cat
             content=ai_response,
             order=3,
             api_key=None,
-            processing_step=processing_steps.get(f"{chat_category_id} : 3")
+            processing_step=processing_steps.get(f"{chat_category_id} : 3"),
+            attempt_number=attempt
         )
     except:
         related_components = None
     return related_components
 
 
-async def build_engineered_prompt_2 (pe_final_answer, pe_final_answer_format, related_components, prompt, chat, chat_category_id, processing_steps):
+async def build_engineered_prompt_2 (pe_final_answer, pe_final_answer_format, related_components, prompt, chat, chat_category_id, processing_steps, attempt):
     if related_components is None:
         return "None"
     elif related_components==[]:
@@ -162,12 +165,13 @@ async def build_engineered_prompt_2 (pe_final_answer, pe_final_answer_format, re
             content=final_prompt,
             order=4,
             api_key=None,
-            processing_step=processing_steps.get(f"{chat_category_id} : 4")
+            processing_step=processing_steps.get(f"{chat_category_id} : 4"),
+            attempt_number=attempt
         )
         return final_prompt
 
 
-async def get_final_solution(engineered_prompt_2, chat, chat_category_id, processing_steps):
+async def get_final_solution(engineered_prompt_2, chat, chat_category_id, processing_steps, attempt):
     if engineered_prompt_2 == "None":
         CodingChatMessage.objects.create(
             chat=chat,
@@ -176,7 +180,8 @@ async def get_final_solution(engineered_prompt_2, chat, chat_category_id, proces
             status='none',
             order=5,
             api_key=None,
-            processing_step=processing_steps.get(f"{chat_category_id} : 5")
+            processing_step=processing_steps.get(f"{chat_category_id} : 5"),
+            attempt_number=attempt
         )
         return none_answer
     elif engineered_prompt_2 == "No components":
@@ -187,7 +192,8 @@ async def get_final_solution(engineered_prompt_2, chat, chat_category_id, proces
             status='no-components',
             order=5,
             api_key=None,
-            processing_step=processing_steps.get(f"{chat_category_id} : 5")
+            processing_step=processing_steps.get(f"{chat_category_id} : 5"),
+            attempt_number=attempt
         )
         return no_components_answer
     else:
@@ -198,12 +204,13 @@ async def get_final_solution(engineered_prompt_2, chat, chat_category_id, proces
             content=ai_response,
             order=5,
             api_key=None,
-            processing_step=processing_steps.get(f"{chat_category_id} : 5")
+            processing_step=processing_steps.get(f"{chat_category_id} : 5"),
+            attempt_number=attempt
         )
         return ai_response
 
 
-async def build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer, prompt, chat_category_id, processing_steps):
+async def build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer, prompt, chat_category_id, processing_steps, attempt):
     # This is my initial prompt + ep_2 + This is your solution + ai_answer_2 + this is my next prompt to adjust the solution + prompt + formatting variable
     engineered_adjustment_prompt = "This is my initial prompt: \n\n" + last_engineered_prompt + "\n\nThis was your solution:\n\n" + last_ai_answer + "\n\nthis is my next prompt to adjust the solution:\n\n" + prompt + "\n\n" + pe_final_answer_format
     max_order = await sync_to_async(
@@ -216,12 +223,13 @@ async def build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_
         content=engineered_adjustment_prompt,
         order=max_order+1,
         api_key=None,
-        processing_step=processing_steps.get(f"{chat_category_id} : 6")
+        processing_step=processing_steps.get(f"{chat_category_id} : 6"),
+        attempt_number=attempt
     )
 
     return engineered_adjustment_prompt
 
-async def get_adjusted_solution(chat, engineered_adjustment_prompt, chat_category_id, processing_steps):
+async def get_adjusted_solution(chat, engineered_adjustment_prompt, chat_category_id, processing_steps, attempt):
     # appel à l'API IA
     ai_response = await async_get_response_ai_2(engineered_adjustment_prompt, chat)
     max_order = await sync_to_async(
@@ -234,7 +242,8 @@ async def get_adjusted_solution(chat, engineered_adjustment_prompt, chat_categor
         content=ai_response,
         order=max_order+1,
         api_key=None,
-        processing_step=processing_steps.get(f"{chat_category_id} : 7")
+        processing_step=processing_steps.get(f"{chat_category_id} : 7"),
+        attempt_number=attempt
     )
     return ai_response
 

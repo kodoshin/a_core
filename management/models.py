@@ -42,6 +42,7 @@ class SubscriptionPlan(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     advantages = models.TextField(null=True, blank=True)
     duration_days = models.PositiveIntegerField(default=366)
+    regeneration_attempts = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name

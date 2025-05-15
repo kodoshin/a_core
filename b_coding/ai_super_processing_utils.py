@@ -114,7 +114,7 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt, techno
                                                         ProcessingStep.objects.filter(chat_category=chat_category)})()
 
         if is_first_prompt:
-            await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps, attempt)
+            await save_prompt(chat, prompt, chat_category, processing_steps, attempt)
             engineered_prompt_0 = await build_engineered_prompt_0(pe_files_xml.format(technology=technology_name), files, prompt, chat, chat_category, processing_steps, attempt)
             relevant_files = await get_related_files(engineered_prompt_0, files, chat, chat_category, processing_steps, attempt)
             #print('Relevant files !!!!!!!!!!1')
@@ -134,8 +134,10 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt, techno
 
             else:
                 related_components = []
+            max_order = await sync_to_async(
+                lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
             await sync_to_async(CodingChatMessage.objects.create)(
-                chat=chat, type='ai', content=ai_answer_1, order=5, api_key=None,
+                chat=chat, type='ai', content=ai_answer_1, order=max_order+1, api_key=None,
                 processing_step=processing_steps.get(f'{chat_category} : 5'), attempt_number=attempt
             )
             engineered_prompt_2 = await build_engineered_prompt_2(pe_final_answer.format(technology=technology_name), pe_final_answer_format.replace("{technology}", technology_name).replace('{code_example}',technology_format_example), related_components, prompt, chat, chat_category, processing_steps, attempt)
@@ -152,7 +154,7 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt, techno
             )
             return ai_answer_2
         else:
-            await sync_to_async(save_prompt)(chat, prompt, chat_category, processing_steps, attempt)
+            await save_prompt(chat, prompt, chat_category, processing_steps, attempt)
             last_prompt_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='r-prompt').last())()
             last_engineered_prompt = last_prompt_obj.content.replace(pe_final_answer_format.replace("{technology}", technology_name).replace('{code_example}',technology_format_example), '')
             last_ai_answer_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='gpt-a').last())()
@@ -179,18 +181,18 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt, techno
         return "We haven't been able to process your demand, please try again or change your prompt."
 
 
-def save_prompt(chat, prompt, chat_category_id, processing_steps, attempt_number):
+async def save_prompt(chat, prompt, chat_category_id, processing_steps, attempt_number):
     chat.prompts_count = chat.prompts_count + 1
     chat.chat_category = chat_category_id
-    max_order = 7*(attempt_number-1) + 1
-    chat.save()
+    max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])() or 0
+    await sync_to_async(chat.save, thread_sensitive=True)()
     # Enregistrer le message utilisateur
-    CodingChatMessage.objects.create(
+    await sync_to_async(CodingChatMessage.objects.create)(
         chat=chat,
         type='prompt',
         processing_step=processing_steps.get(f"{chat_category_id} : 1"),
         content=prompt,
-        order=max_order,
+        order=max_order+1,
         api_key=None,
         attempt_number=attempt_number
     )
