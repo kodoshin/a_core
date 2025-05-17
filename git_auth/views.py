@@ -11,6 +11,8 @@ from .models import AllowedFile
 import re
 import os
 from django.http import JsonResponse
+import tiktoken
+
 
 
 def get_github_token(user):
@@ -150,6 +152,17 @@ def view_repo_files(request, git_repo_id, repo_name):
             if item['type'] == 'folder':
                 sort_tree(item['children'])
     sort_tree(file_tree['file_tree'])
+
+    def add_token_counts(entries):
+        encoding = tiktoken.get_encoding("cl100k_base")
+        for entry in entries:
+            if entry['type'] == 'file':
+                tokens = encoding.encode(entry.get('content', ''))
+                entry['token_count'] = len(tokens)
+            else:
+                add_token_counts(entry['children'])
+
+    add_token_counts(file_tree['file_tree'])
 
     response_repo = requests.get(f'https://api.github.com/repos/{request.user.username}/{repo_name}', headers=headers)
     user = request.user

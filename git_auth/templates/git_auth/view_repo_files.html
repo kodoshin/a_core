@@ -11,7 +11,7 @@
 
 <form method="POST" action="{% url 'process_selected_files' git_repo_id=file_tree.git_repo_id repo_name=file_tree.repo_name %}">
     {% csrf_token %}
-    <input type="hidden" name="project_id" value="{{ project.id }}">
+    <input title="element_selector" type="hidden" name="project_id" value="{{ project.id }}">
     <div class="container" style="background-color: unset">
         <h1 class="repo-name" style="color: white; margin-bottom: 25px;">{{ file_tree.repo_name }}</h1>
         <ul class="file-tree">
@@ -58,6 +58,28 @@ document.addEventListener("DOMContentLoaded", function() {
                 childCheckboxes.forEach(childCheckbox => {
                     childCheckbox.checked = this.checked;
                 });
+            }
+            // Si décoché, décocher les parents
+            if (!this.checked) {
+                let parentLi = li.parentElement.closest('li.file-item');
+                while (parentLi) {
+                    const parentCb = parentLi.querySelector('.item-row > .file-checkbox');
+                    if (parentCb) parentCb.checked = false;
+                    parentLi = parentLi.parentElement.closest('li.file-item');
+                }
+            }
+
+            // Remontée récursive : décocher ou cocher le parent selon l'état de tous ses enfants
+            let parentLi = li.parentElement.closest('li.file-item');
+            while (parentLi) {
+                const parentCb = parentLi.querySelector('.item-row > .file-checkbox');
+                const subtree = parentLi.querySelector('ul.file-tree');
+                if (parentCb && subtree) {
+                    const childCbs = subtree.querySelectorAll('.file-checkbox');
+                    const allChecked = Array.from(childCbs).every(cb => cb.checked);
+                    parentCb.checked = allChecked;
+                }
+                parentLi = parentLi.parentElement.closest('li.file-item');
             }
         });
     });

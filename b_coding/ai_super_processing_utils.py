@@ -155,8 +155,8 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt, techno
             return ai_answer_2
         else:
             await save_prompt(chat, prompt, chat_category, processing_steps, attempt)
-            last_prompt_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='r-prompt').last())()
-            last_engineered_prompt = last_prompt_obj.content.replace(pe_final_answer_format.replace("{technology}", technology_name).replace('{code_example}',technology_format_example), '')
+            last_prompt_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='r-prompt', attempt_number=attempt).last())()
+            last_engineered_prompt = last_prompt_obj.content #.replace(pe_final_answer_format.replace("{technology}", technology_name).replace('{code_example}',technology_format_example), '')
             last_ai_answer_obj = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat, type='gpt-a').last())()
             last_ai_answer = last_ai_answer_obj.content
             engineered_adjustment_prompt = await build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer,prompt, chat_category, processing_steps, attempt)

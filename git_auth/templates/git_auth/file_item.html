@@ -6,7 +6,7 @@
             <span class="folder">{{ item.name }}</span>
         {% else %}
             <span class="icon">📄</span>
-            <label for="{{ item.path }}" class="file" style="color: aliceblue;">{{ item.name }}</label>
+            <label for="{{ item.path }}" class="file" style="color: aliceblue;">{{ item.name }} ({{ item.token_count }} tokens)</label>
         {% endif %}
 
         <!-- La checkbox -->
