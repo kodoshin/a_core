@@ -1,6 +1,8 @@
 from django.db import models
 from datetime import timedelta
 from django.contrib.auth.models import User
+from django.db.models import Q
+
 
 
 class AIModel(models.Model):
@@ -46,6 +48,15 @@ class SubscriptionPlan(models.Model):
 
     def __str__(self):
         return self.name
+
+    @classmethod
+    def get_default_free_plan(cls):
+        """
+        Retourne le plan dont le prix est égal à zéro (plan gratuit).
+        """
+        return cls.objects.filter(
+            Q(monthly_price=0) | Q(yearly_price=0)
+        ).order_by('created_at').first()
 
 
 class Subscription(models.Model):

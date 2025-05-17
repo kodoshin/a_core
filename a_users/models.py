@@ -4,6 +4,8 @@ from django.templatetags.static import static
 from a_projects.models import Project
 from b_coding.models import ChatCategory
 from fernet_fields import EncryptedCharField
+from django.utils import timezone
+from management.models import Subscription
 #from .fields import FallbackEncryptedTextField
 from management.models import SubscriptionPlan
 
@@ -65,6 +67,24 @@ class Profile(models.Model):
     daily_credit_claim_date = models.DateField(null=True, blank=True)
     def __str__(self):
         return str(self.user)
+
+    @property
+    def current_subscription(self):
+        now = timezone.now()
+        return Subscription.objects.filter(
+            user=self.user,
+            active=True,
+            start_date__lte=now,
+            end_date__gte=now
+        ).order_by('-start_date').first()
+
+    @property
+    def current_plan(self):
+        subscription = self.current_subscription
+        if subscription and subscription.plan:
+            return subscription.plan
+        # fallback vers le plan gratuit
+        return SubscriptionPlan.get_default_free_plan()
 
     @property
     def name(self):

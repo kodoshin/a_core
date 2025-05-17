@@ -19,4 +19,10 @@ class FileAdmin(admin.ModelAdmin):
 
 @admin.register(Component)
 class ComponentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'file', 'component_type')
+    list_display = ('id', 'name', 'file', 'component_type', 'get_project_name')
+
+    def get_project_name(self, obj):
+        return obj.file.project.name if obj.file and obj.file.project else None
+
+    get_project_name.admin_order_field = 'file__project__name'  # permet le tri sur ce champ
+    get_project_name.short_description = 'Project Name'

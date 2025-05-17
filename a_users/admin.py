@@ -18,10 +18,14 @@ class CountryAdmin(ImportExportModelAdmin):
     search_fields = ('name',)
 
 
-@admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    #exclude = ("github_access_key",)
-    search_fields = ('displayname',)
+    list_display = ('user', 'role', 'current_plan',)
+    def current_plan(self, obj):
+        plan = obj.current_plan
+        return plan.name if plan else '-'
+    current_plan.short_description = 'Plan actuel'
+admin.site.register(Profile, ProfileAdmin)
+
 
 admin.site.register(CreditClaim)
 
