@@ -5,6 +5,20 @@
 {% block content %}
 <style>
     /* Ensure main container can position the toggle button */
+    .prev-step-btn,
+    .next-step-btn,
+    .copy-code-btn {
+        cursor: pointer;
+    }
+    .code-container pre {
+        cursor: text;
+    }
+    .message.ai {
+        cursor: auto;
+    }
+    .message p {
+        cursor: text;
+    }
     .main-container {
         position: relative;
     }
@@ -246,18 +260,36 @@
 
 
 <script> //Next & Previous buttons with right left arrows
-document.addEventListener('keydown', function(event) {
-    // Prevent interfering while typing in textarea
-    if (document.activeElement.tagName.toLowerCase() === 'textarea' || document.activeElement.isContentEditable) {
-        return;
-    }
-    if (event.key === 'ArrowRight') {
-        const nextBtn = document.querySelector('.next-step-btn');
-        if (nextBtn) nextBtn.click();
-    } else if (event.key === 'ArrowLeft') {
-        const prevBtn = document.querySelector('.prev-step-btn');
-        if (prevBtn) prevBtn.click();
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    let activeContainer = null;
+
+    // When clicking on an AI message, mark it as active
+    document.querySelectorAll('.message.ai').forEach(container => {
+        //container.style.cursor = 'pointer';
+        container.addEventListener('click', function() {
+            document.querySelectorAll('.message.ai').forEach(c => c.classList.remove('active-ai-message'));
+            this.classList.add('active-ai-message');
+            activeContainer = this;
+        });
+    });
+
+    // Scoped arrow‐key navigation
+    document.addEventListener('keydown', function(event) {
+        // Skip when typing in textarea or contentEditable
+        if (document.activeElement.tagName.toLowerCase() === 'textarea' ||
+            document.activeElement.isContentEditable) {
+            return;
+        }
+        if (!activeContainer) return;
+
+        if (event.key === 'ArrowRight') {
+            const nextBtn = activeContainer.querySelector('.next-step-btn');
+            if (nextBtn) nextBtn.click();
+        } else if (event.key === 'ArrowLeft') {
+            const prevBtn = activeContainer.querySelector('.prev-step-btn');
+            if (prevBtn) prevBtn.click();
+        }
+    });
 });
 </script>
 
