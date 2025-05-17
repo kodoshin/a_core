@@ -10,6 +10,7 @@ from django.views.decorators.http import require_POST
 from .ai_regular_processing_utils import ai_processing as regular_ai_processing
 from .ai_super_processing_utils import ai_processing as super_ai_processing
 from django.views.decorators.csrf import csrf_exempt
+from management.ai_bases import async_get_ai_title
 
 from asgiref.sync import sync_to_async
 import asyncio
@@ -91,14 +92,38 @@ async def code_chat_view(request):
                 chat = await sync_to_async(CodingChat.objects.create)(user=user, project=default_project)
                 is_first_prompt = True
             if available_credits >= default_chat_category.price:
-                if chat.title is None :
-                    chat.title = prompt[:25] + '...' if len(prompt) >= 28 else prompt
-                    await sync_to_async(chat.save)()
+                #if chat.title is None :
+                #    chat.title = prompt[:25] + '...' if len(prompt) >= 28 else prompt
+                #    await sync_to_async(chat.save)()
+
+                title_task = (
+                    asyncio.create_task(async_get_ai_title(prompt))
+                    if chat.title is None
+                    else None
+                )
 
                 if default_chat_category.type == 'regular':
-                    ai_response = await regular_ai_processing(prompt, components, chat, is_first_prompt, technology, attempt_no)
+                    response_task = asyncio.create_task(
+                        regular_ai_processing(
+                            prompt, components, chat, is_first_prompt, technology, attempt_no
+                        )
+                    )
                 elif default_chat_category.type == 'super':
-                    ai_response = await super_ai_processing(prompt, files, components, chat, is_first_prompt, technology, attempt_no)
+                    response_task = asyncio.create_task(
+                        super_ai_processing(
+                            prompt, files, components, chat, is_first_prompt, technology, attempt_no
+                        )
+                    )
+
+                # Await the AI response
+                ai_response = await response_task
+
+                if title_task:
+                    ai_title = await title_task
+                    chat.title = ai_title
+                    await sync_to_async(chat.save)()
+
+
                 if is_first_prompt:
                     profile.available_credits = available_credits - default_chat_category.price
                 else:

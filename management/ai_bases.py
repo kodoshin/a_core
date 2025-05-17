@@ -108,6 +108,21 @@ def get_response_ai_2(prompt, chat):
         return response.text
 
 
+async def async_get_ai_title(prompt: str) -> str:
+    """
+    Generate a concise one-line title for a given user prompt.
+    """
+    # Craft a specific instruction for title creation
+    title_instruction = (
+        "Based on the user's request below, provide a concise title "
+        "(max 25 characters, no punctuation at the end):\n\n"
+        f"{prompt}"
+    )
+    # Use the existing GPT output function to fetch the title
+    ai_title = await async_get_gpt_output(title_instruction)
+    # Clean up whitespace and return
+    return ai_title.strip()
+
 async def async_get_response_ai_1(prompt, chat):
     model = 'o4-mini'
     url = 'https://api.openai.com/v1/chat/completions'

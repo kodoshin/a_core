@@ -111,7 +111,7 @@
                     {% for chat in chats %}
                         <li style="margin-top: 10px;">
                             <span {% if chat.id == current_chat.id %}class="selected-chat"{% endif %}>
-                            <a href="?chat_id={{ chat.id }}" style="color: white; font-size: medium; font-weight: bold;">{{ chat.title }}</a>
+                            <a href="?chat_id={{ chat.id }}" style="color: white; font-size: small; font-weight: bold;">{{ chat.title }}</a>
                             </span>
                             <span class="delete-chat" data-chat-id="{{ chat.id }}" style="cursor:pointer; color:red; margin-left:0px; float: right;">&#x1F5D1;</span>
                             <span class="cancel-delete" data-chat-id="{{ chat.id }}" style="display:none; cursor:pointer; color:gray; margin-left:0px; float: right;">&#x274C;</span>
