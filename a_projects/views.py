@@ -11,6 +11,8 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 import json
+import tiktoken
+
 
 
 
@@ -302,6 +304,18 @@ def view_modified_repo_files(request, git_repo_id, repo_name, project_id):
             if item['type'] == 'folder':
                 sort_tree(item['children'])
     sort_tree(file_tree['file_tree'])
+
+    # Add token counts for each file node
+    def add_token_counts(entries):
+        encoding = tiktoken.get_encoding("cl100k_base")
+        for entry in entries:
+            if entry['type'] == 'file':
+                tokens = encoding.encode(entry.get('content', ''))
+                entry['token_count'] = len(tokens)
+            else:
+                add_token_counts(entry['children'])
+
+    add_token_counts(file_tree['file_tree'])
 
     def build_all_paths(path=''):
         contents = fetch_directory_contents(path)
