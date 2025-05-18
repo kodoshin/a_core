@@ -8,4 +8,5 @@ cmds = ["python -m venv --copies /opt/venv && . /opt/venv/bin/activate && pip in
 cmd = """gunicorn a_core.wsgi:application \
        --bind 0.0.0.0:$PORT \
        --timeout 300 \
-       --workers 1"""
+       --workers 4 \
+       --threads 2"""
