@@ -2,6 +2,7 @@ from django.db import models
 from datetime import timedelta
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.db.models import F
 
 
 
@@ -21,14 +22,30 @@ class AIModel(models.Model):
 
 
 class APIKey(models.Model):
+    KEY_TYPE_CHOICES = [
+        ('chat', 'Chat'),
+        ('title', 'Title'),
+        ('ai1', 'AI1'),
+        ('ai2', 'AI2'),
+        ('documentation', 'Documentation'),
+        ('other', 'Other'),
+    ]
     ai_model = models.ForeignKey(AIModel, on_delete=models.CASCADE, null=True)
+    key_type = models.CharField(max_length=20, choices=KEY_TYPE_CHOICES, default='chat')
     api_key = models.CharField(max_length=255)
+    real_time_users = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.ai_model.name} - {self.api_key[:5]}"
+        return f'{self.ai_model.name} ({self.key_type}) - users: {self.real_time_users}'
+
+    def increment(self):
+        APIKey.objects.filter(pk=self.pk).update(real_time_users=F('real_time_users') + 1)
+
+    def decrement(self):
+        APIKey.objects.filter(pk=self.pk).update(real_time_users=F('real_time_users') - 1)
 
 
 class SubscriptionPlan(models.Model):

@@ -120,7 +120,7 @@ async def code_chat_view(request):
 
                 if title_task:
                     ai_title = await title_task
-                    chat.title = ai_title
+                    chat.title = ai_title[:25]
                     await sync_to_async(chat.save)()
 
 

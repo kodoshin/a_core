@@ -9,7 +9,8 @@ class APIKeyAdmin(admin.ModelAdmin):
 
 @admin.register(APIKey)
 class APIKeyAdmin(admin.ModelAdmin):
-    list_display = ('ai_model', 'is_active', 'created_at')
+    list_display = ('ai_model', 'key_type', 'real_time_users', 'is_active', 'created_at')
+    list_filter = ('key_type', 'is_active', 'ai_model__provider')
 
 @admin.register(SubscriptionPlan)
 class SubscriptionPlanAdmin(admin.ModelAdmin):

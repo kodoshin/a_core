@@ -474,7 +474,6 @@ $(document).ready(function() {
     $(document).ready(function() {
         $('#project-dropdown').on('change', function() {
             var selectedProjectId = $(this).val();
-
             $.ajax({
                 url: '{% url "update_default_project" %}',
                 type: 'POST',
@@ -484,31 +483,39 @@ $(document).ready(function() {
                 },
                 success: function(response) {
                     if (response.status === 'success') {
-                        //window.location.reload();
-                        window.hasDefaultProject = true
-                        // On récupère la UL et on la vide
+                        window.hasDefaultProject = true;
                         var chatList = $('#chats-list ul');
                         chatList.empty();
-
-                        // Si des chats sont renvoyés, on les affiche
                         if (response.chats && response.chats.length > 0) {
                             response.chats.forEach(function(chat) {
-                                var li = $('<li>');
+                                var li = $('<li>').css('margin-top','10px');
                                 var link = $('<a>')
                                     .attr('href', '?chat_id=' + chat.id)
                                     .text(chat.title)
-                                    .css('color', 'white')
-                                    .css('font-weight', 'bold');
-
-                                li.append(link);
+                                    .css({'color':'white','font-size':'small','font-weight':'bold'});
+                                var deleteSpan = $('<span>')
+                                    .addClass('delete-chat')
+                                    .attr('data-chat-id', chat.id)
+                                    .css({'cursor':'pointer','color':'red','margin-left':'0','float':'right'})
+                                    .html('&#x1F5D1;');
+                                var cancelSpan = $('<span>')
+                                    .addClass('cancel-delete')
+                                    .attr('data-chat-id', chat.id)
+                                    .css({'display':'none','cursor':'pointer','color':'gray','margin-left':'0','float':'right'})
+                                    .html('&#x274C;');
+                                var confirmSpan = $('<span>')
+                                    .addClass('confirm-delete')
+                                    .attr('data-chat-id', chat.id)
+                                    .css({'display':'none','cursor':'pointer','color':'green','margin-left':'0','float':'right'})
+                                    .html('&#x2714;');
+                                li.append(link, deleteSpan, cancelSpan, confirmSpan);
                                 chatList.append(li);
                             });
                         } else {
-                            // Sinon, on affiche "No Chats."
                             chatList.append(
                                 $('<li>')
                                     .text('No Chats.')
-                                    .css('font-weight', 'bold')
+                                    .css('font-weight','bold')
                             );
                         }
                     } else {
@@ -556,97 +563,90 @@ $(document).ready(function() {
 </script>
 
 
-<script> //Polls management
-  $(document).ready(function() {
+<script>
+// Polls management
+$(document).ready(function() {
     var lastAiMessageId = 0;
 
     function pollUpdates() {
         var chatId = $('#chat_id').val();
         $.ajax({
             url: '{% url "code_chat_updates" %}',
-            data: {
-                chat_id: chatId,
-                last_id: lastAiMessageId
-            },
+            data: { chat_id: chatId, last_id: lastAiMessageId },
             success: function(data) {
                 data.messages.forEach(function(msg) {
-                    // Parser le XML du message
                     var parser = new DOMParser();
                     var xmlDoc = parser.parseFromString(msg.content, 'application/xml');
                     var rootTag = xmlDoc.documentElement.tagName;
-
                     if (rootTag === 'files') {
-                        // Pour <files> : on affiche chaque <file> sur une ligne
-                        var files = xmlDoc.getElementsByTagName('file');
-                        for (var i = 0; i < files.length; i++) {
-                            $('#loading-text').append(files[i].textContent + '<br>');
-                        }
-                    }
-                    else if (rootTag === 'components') {
-                        // Pour <components> : on affiche "file : name" pour chaque <component>
-                        var comps = xmlDoc.getElementsByTagName('component');
-                        for (var i = 0; i < comps.length; i++) {
-                            var fileName = comps[i].getElementsByTagName('file')[0].textContent;
-                            var compName = comps[i].getElementsByTagName('name')[0].textContent;
-                            $('#loading-text').append(fileName + ' : ' + compName + '<br>');
-                        }
-                    }
-                    else {
-                        // Fallback : afficher brut
+                        var items = Array.from(xmlDoc.getElementsByTagName('file'));
+                        items.forEach(function(file, index) {
+                            setTimeout(function() {
+                                $('#loading-text').append(file.textContent + '<br>');
+                            }, index * 500);
+                        });
+                    } else if (rootTag === 'components') {
+                        var items = Array.from(xmlDoc.getElementsByTagName('component'));
+                        items.forEach(function(comp, index) {
+                            setTimeout(function() {
+                                var fileName = comp.getElementsByTagName('file')[0].textContent;
+                                var compName = comp.getElementsByTagName('name')[0].textContent;
+                                $('#loading-text').append(fileName + ' : ' + compName + '<br>');
+                            }, index * 500);
+                        });
+                    } else {
                         $('#loading-text').append(msg.content + '<br>');
                     }
-
-                    // Mettre à jour lastAiMessageId
                     lastAiMessageId = msg.id;
                 });
             },
-
-
             complete: function() {
-                // Continue polling every 2 seconds
                 setTimeout(pollUpdates, 2000);
             }
         });
     }
 
-    $('#chat-form').on('submit', function(e) {
-        if (!window.hasDefaultProject) {
-            e.preventDefault();
-            alert('Please select a project');
-            return;
-        }
-        e.preventDefault();
-        var prompt = $('#prompt').val().trim();
-        if (prompt === "Ask anything" || prompt === "") {
-            alert('Please enter a prompt.');
-            return;
-        }
-        // Show loader and clear previous notifications
-        $('#loading-spinner').show();
-        $('#loading-text').show().empty();
-        // Start polling for AI processing updates
-        pollUpdates();
+    // Expose for external calls (e.g. regenerate)
+    window.pollUpdates = pollUpdates;
 
-        // Send the main chat request
-        $.ajax({
-            url: '{% url "code_chat_view" %}',
-            type: 'POST',
-            data: $(this).serialize(),
-            success: function(data) {
-                $('#loading-spinner').hide();
-                // Redirect to render final chat when complete
-                window.location.href = '?chat_id=' + data.chat_id;
-            },
-            error: function() {
-                $('#loading-spinner').hide();
-                alert('An error has occured.');
+    $(document).ready(function() {
+        $('#chat-form').on('submit', function(e) {
+            if (!window.hasDefaultProject) {
+                e.preventDefault();
+                alert('Please select a project');
+                return;
             }
+            e.preventDefault();
+            var prompt = $('#prompt').val().trim();
+            if (prompt === "Ask anything" || prompt === "") {
+                alert('Please enter a prompt.');
+                return;
+            }
+            // Show loader and clear previous text
+            $('#loading-spinner').show();
+            $('#loading-text').show().empty();
+            // Start polling for AI processing updates
+            pollUpdates();
+            // Send the chat request
+            $.ajax({
+                url: '{% url "code_chat_view" %}',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(data) {
+                    $('#loading-spinner').hide();
+                    // Preserve the selected attempt in the redirect
+                    var attempt = $('#attempt_no').val();
+                    window.location.href = '?chat_id=' + data.chat_id + '&attempt=' + attempt;
+                },
+                error: function() {
+                    $('#loading-spinner').hide();
+                    alert('An error has occured.');
+                }
+            });
         });
     });
 });
-
 </script>
-
 
 <script> //Step Navigation & copy button
     $(document).ready(function() {
@@ -692,45 +692,50 @@ $(document).ready(function() {
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
 <script>
-$(function(){
-  $('#regenerate-btn').on('click', function(e){
-    e.preventDefault();
-    // 1. Effacer les anciennes étapes et masquer les flèches
-    $('.steps-container').empty();
-    $('.prev-step-btn, .next-step-btn').hide();
-    // 2. Afficher spinner et texte
-    $('#loading-text').text('Regenerating...').show();
-    $('#loading-spinner').show();
-    // 3. Appel AJAX
-    $.ajax({
-      url: "{% url 'code_chat_view' %}",
-      method: "POST",
-      data: {
-        regenerate: 1,
-        chat_id: "{{ current_chat.id }}",
-        csrfmiddlewaretoken: "{{ csrf_token }}"
-      },
-      success: function(data){
-        if(data.status === 'success'){
-          // Redirection vers la nouvelle tentative pour recharger le chat
-          window.location.href = '?chat_id={{ current_chat.id }}&attempt=' + ({{ total_attempts }} + 1);
-        } else {
-          alert(data.message);
+$(document).ready(function(){
+    $('#regenerate-btn').on('click', function(e){
+        e.preventDefault();
+        // Clear previous steps and hide controls
+        $('.steps-container').empty();
+        $('.prev-step-btn, .next-step-btn').hide();
+        // Show loading spinner and message
+        $('#loading-text').text('Regenerating...').show();
+        $('#loading-spinner').show();
+        // Start polling during regeneration
+        if (typeof window.pollUpdates === 'function') {
+            pollUpdates();
         }
-      },
-      error: function(){
-        alert('Erreur lors de la régénération.');
-      },
-      complete: function(){
-        // Masquer spinner et texte si erreur ou après redirection
-        $('#loading-spinner').hide();
-        $('#loading-text').hide();
-      }
+        $.ajax({
+            url: "{% url 'code_chat_view' %}",
+            method: "POST",
+            data: {
+                regenerate: 1,
+                chat_id: "{{ current_chat.id }}",
+                csrfmiddlewaretoken: "{{ csrf_token }}"
+            },
+            success: function(data){
+                if(data.status === 'success'){
+                    window.location.href = '?chat_id={{ current_chat.id }}&attempt=' + ({{ total_attempts }} + 1);
+                } else {
+                    alert(data.message);
+                }
+            },
+            error: function(){
+                alert('Erreur lors de la régénération.');
+            },
+            complete: function(){
+                $('#loading-spinner').hide();
+                $('#loading-text').hide();
+            }
+        });
     });
-  });
 });
 </script>
+
+
 
 <script>
 $(function(){
