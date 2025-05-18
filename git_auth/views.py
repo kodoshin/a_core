@@ -195,6 +195,7 @@ def view_repo_files(request, git_repo_id, repo_name):
 
 
 def process_selected_files (request, git_repo_id, repo_name):
+    #print('Processing FILES')
     if request.method == 'POST':
         project_id = request.POST.get('project_id')
         project = Project.objects.get(id=project_id)  # Récupérer le projet associé
@@ -237,6 +238,7 @@ def process_selected_files (request, git_repo_id, repo_name):
             pass
         status = Status.objects.get(code=1)
         project = get_object_or_404(Project, git_repo_id=git_repo_id)
+        #print('Documenting Components')
         document_components(project, project.technology)
         project.status = status
         project.save()

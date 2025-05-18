@@ -23,6 +23,7 @@ def node_document_file(file_content: str, file_instance, file_name: str, Technol
     :param file_name: Le nom (ou chemin) du fichier (utile pour détecter le type).
     :param Technology: L'instance représentant la technologie (ici Node.js).
     """
+    #print('DOCUMENTING NODE JS')
     if file_name.endswith(('.js', '.ts')):
         node_document_js_file(file_content, file_instance, file_name, Technology)
     elif file_name.endswith('.html'):

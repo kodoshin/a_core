@@ -22,9 +22,9 @@ def document_components (project, technology):
             py_document_python_file(file.content, file, file.name, technology)
         elif technology.name == 'React':
             react_document_file(file.content, file, technology)
-        elif technology.name == 'Next.js':
+        elif technology.name == 'Next JS':
             nextjs_document_file(file.content, file, technology)
-        elif technology.name == 'Node.js':
+        elif technology.name == 'Node JS':
             node_document_file(file.content, file, file.name, technology)
         elif technology.name == 'Flask':
             fl_document_file(file.content, file, file.name, technology)
