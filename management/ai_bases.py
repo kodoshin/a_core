@@ -214,7 +214,7 @@ async def async_get_ai_title(content):
         body = {
             'model': await sync_to_async(lambda k: k.ai_model.name)(key),
             'messages': [
-                {'role': 'user', 'content': f"Generate a concise title for the following text:\n\n{content}"}
+                {'role': 'user', 'content': f"Generate a concise title for the following text:\n\n{content}, maximum 25 characters, no special annotation in the beginning or the end"}
             ]
         }
         async with httpx.AsyncClient(timeout=120.0) as client:
