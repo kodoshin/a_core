@@ -16,13 +16,16 @@ import os
 from storages.backends.azure_storage import AzureStorage
 import dj_database_url
 from environ import Env
-
-
 import os
 import stripe
-
 from django.utils.encoding import force_str
 import django.utils.encoding
+
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # en octets
+
+
+
 django.utils.encoding.force_text = force_str
 
 BASE_DIR = Path(__file__).resolve().parent.parent

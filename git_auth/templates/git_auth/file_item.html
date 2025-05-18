@@ -10,18 +10,19 @@
         {% endif %}
 
         <!-- La checkbox -->
-        <input type="checkbox"
-               class="file-checkbox"
-               name="file-checkbox"
-               data-path="{{ item.path }}"
-               id="{{ item.path }}"
-               value="{{ item }}"
-               {% if item.type == "file" and item.token_count >= 20000 %}
-                   disabled
-               {% else %}
-                   checked
-               {% endif %}
-               title="{% if item.type == 'file' and item.token_count > 20000 %}File too large to select{% endif %}" >
+        <input
+            type="checkbox"
+            class="file-checkbox"
+            data-path="{{ item.path }}"
+            id="{{ item.path }}"
+            value="{{ item }}"
+            {% if item.type == "file" and item.token_count >= 20000 %}
+                disabled
+            {% else %}
+                name="file-checkbox" checked
+            {% endif %}
+            title="{% if item.type == 'file' and item.token_count > 20000 %}File too large to select{% endif %}"
+        >
     </div>
 
     <!-- 2) Si c’est un dossier, on affiche le <ul> des enfants -->
