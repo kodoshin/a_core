@@ -63,6 +63,13 @@ class SubscriptionPlan(models.Model):
     duration_days = models.PositiveIntegerField(default=366)
     regeneration_attempts = models.PositiveIntegerField(default=0)
 
+    stripe_tax_code = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True,
+        help_text='Stripe Tax Code for automatic_tax (e.g., txcd_56151200 for digital services)'
+    )
+
     def __str__(self):
         return self.name
 
@@ -82,6 +89,11 @@ class Subscription(models.Model):
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField()
     active = models.BooleanField(default=True)
+
+    amount_subtotal = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    tax_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    amount_total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    currency = models.CharField(max_length=3, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.end_date:

@@ -1,5 +1,6 @@
 <title>Login</title>
 
+<div style="background-color: rgba(31, 30, 35); color: white">
 {% extends "account/base_entrance.html" %}
 {% load i18n %}
 {% load allauth account %}
@@ -37,6 +38,8 @@
         {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
 
     {% endif %}
+</div>
+
 
 
 {% endblock content %}

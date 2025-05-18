@@ -5,24 +5,23 @@
 {% block content %}
 
 {% if onboarding %}
-<h1 class="mb-8" style="font-family: 'DynaPuff'; color: black">Complete your Profile</h1>
+<h1 class="mb-8" style="color: white">Complete your Profile</h1>
 {% else %}
-<h1 class="mb-8" style="font-family: 'DynaPuff'; color: black">Edit your Profile</h1>
+<h1 class="mb-8">Edit your Profile</h1>
 {% endif %}
 
 <div class="text-center flex flex-col items-center">
     <img id="avatar" class="w-36 h-36 rounded-full object-cover my-4" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/avatar.svg" />
     <div class="text-center max-w-md">
-        <h1 id="displayname" style="color: black; font-family: 'DynaPuff';">{{ user.profile.displayname|default:"" }}</h1>
+        <h1 id="displayname">{{ user.profile.displayname|default:"" }}</h1>
         <div class="text-gray-400 mb-2 -mt-3">@{{ user.username }}</div>
     </div>
 </div>
 
 <div>
-    <label style="color: dimgray; display: inline; font-family: 'DynaPuff'; font-style: oblique">
-        <span>Available Credits :</span>
-        <span style="display: inline; font-style: normal ;"> {{ profile.available_credits }} </span>
-        <img style="max-width: 20px; display: inline;" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/gold-coin.png" alt="magic"  >
+    <label style="color: dimgray; display: inline; font-style: oblique; font-weight: bold">
+        <span>Plan :</span>
+        <span style="display: inline; font-style: normal ;"> {{ profile.current_plan.name }}. ends in : {{ profile.current_subscription.end_date }} </span>
     </label>
 </div>
 <br><br>
@@ -30,9 +29,8 @@
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" >Submit</button>
-    {% if onboarding %}
-    <a class="button button-gray ml-1" href="{% url 'home' %}">Skip</a>
-    {% else %}
+    {% if not onboarding %}
+
     <a class="button button-gray ml-1" href="{{ request.META.HTTP_REFERER }}">Cancel</a>
     {% endif %}
 </form>

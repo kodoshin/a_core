@@ -168,7 +168,10 @@ def claim_credits_view(request):
             profile.has_claimed_credits = False
 
         if not profile.has_claimed_credits:
-            profile.available_credits += 20
+            daily_amount = 5
+            if profile.current_plan and profile.current_plan.daily_credits:
+                daily_amount = profile.current_plan.daily_credits
+            profile.available_credits += daily_amount
             profile.has_claimed_credits = True
             profile.daily_credit_claim_date = local_today
             profile.save()

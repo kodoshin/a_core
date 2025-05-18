@@ -52,9 +52,9 @@ class ProfileForm(forms.ModelForm):
         model = Profile
         fields = ['role', 'country', 'marketing_channel', 'accept_marketing_communication', 'accept_data_usage_policy','timezone', 'gmt_offset']
         widgets = {
-            'role': forms.Select(attrs={'style': "color: black; font-weight: bold; font-family: 'DynaPuff';"}),
-            'country': forms.Select(attrs={'style': "color: black; font-weight: bold; font-family: 'DynaPuff';"}),
-            'marketing_channel': forms.Select(attrs={'style': "color: black;font-weight: bold; font-family: 'DynaPuff';"}),
+            'role': forms.Select(attrs={'style': "color: black; font-weight: bold;"}),
+            'country': forms.Select(attrs={'style': "color: black; font-weight: bold;"}),
+            'marketing_channel': forms.Select(attrs={'style': "color: black;font-weight: bold;"}),
             'accept_marketing_communication': forms.CheckboxInput(attrs={'style': "width: 20px;"}),
             'timezone': forms.HiddenInput(),
             'gmt_offset': forms.HiddenInput(),
@@ -72,14 +72,14 @@ class ProfileForm(forms.ModelForm):
                 "I accept the <a href='#' id='policy-link'>data usage policy</a>"
             )
 
-        label_width = '250px'
+        label_width = '255px'
         # On modifie le label de chaque champ pour inclure du style en ligne
         for field_name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
                 field.label = mark_safe(
-                    f"""<span style="color: black; font-weight: bold; font-family: 'DynaPuff';">{field.label}</span>"""
+                    f"""<span style="color: white; font-weight: bold;">{field.label}</span>"""
                 )
             else:
                 field.label = mark_safe(
-                    f"""<span style="color: black; display: inline-block; width: {label_width}; font-weight: bold; font-family: 'DynaPuff';">{field.label}</span>"""
+                    f"""<span style="color: white; display: inline-block; width: {label_width}; font-weight: bold;">{field.label}</span>"""
                 )

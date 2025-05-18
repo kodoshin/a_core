@@ -4,15 +4,15 @@
 
 {% block content %}
 
-<h1 class="mb-8" style="font-family: 'DynaPuff'; color: black">Account Settings</h1>
+<h1 class="mb-8">Account Settings</h1>
 
-<table class="w-full text-sm text-left text-gray-500" style="font-family: 'DynaPuff'">
+<table class="w-full text-sm text-left text-gray-500">
     <tbody>
         <tr class="border-b">
-            <th scope="row" class="pt-4 pb-1 text-base font-bold text-gray-900">
+            <th scope="row" class="pt-4 pb-1 text-base font-bold text-gray-900" style="color: white">
                 Email address
             </th>
-            <td id="email-address" class="pt-4 pb-1 pl-4">
+            <td id="email-address" class="pt-4 pb-1 pl-4" style="color: white">
                 {% if user.email %}{{ user.email }}{% else %}No Email{% endif %}
             </td>
             <!--
@@ -48,13 +48,13 @@
         -->
 
         <tr class="border-b">
-            <th scope="row" class="pt-4 pb-1 text-base font-bold text-gray-900">
+            <th scope="row" class="pt-4 pb-1 text-base font-bold text-gray-900" style="color: white">
                 Github Access Key
             </th>
-            <td id="github-key-edit" class="pt-4 pb-1 pl-4">
+            <td id="github-key-edit" class="pt-4 pb-1 pl-4" style="color: white">
                 {% if user.profile.github_access_key %}************{% else %}No Key{% endif %}
             </td>
-            <td class="pt-4 pb-1 pl-4">
+            <td class="pt-4 pb-1 pl-4" style="color: white">
                 <a id="github-key" class="cursor-pointer font-medium text-blue-600 hover:underline"
                     hx-get="{% url 'profile-githubkeychange' %}"
                     hx-target="#github-key-edit"
@@ -65,10 +65,10 @@
         </tr>
 
         <tr class="border-b">
-            <th scope="row" class="py-4 text-base font-bold text-gray-900">
+            <th scope="row" class="py-4 text-base font-bold text-gray-900" style="color: white">
                 Delete Account
             </th>
-            <td class="py-4 pl-4">
+            <td class="py-4 pl-4" style="color: white">
                 Once deleted, account is gone. Forever.
             </td>
             <td class="py-4 pl-4">

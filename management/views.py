@@ -47,6 +47,8 @@ def create_checkout_session(request, offer_id):
         mode='payment',
         success_url=success_url,
         cancel_url=cancel_url,
+        billing_address_collection='auto',
+        automatic_tax={'enabled': True},
         metadata={
             'offer_id': offer.id,
             'user_id': request.user.id
@@ -60,24 +62,28 @@ def create_checkout_session_plan(request, plan_id):
     plan = get_object_or_404(SubscriptionPlan, id=plan_id)
     success_url = f"{settings.DOMAIN}{reverse('pricing_credits')}?session_id={{CHECKOUT_SESSION_ID}}"
     cancel_url = f"{settings.DOMAIN}{reverse('pricing_credits')}"
+    line_item = {
+        'price_data': {
+            'currency': 'usd',
+            'product_data': {
+                'name': plan.name,
+                # use plan-specific tax code or fallback to digital services code
+                'tax_code': plan.stripe_tax_code or None,
+            },
+            'unit_amount': int(plan.yearly_price * 100),
+            'tax_behavior': 'exclusive',
+        },
+        'quantity': 1,
+    }
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
-        line_items=[{
-            'price_data': {
-                'currency': 'usd',
-                'product_data': {'name': f"{plan.name}"},
-                'unit_amount': int(plan.yearly_price * 100),
-            },
-            'quantity': 1,
-        }],
+        line_items=[line_item],
         mode='payment',
         success_url=success_url,
         cancel_url=cancel_url,
-        metadata={
-            'plan_id': plan.id,
-            'user_id': request.user.id
-        }
-
+        billing_address_collection='required',
+        automatic_tax={'enabled': True},
+        metadata={'plan_id': plan.id, 'user_id': request.user.id}
     )
     return redirect(session.url, code=303)
 
@@ -94,18 +100,21 @@ def stripe_webhook(request):
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-        metadata = session.get('metadata', {})
+        # Retrieve expanded session to get total_details
+        session_full = stripe.checkout.Session.retrieve(
+            session['id'],
+            expand=['total_details']
+        )
+        metadata = session_full.get('metadata', {})
         user = User.objects.get(id=metadata.get('user_id'))
-
-        if 'offer_id' in metadata:
-            offer = CreditOffer.objects.get(id=metadata['offer_id'])
-            profile = Profile.objects.get(user=user)
-            profile.available_credits += offer.credits
-            profile.save()
-
-        elif 'plan_id' in metadata:
+        if 'plan_id' in metadata:
             plan = SubscriptionPlan.objects.get(id=metadata['plan_id'])
-            # create an annual subscription
-            Subscription.objects.create(user=user, plan=plan)
-
+            Subscription.objects.create(
+                user=user,
+                plan=plan,
+                amount_subtotal=session_full.amount_subtotal / 100,
+                tax_amount=(session_full.total_details.amount_tax or 0) / 100,
+                amount_total=session_full.amount_total / 100,
+                currency=session_full.currency.upper()
+            )
     return HttpResponse(status=200)
