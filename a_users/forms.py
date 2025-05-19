@@ -1,7 +1,7 @@
 from django.forms import ModelForm
 from django import forms
 from django.contrib.auth.models import User
-from .models import Profile
+from .models import Profile, Region
 from django.utils.safestring import mark_safe
 
 
@@ -50,10 +50,14 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['role', 'country', 'marketing_channel', 'accept_marketing_communication', 'accept_data_usage_policy','timezone', 'gmt_offset']
+        fields = ['role', 'country', 'region', 'marketing_channel', 'accept_marketing_communication', 'accept_data_usage_policy','timezone', 'gmt_offset']
         widgets = {
             'role': forms.Select(attrs={'style': "color: black; font-weight: bold;"}),
             'country': forms.Select(attrs={'style': "color: black; font-weight: bold;"}),
+            'region': forms.Select(attrs={
+                'style': 'color: black; font-weight: bold;',
+                'class': 'js-region-select'
+            }),
             'marketing_channel': forms.Select(attrs={'style': "color: black;font-weight: bold;"}),
             'accept_marketing_communication': forms.CheckboxInput(attrs={'style': "width: 20px;"}),
             'timezone': forms.HiddenInput(),
@@ -83,3 +87,15 @@ class ProfileForm(forms.ModelForm):
                 field.label = mark_safe(
                     f"""<span style="color: white; display: inline-block; width: {label_width}; font-weight: bold;">{field.label}</span>"""
                 )
+
+        # Filter region queryset based on country in POST or instance
+        if self.data.get('country'):
+            try:
+                country_id = int(self.data.get('country'))
+                self.fields['region'].queryset = Region.objects.filter(country_id=country_id)
+            except (ValueError, TypeError):
+                self.fields['region'].queryset = Region.objects.none()
+        elif self.instance and self.instance.country:
+            self.fields['region'].queryset = Region.objects.filter(country=self.instance.country)
+        else:
+            self.fields['region'].queryset = Region.objects.none()

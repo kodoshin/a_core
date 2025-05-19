@@ -535,6 +535,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <div class="container">
   <div class="row">
     <div class="col-md-3">
+        {% if can_create %}
         <a style="text-decoration: none" href="{{ request.path }}git/repos/">
           <div class="card mb-4">
             <div class="card-body">
@@ -543,6 +544,16 @@ document.addEventListener('DOMContentLoaded', function(){
             </div>
           </div>
         </a>
+        {% else %}
+        <a style="text-decoration: none" href="{% url 'pricing_credits' %}">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h2 class="card-title" style="color: red">+ Create</h2>
+              <p class="card-text" style="color: red">Maximum achieved ({{plan_limit}})</p>
+            </div>
+          </div>
+        </a>
+        {% endif %}
       </div>
     {% for project in projects %}
       <div class="col-md-3">

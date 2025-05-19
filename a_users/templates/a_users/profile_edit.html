@@ -48,9 +48,45 @@
 </div>
 
 
+
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const countrySelect = document.getElementById('id_country');
+    const regionSelect = document.querySelector('.js-region-select');
+    const wrapper = regionSelect.parentElement;
+    wrapper.style.display = 'none';
+
+    function updateRegions(countryId) {
+        if (countryId) {
+            console.log('diplay regions')
+            fetch("{% url 'ajax_load_regions' %}?country=" + countryId)
+                .then(res => res.json())
+                .then(data => {
+                    regionSelect.innerHTML = '<option value="">---------</option>';
+                    data.regions.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.id; opt.textContent = p.name;
+                        regionSelect.appendChild(opt);
+                    });
+                    wrapper.style.display = data.regions.length ? 'block' : 'none';
+                });
+        } else {
+            wrapper.style.display = 'none';
+            regionSelect.innerHTML = '<option value="">---------</option>';
+        }
+    }
+
+    countrySelect.addEventListener('change', function() {
+        updateRegions(this.value);
+    });
+
+    // Initial load for edit mode
+    updateRegions(countrySelect.value);
+});
+</script>
 
 
+<script>
     document.addEventListener('DOMContentLoaded', function() {
         const timezoneField = document.getElementById('id_timezone');
         if (timezoneField) {
@@ -101,8 +137,6 @@
         }
 
     });
-
-
 </script>
 
 {% endblock %}

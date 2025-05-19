@@ -8,13 +8,18 @@
 <div style="padding-left: 2em">
     <br> <br> <br> <br>
 
+
     {% if not project.github_sync %}
-        <button type="button" class="select-button" onclick="redirectToRepo()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff';">Reload Source Code</button>
-        <button type="button" class="sync-button" onclick="redirectToSyncGithub()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff'; background-color: green; color: white;">Sync with Github</button>
+        <button type="button" class="select-button" onclick="redirectToRepo()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em;">Reload Source Code</button>
+        {% if user.profile.is_paid_user %}
+        <button type="button" class="sync-button" onclick="redirectToSyncGithub()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; background-color: green; color: white;">Sync with Github</button>
+        {% else %}
+        <a href="{% url 'pricing_credits' %}"><button type="button" class="sync-button" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; background-color: green; color: white;">Sync with Github</button></a>
+        {% endif %}
     {% else %}
-        <button type="button" class="delete-github-sync-button" onclick="redirectToDeleteGithubSync()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff'; background-color: orange; color: white;">Delete Github Sync</button>
+        <button type="button" class="delete-github-sync-button" onclick="redirectToDeleteGithubSync()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; background-color: orange; color: white;">Delete Github Sync</button>
     {% endif %}
-        <button type="button" class="delete-button" onclick="redirectToDelete()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff'; background-color: red; color: white;">Delete</button>
+        <button type="button" class="delete-button" onclick="redirectToDelete()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; background-color: red; color: white;">Delete</button>
 
 
     <br><br>

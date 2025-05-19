@@ -1,14 +1,14 @@
 from django.contrib import admin
-from .models import Profile, Country, CreditClaim, Policy
+from .models import Profile, Country, CreditClaim, Policy, Region
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
-
 
 
 class CountryResource(resources.ModelResource):
     class Meta:
         model = Country
         import_id_fields = ('name',)  # Spécifier la clé unique
+
 
 # Ajout de l'import/export dans l'admin
 @admin.register(Country)
@@ -18,14 +18,28 @@ class CountryAdmin(ImportExportModelAdmin):
     search_fields = ('name',)
 
 
+class RegionResource(resources.ModelResource):
+    class Meta:
+        model = Region
+        import_id_fields = ('name',)
+
+
+@admin.register(Region)
+class RegionAdmin(ImportExportModelAdmin):
+    resource_class = RegionResource
+    list_display = ('country', 'name', 'code')  # Affichage des colonnes
+    search_fields = ('name',)
+
+
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'role', 'current_plan',)
     def current_plan(self, obj):
         plan = obj.current_plan
         return plan.name if plan else '-'
     current_plan.short_description = 'Plan actuel'
-admin.site.register(Profile, ProfileAdmin)
 
+
+admin.site.register(Profile, ProfileAdmin)
 
 admin.site.register(CreditClaim)
 

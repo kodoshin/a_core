@@ -111,6 +111,9 @@ def github_webhook(request):
 
 def sync_with_github(request, project_id):
     print('creating webhook')
+    if not request.user.profile.is_paid_user:
+        messages.error(request, "This feature is reserved for premium plans..")
+        return redirect('view_documentation', project_id=project_id)
     project = get_object_or_404(Project, id=project_id, user=request.user)
     token = get_github_token(request.user)
     if not token:

@@ -12,12 +12,24 @@ def home(request):
         status = Status.objects.get(code=1)
     except :
         status = None
-    try:
-        user = request.user
-        user_projects = Project.objects.filter(user=user, status=status)
-        context = {'personas': personas, 'projects': user_projects, 'technologies': technologies}
-    except:
-        context = {'personas': personas, 'radar_chart': radar_chart, 'technologies': technologies}
+
+    if request.user.is_authenticated:
+        user_projects = Project.objects.filter(user=request.user, status=status)
+        plan_limit = request.user.profile.current_plan.project_limits
+        can_create = user_projects.count() < plan_limit
+        context = {
+            'personas': personas,
+            'projects': user_projects,
+            'technologies': technologies,
+            'can_create': can_create,
+            'plan_limit': plan_limit,
+        }
+    else:
+        context = {
+            'personas': personas,
+            'radar_chart': radar_chart,
+            'technologies': technologies
+        }
 
 
     return render(request, 'home.html', context)

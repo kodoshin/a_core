@@ -12,4 +12,5 @@ urlpatterns = [
     path('delete/', profile_delete_view, name="profile-delete"),
     path('user/projects/', user_projects_view, name='user-projects'),
     path('claim-credits/', claim_credits_view, name="claim-credits"),
+    path('ajax/load-provinces/', load_regions, name='ajax_load_regions'),
 ]

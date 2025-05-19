@@ -9,12 +9,20 @@ from a_projects.models import Project
 from django.http import HttpResponseForbidden
 import pytz
 from django.utils import timezone
-from .models import CreditClaim, Policy
+from .models import CreditClaim, Policy, Region
+from django.http import JsonResponse
 
 
 
 
 from .models import Profile
+
+@login_required
+def load_regions(request):
+    country_id = request.GET.get('country')
+    regions = Region.objects.filter(country_id=country_id).order_by('name')
+    data = [{'id': p.id, 'name': p.name} for p in regions]
+    return JsonResponse({'regions': data})
 
 
 def profile_view(request, username=None):

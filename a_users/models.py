@@ -6,7 +6,6 @@ from b_coding.models import ChatCategory
 from fernet_fields import EncryptedCharField
 from django.utils import timezone
 from management.models import Subscription
-#from .fields import FallbackEncryptedTextField
 from management.models import SubscriptionPlan
 
 
@@ -16,9 +15,21 @@ class Country(models.Model):
 
     class Meta:
         ordering = ['name']
+
     def __str__(self):
         return str(self.name)
 
+
+class Region(models.Model):
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name='provinces')
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=10, blank=True, null=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
 
 class Profile(models.Model):
     ROLE_CHOICES = [
@@ -54,6 +65,7 @@ class Profile(models.Model):
     available_credits = models.IntegerField(default=0)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='other')
     country = models.ForeignKey(Country, on_delete=models.DO_NOTHING, related_name='profiles_with_country', blank=True, null=True)
+    region = models.ForeignKey(Region, on_delete=models.DO_NOTHING, related_name='profiles_with_province', blank=True, null=True)
     city = models.CharField(max_length=50, null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     accept_marketing_communication = models.BooleanField(default=False) #S'il accepts de recevoir les nouveautés marketing
@@ -65,8 +77,17 @@ class Profile(models.Model):
     timezone = models.CharField(max_length=50, blank=True, null=True, help_text="User timezone detected automatically.")
     gmt_offset = models.CharField(max_length=10, blank=True, null=True, help_text="Difference between GMT and user timezone (e.g., GMT+01:00).")
     daily_credit_claim_date = models.DateField(null=True, blank=True)
+
     def __str__(self):
         return str(self.user)
+
+    @property
+    def is_paid_user(self):
+        """
+        Retourne True si l'utilisateur est sur un plan payant (prix mensuel ou annuel > 0).
+        """
+        plan = self.current_plan
+        return (plan.original_monthly_price or 0) > 0 or (plan.original_monthly_price or 0) > 0
 
     @property
     def current_subscription(self):
