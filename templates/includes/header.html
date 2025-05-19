@@ -13,7 +13,7 @@
 
 
 
-            {% if request.resolver_match.view_name == "home" %}
+            {% if request.resolver_match.view_name == "home"  %}
                 {% if not user.profile.has_claimed_credits %}
                 <li>
                     <form action="{% url 'claim-credits' %}" method="post">

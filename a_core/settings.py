@@ -33,6 +33,13 @@ env = Env()
 Env.read_env(env_file=BASE_DIR / '.env')
 
 
+CELERY_BROKER_URL = env('REDIS_URL')
+CELERY_RESULT_BACKEND = env('REDIS_URL')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+
 
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
 STRIPE_PUBLIC_KEY = 'pk_test_XXXXXXXXXXXXXXXXXXXXXXXX' #os.getenv('STRIPE_PUBLISHABLE_KEY')
@@ -87,7 +94,8 @@ INSTALLED_APPS = [
     'a_users',
     'git_auth',
     'b_coding',
-    'management'
+    'management',
+    'tasks'
 ]
 
 SITE_ID = 1

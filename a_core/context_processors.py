@@ -17,7 +17,10 @@ def reset_daily_credits(request):
         # If the last claim date is not today and credits were already claimed, reset the flag
         if profile.daily_credit_claim_date != local_today and profile.has_claimed_credits:
             profile.has_claimed_credits = False
-            profile.save()
+            try:
+                profile.save()
+            except:
+                pass
     return {}
 
 """
