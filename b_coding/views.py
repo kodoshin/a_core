@@ -172,15 +172,27 @@ async def code_chat_view(request):
         chats = await sync_to_async(
             lambda: list(CodingChat.objects.filter(user=user, project=default_project).order_by('-created_on')))()
         chat_id = request.GET.get('chat_id')
-        selected_attempt = int(request.GET.get('attempt', '1'))
         if chat_id:
+            # On récupère le chat et le nombre total d'essais
             current_chat = await sync_to_async(
                 lambda: CodingChat.objects.select_related('chat_category').get(id=chat_id, user=user))()
-            # total attempts = regeneration_count+1
             total_attempts = current_chat.regeneration_count + 1
-            # clamp selected
+
+            # On récupère le paramètre "attempt" s'il existe, sinon on prend toujours le dernier essai
+            attempt_param = request.GET.get('attempt')
+            if attempt_param:
+                try:
+                    selected_attempt = int(attempt_param)
+                except ValueError:
+                    selected_attempt = total_attempts
+            else:
+                selected_attempt = total_attempts
+
+            # On borne la valeur entre 1 et total_attempts
             if selected_attempt < 1 or selected_attempt > total_attempts:
                 selected_attempt = total_attempts
+
+            # On charge les messages pour l'essai sélectionné
             raw_messages = await sync_to_async(lambda: list(
                 current_chat.messages.filter(attempt_number=selected_attempt,
                                              type__in=['prompt', 'gpt-a', 'gpt-q']).order_by('id')
