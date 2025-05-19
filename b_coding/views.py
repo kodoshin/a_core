@@ -16,7 +16,6 @@ from asgiref.sync import sync_to_async
 import asyncio
 
 
-MAX_REGENERATIONS = 3
 def fix_response_format(response):
     response = response.replace(", ')", ",'')")
     response = response.replace(",')", ",'')")
@@ -29,6 +28,7 @@ async def code_chat_view(request):
     default_project = profile.default_project
     default_chat_category = profile.default_chat_category
     available_credits = profile.available_credits
+    max_attempts = await sync_to_async(lambda: profile.current_plan.regeneration_attempts)()
     components = await sync_to_async(lambda: Component.objects.filter(file__project=default_project))()
     files = await sync_to_async(list)(File.objects.filter(project=default_project))
     try :
@@ -39,7 +39,7 @@ async def code_chat_view(request):
 
     if request.method == 'POST':
 
-        ############################################## Regenerate #########################################3
+        ############################################## Regenerate #########################################
         # Handle regeneration
         if 'regenerate' in request.POST:
             print('regenerating')
@@ -50,8 +50,8 @@ async def code_chat_view(request):
                                                                                                    user=user)
                 # Count existing messages without blocking
                 msg_count = await sync_to_async(chat.messages.count)()
-                # Enforce max 3 regenerations
-                if chat.regeneration_count < 3:
+                # Enforce max regenerations number
+                if chat.regeneration_count < max_attempts:
                     # Fetch last user prompt
                     last_prompt_obj = await sync_to_async(
                         lambda: chat.messages.filter(type='prompt').order_by('id').first())()
@@ -74,7 +74,7 @@ async def code_chat_view(request):
             except Exception as e:
                 return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
-        ################################################## FIRST PROMPT #########################################3
+        ################################################## FIRST PROMPT #########################################
         if 'prompt' in request.POST and 'regenerate' not in request.POST:
             print('PROMPT !!!')
             prompt = request.POST.get('prompt')
