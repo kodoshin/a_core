@@ -1,6 +1,6 @@
 web: gunicorn a_core.wsgi:application \
       --bind 0.0.0.0:$PORT \
-      --workers 1 \
+      --workers 2 \
       --threads 4 \
       --timeout 300 \
       --worker-class gthread
