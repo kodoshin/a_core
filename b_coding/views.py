@@ -14,6 +14,8 @@ from management.ai_bases import async_get_ai_title
 
 from asgiref.sync import sync_to_async
 import asyncio
+from django.db.models import Max
+
 
 
 def fix_response_format(response):
@@ -120,7 +122,7 @@ async def code_chat_view(request):
 
                 if title_task:
                     ai_title = await title_task
-                    chat.title = ai_title[:25]
+                    chat.title = ai_title[:28]
                     await sync_to_async(chat.save)()
 
 
@@ -291,9 +293,13 @@ async def get_processing_updates(request):
     if not latest_chat:
         return JsonResponse({'messages': []})
     last_id = int(request.GET.get('last_id', 0))
+    last_attempt_data = await sync_to_async(
+        lambda: CodingChatMessage.objects.filter(chat=latest_chat).aggregate(max_attempt=Max('attempt_number'))
+    )()
+    last_attempt = last_attempt_data.get('max_attempt') or 1
     messages = await sync_to_async(lambda: list(
         CodingChatMessage.objects
-        .filter(chat_id=latest_chat.id, type='ai', id__gt=last_id)
+        .filter(chat_id=latest_chat.id, type='ai', attempt_number=last_attempt, id__gt=last_id)
         .order_by('id')
         .values('id', 'content')
     ))()
