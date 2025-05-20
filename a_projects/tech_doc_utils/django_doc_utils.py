@@ -30,7 +30,22 @@ def dj_document_file(file_content: str, file_instance, file_name: str, Technolog
     """
     # Si le fichier est un fichier Python, on le parse avec ast
     if file_name.endswith('.py'):
-        dj_document_python_file(file_content, file_instance, file_name, Technology)
+        if file_name == 'settings.py':
+            comp_type, _ = ComponentType.objects.get_or_create(name="Settings", technology=Technology)
+            component, created = Component.objects.get_or_create(
+                file=file_instance,
+                component_type=comp_type,
+                name=file_name,
+                description="Styling File",
+                start_line=1,
+
+                defaults={'content': file_content, 'end_line': len(file_content.splitlines())}
+            )
+            if not created:
+                component.content = file_content
+                component.save()
+        else :
+            dj_document_python_file(file_content, file_instance, file_name, Technology)
     # Si c'est un template (fichier HTML)
     elif file_name.endswith('.html'):
         comp_type, _ = ComponentType.objects.get_or_create(name="Templates", technology=Technology)
@@ -75,7 +90,7 @@ def dj_document_file(file_content: str, file_instance, file_name: str, Technolog
             file=file_instance,
             component_type=comp_type,
             name=file_name,
-            description=f"Fichier de type {comp_type_name}",
+            description=f"File of type : {comp_type_name}",
             start_line=1,
 
             defaults={'content': file_content, 'end_line': len(file_content.splitlines())}
@@ -107,7 +122,7 @@ def dj_document_python_file(file_content: str, file_instance, file_name: str, Te
 
             start_line=1,
 
-            defaults={'content': file_content, 'end_line': len(file_content.splitlines()), 'description': "Fichier Python non parsable : " + str(e)}
+            defaults={'content': file_content, 'end_line': len(file_content.splitlines()), 'description': "Python File is not parsable : " + str(e)}
         )
         if not created:
             component.content = file_content
@@ -126,7 +141,7 @@ def dj_document_python_file(file_content: str, file_instance, file_name: str, Te
                 file=file_instance,
                 component_type=comp_type,
                 name="urlpatterns",
-                description="Liste des URL patterns",
+                description="URL patterns list",
                 start_line=None,
                 end_line=None,
                 defaults={'content': url_content}

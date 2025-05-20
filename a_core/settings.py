@@ -95,8 +95,14 @@ INSTALLED_APPS = [
     'git_auth',
     'b_coding',
     'management',
-    'tasks'
+    'tasks',
+    'django_crontab',
 ]
+
+CRONJOBS = [
+    ('0 0 * * *', 'django.core.management.call_command', ['add_monthly_credits']),
+]
+
 
 SITE_ID = 1
 
