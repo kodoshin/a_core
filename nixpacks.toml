@@ -7,7 +7,6 @@ cmds = ["python -m venv --copies /opt/venv && . /opt/venv/bin/activate && pip in
 [start]
 cmd = """crond -f &
        python manage.py crontab remove || true
-       python manage.py crontab add &&
        gunicorn a_core.wsgi:application \
        --bind 0.0.0.0:$PORT \
        --timeout 300 \
