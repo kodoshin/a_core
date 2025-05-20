@@ -1,13 +1,15 @@
 <header class="flex items-center justify-between bg-[#1f1e23] h-20 px-8 text-white sticky top-0 z-40">
     <div>
         <a class="flex items-center gap-2" href="/">
-             <img class="h-12" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/Kodoshin logo.png" alt="Logo"/>
+
+             <img class="max-h-12 min-w-24 w-auto max-w-full" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/Kodoshin logo.png" alt="Logo"/>
              <!--<img class="h-14" src="/static/images/ninjas.png" alt="Logo"/>
              <h1 style="color: #ffffff;">Kodoshin</h1> -->
+
         </a>
     </div>
-    <nav class="block relative">
-        <ul class="navitems flex items-center justify-center h-full">
+    <nav class="relative h-20">
+        <ul class="navitems flex items-center justify-center h-full" style="height: 100%;">
             {% if request.user.is_authenticated %}
 
 
@@ -18,15 +20,15 @@
                 <li>
                     <form action="{% url 'claim-credits' %}" method="post">
                         {% csrf_token %}
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" style="background-color: unset; font-size: 0.8em;">
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold rounded whitespace-nowrap text-[10px] sm:text-xs md:text-sm lg:text-base px-2 sm:px-3 md:px-4 py-1 sm:py-2" style="background-color: unset; font-size: 0.8em;">
                             <span style="color: #a41515;">Claim daily credits ({{ user.profile.current_plan.daily_credits|default:5 }})</span>
                         </button>
                     </form>
                 </li>
                 {% else %}
                 <li>
-                    <button disabled class="bg-gray-500 text-white font-bold py-2 px-4 rounded" style="background-color: unset; font-size: 0.8em;">
-                        <span style="color: lightgray;">Daily Credits Claimed</span>
+                    <button disabled class="bg-gray-500 text-white font-bold rounded whitespace-nowrap text-[10px] sm:text-xs md:text-sm lg:text-base px-2 sm:px-3 md:px-4 py-1 sm:py-2" style="background-color: unset; font-size: 0.8em;">
+                        <span style="color: lightgray;">Claimed</span>
                     </button>
                 </li>
                 {% endif %}
