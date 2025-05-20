@@ -6,8 +6,14 @@ cmds = ["python -m venv --copies /opt/venv && . /opt/venv/bin/activate && pip in
 
 [start]
 cmd = """crond -f &
-       python manage.py crontab add &&
-       gunicorn a_core.wsgi:application \
+
+      # Supprime l’ancienne crontab (ignore l’erreur si elle n’existe pas)
+      python manage.py crontab remove || true &&
+
+      # Ajoute votre job défini dans settings.CRÓNJOBS
+      python manage.py crontab add &&
+      
+      gunicorn a_core.wsgi:application \
        --bind 0.0.0.0:$PORT \
        --timeout 300 \
        --workers 2 \
