@@ -1,17 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from a_users.models import Profile
 from a_projects.models import Project, Component, File
 from .models import CodingChat, ProcessingStep, CodingChatMessage, ChatCategory
 from django.http import JsonResponse
-from management.ai_bases import get_gpt_output
+#from management.ai_bases import get_gpt_output
 from .utils import parse_steps
 from django.views.decorators.http import require_POST
 from .ai_regular_processing_utils import ai_processing as regular_ai_processing
 from .ai_super_processing_utils import ai_processing as super_ai_processing
 from django.views.decorators.csrf import csrf_exempt
 from management.ai_bases import async_get_ai_title
-
 from asgiref.sync import sync_to_async
 import asyncio
 from django.db.models import Max
@@ -176,8 +175,10 @@ async def code_chat_view(request):
         chat_id = request.GET.get('chat_id')
         if chat_id:
             # On récupère le chat et le nombre total d'essais
-            current_chat = await sync_to_async(
-                lambda: CodingChat.objects.select_related('chat_category').get(id=chat_id, user=user))()
+            try :
+                current_chat = await sync_to_async(lambda: CodingChat.objects.select_related('chat_category').get(id=chat_id, user=user))()
+            except CodingChat.DoesNotExist:
+                return redirect('code_chat_view')
             total_attempts = current_chat.regeneration_count + 1
 
             # On récupère le paramètre "attempt" s'il existe, sinon on prend toujours le dernier essai

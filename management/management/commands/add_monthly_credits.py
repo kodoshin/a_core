@@ -14,7 +14,7 @@ class Command(BaseCommand):
         ).select_related('plan', 'user__profile')
         for subscription in subscriptions:
             plan = subscription.plan
-            if plan.monthly_credits > 0 : # and subscription.start_date.day == today.day:
+            if plan.monthly_credits > 0 and subscription.start_date.day == today.day:
                 profile = subscription.user.profile
                 profile.available_credits = F('available_credits') + plan.monthly_credits
                 profile.save(update_fields=['available_credits'])

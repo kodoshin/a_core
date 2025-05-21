@@ -33,7 +33,7 @@
 
 
 
-<div class="pricing-columns">
+<div class="flex flex-col md:flex-row gap-6 justify-center">
   {% for offer in credit_offers %}
     <form action="{% url 'create_checkout_session' offer.id %}" method="post" style="background-color: unset;">
       {% csrf_token %}
@@ -61,7 +61,7 @@
 </div>
 
 <!-- Ajouter muted dans class si on veut enlever un avantage -->
-<div class="pricing-columns">
+<div class="flex flex-col md:flex-row gap-6 justify-center">
 
   {% for plan in subscription_plans %}
 
@@ -226,7 +226,6 @@
     .pricing-card.middle {
       transform: scale(1.05);
       border: 2px solid #1a73e8;
-
 
     }
   </style>
