@@ -56,7 +56,7 @@ As an AI assistant, help me with the following:
 
 Review the provided {technology} project resources and the request
 
-Provide me a detailed solution using the resources to solve the request
+Provide me a detailed solution using the resources to solve the request.
 
 """
 
@@ -71,6 +71,7 @@ Do not modify the structure of the XML formats provided, and make sure to includ
 Make sure to respect code indentations and line breaks.
 Make sure to include the full path of the file.
 Please include the steps of creation of new resources or non existed files, apps or components
+Please include package installation and configuration steps that are specific to the demand
 
 """
 

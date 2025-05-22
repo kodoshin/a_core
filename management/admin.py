@@ -1,7 +1,11 @@
 from django.contrib import admin
-from .models import APIKey, SubscriptionPlan, Subscription, DiscountCoupon, AIModel, CreditOffer
+from .models import APIKey, SubscriptionPlan, Subscription, DiscountCoupon, AIModel, CreditOffer, SubscriptionBonus
 
 
+
+@admin.register(SubscriptionBonus)
+class SubscriptionBonusAdmin(admin.ModelAdmin):
+    list_display = ('code', 'credits', 'valid_from', 'valid_until', 'active')
 
 @admin.register(AIModel)
 class APIKeyAdmin(admin.ModelAdmin):

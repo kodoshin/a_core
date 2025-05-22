@@ -18,12 +18,14 @@
     </div>
 </div>
 
+{% if profile.profile_is_filled %}
 <div>
     <label style="color: dimgray; display: inline; font-style: oblique; font-weight: bold">
         <span>Plan :</span>
         <span style="display: inline; font-style: normal ;"> {{ profile.current_plan.name }}. ends in : {{ profile.current_subscription.end_date }} </span>
     </label>
 </div>
+{% endif %}
 <br><br>
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
@@ -49,41 +51,46 @@
 
 
 
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const countrySelect = document.getElementById('id_country');
-    const regionSelect = document.querySelector('.js-region-select');
-    const wrapper = regionSelect.parentElement;
-    wrapper.style.display = 'none';
+  document.addEventListener('DOMContentLoaded', function() {
+      const countrySelect = document.getElementById('id_country');
+      const regionSelect = document.querySelector('.js-region-select');
+      const wrapper = regionSelect.parentElement;
+      wrapper.style.display = 'none';
 
-    function updateRegions(countryId) {
-        if (countryId) {
-            console.log('diplay regions')
-            fetch("{% url 'ajax_load_regions' %}?country=" + countryId)
-                .then(res => res.json())
-                .then(data => {
-                    regionSelect.innerHTML = '<option value="">---------</option>';
-                    data.regions.forEach(p => {
-                        const opt = document.createElement('option');
-                        opt.value = p.id; opt.textContent = p.name;
-                        regionSelect.appendChild(opt);
-                    });
-                    wrapper.style.display = data.regions.length ? 'block' : 'none';
-                });
-        } else {
-            wrapper.style.display = 'none';
-            regionSelect.innerHTML = '<option value="">---------</option>';
-        }
-    }
+      function updateRegions(countryId) {
+          if (countryId) {
+              fetch("{% url 'ajax_load_regions' %}?country=" + countryId, {
+                  headers: {
+                      'X-Requested-With': 'XMLHttpRequest'
+                  }
+              })
+              .then(res => res.json())
+              .then(data => {
+                  regionSelect.innerHTML = '<option value="">---------</option>';
+                  data.regions.forEach(p => {
+                      const opt = document.createElement('option');
+                      opt.value = p.id;
+                      opt.textContent = p.name;
+                      regionSelect.appendChild(opt);
+                  });
+                  wrapper.style.display = data.regions.length ? 'block' : 'none';
+              });
+          } else {
+              wrapper.style.display = 'none';
+              regionSelect.innerHTML = '<option value="">---------</option>';
+          }
+      }
 
-    countrySelect.addEventListener('change', function() {
-        updateRegions(this.value);
-    });
+      countrySelect.addEventListener('change', function() {
+          updateRegions(this.value);
+      });
 
-    // Initial load for edit mode
-    updateRegions(countrySelect.value);
-});
-</script>
+      // Chargement initial en mode édition
+      updateRegions(countrySelect.value);
+  });
+  </script>
 
 
 <script>

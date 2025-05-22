@@ -11,6 +11,7 @@ import pytz
 from django.utils import timezone
 from .models import CreditClaim, Policy, Region
 from django.http import JsonResponse
+from management.models import SubscriptionBonus
 
 
 
@@ -25,15 +26,55 @@ def load_regions(request):
     return JsonResponse({'regions': data})
 
 
-def profile_view(request, username=None):
-    if username:
-        profile = get_object_or_404(User, username=username).profile
+def profile_view(request):
+    try:
+        profile = request.user.profile
+    except Profile.DoesNotExist:
+        return redirect('account_login')
+
+    onboarding = not profile.profile_is_filled
+    print('onboarding', str(onboarding))
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            bonus = None
+            code = form.cleaned_data.get('coupon_code', '').strip()
+            # Validation du coupon si onboarding
+            if onboarding and code:
+                try:
+                    bonus = SubscriptionBonus.objects.get(code__iexact=code)
+                    if not bonus.is_valid():
+                        form.add_error('coupon_code', 'Code coupon invalide ou expiré.')
+                except SubscriptionBonus.DoesNotExist:
+                    form.add_error('coupon_code', 'Code coupon invalide ou expiré.')
+
+            if not form.errors:
+                # Sauvegarde du profil
+                profile = form.save()
+                if onboarding:
+                    profile.profile_is_filled = True
+                    profile.save()
+                    # Attribution des crédits bonus
+                    if bonus:
+                        profile.available_credits += bonus.credits
+                        profile.save()
+                        CreditClaim.objects.create(
+                            profile=profile,
+                            credits=bonus.credits,
+                            subscription_bonus=bonus
+                        )
+                return redirect('home')
     else:
-        try:
-            profile = request.user.profile
-        except:
-            return redirect('account_login')
-    return render(request, 'a_users/profile.html', {'profile':profile})
+        form = ProfileForm(instance=profile)
+
+    data_policy = Policy.objects.filter(name='Data Usage Policy').first().content
+    context = {
+        'form': form,
+        'onboarding': onboarding,
+        'profile': profile,
+        'data_policy': data_policy
+    }
+    return render(request, 'a_users/profile_edit.html', context)
 
 
 @login_required
@@ -125,37 +166,7 @@ def user_projects_view(request):
     return render(request, 'a_users/user_projects.html', {'projects': projects})
 
 
-@login_required
-def profile_view(request):
-    profile = request.user.profile
-    # Check if the profile is not completed (assuming 0 means not filled)
-    onboarding = (profile.profile_is_filled == 0)
 
-    if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            # If this was the onboarding process, mark profile as complete
-            if onboarding:
-                profile.profile_is_filled = 1
-                profile.save()
-            return redirect('home')
-    else:
-        form = ProfileForm(instance=profile)
-
-    try:
-        profile = request.user.profile
-    except:
-        return redirect('account_login')
-
-    context = {
-        'form': form,
-        'onboarding': onboarding,
-        'profile': profile,
-        'data_policy': Policy.objects.filter(name='Data Usage Policy').first().content
-    }
-
-    return render(request, 'a_users/profile_edit.html', context)
 
 
 def claim_credits_view(request):

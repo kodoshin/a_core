@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.db.models import F
-
+from django.utils import timezone
 
 
 class AIModel(models.Model):
@@ -116,6 +116,7 @@ class CreditOffer(models.Model):
 class DiscountCoupon(models.Model):
     code = models.CharField(max_length=50, unique=True)
     discount_percentage = models.FloatField()
+    #bonus_credits = models.IntegerField(default=0)  # Crédit bonus offert
     valid_from = models.DateTimeField()
     valid_until = models.DateTimeField()
     active = models.BooleanField(default=True)
@@ -123,4 +124,22 @@ class DiscountCoupon(models.Model):
     def is_valid(self):
         now = timezone.now()
         return self.active and self.valid_from <= now <= self.valid_until
+
+    def __str__(self):
+        return self.code
+
+
+class SubscriptionBonus(models.Model):
+    code = models.CharField(max_length=50, unique=True)
+    credits = models.PositiveIntegerField(default=0)
+    valid_from = models.DateTimeField()
+    valid_until = models.DateTimeField()
+    active = models.BooleanField(default=True)
+
+    def is_valid(self):
+        now = timezone.now()
+        return self.active and self.valid_from <= now <= self.valid_until
+
+    def __str__(self):
+        return f"{self.code} ({self.credits} crédits)"
 

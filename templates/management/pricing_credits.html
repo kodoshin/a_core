@@ -42,10 +42,10 @@
           <div class="pricing-card-header">
             <div class="pricing-title">{{ offer.name }} Credits</div>
             {% if offer.original_price and offer.price != offer.original_price %}
-                <span class="pricing-old-price">${{ offer.original_price }}</span>
-                <span class="pricing-price-promo">${{ offer.price }}</span>
+                <span class="pricing-old-price">${{ offer.original_price|floatformat:0 }}</span>
+                <span class="pricing-price-promo">${{ offer.price|floatformat:0 }}</span>
             {% else %}
-                <span class="pricing-price">${{ offer.price }}</span>
+                <span class="pricing-price">${{ offer.price|floatformat:0 }}</span>
             {% endif %}
           </div>
         </div>
@@ -72,10 +72,10 @@
         <div class="pricing-card-header">
           <div class="pricing-title">{{ plan.name }}</div>
           {% if plan.monthly_price and plan.monthly_price != plan.original_monthly_price %}
-            <span class="pricing-old-price">${{ plan.original_monthly_price }}</span>
-            <span class="pricing-price-promo">${{ plan.monthly_price }}</span>
+            <span class="pricing-old-price">${{ plan.original_monthly_price|floatformat:0 }}</span>
+            <span class="pricing-price-promo">${{ plan.monthly_price|floatformat:0 }}</span>
           {% else %}
-            <span class="pricing-price">${{ plan.monthly_price }}</span>
+            <span class="pricing-price">${{ plan.monthly_price|floatformat:0 }}</span>
           {% endif %}
         </div>
         <div class="pricing-table-content">

@@ -99,7 +99,6 @@ INSTALLED_APPS = [
 ]
 
 
-
 SITE_ID = 1
 
 if ENVIRONMENT != 'development':

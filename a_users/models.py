@@ -5,8 +5,7 @@ from a_projects.models import Project
 from b_coding.models import ChatCategory
 from fernet_fields import EncryptedCharField
 from django.utils import timezone
-from management.models import Subscription
-from management.models import SubscriptionPlan
+from management.models import Subscription, SubscriptionPlan, SubscriptionBonus
 
 
 class Country(models.Model):
@@ -124,9 +123,19 @@ class CreditClaim(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='credit_claims')
     credits = models.PositiveIntegerField(default=20)
     claimed_at = models.DateTimeField(auto_now_add=True)
+    subscription_bonus = models.ForeignKey(
+        SubscriptionBonus,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='bonus_claims'
+    )
 
     def __str__(self):
-        return f"{self.profile.user.username} claimed {self.credits} credits on {self.claimed_at}"
+        base = f'{self.profile.user.username} claimed {self.credits} credits on {self.claimed_at}'
+        if self.subscription_bonus:
+            return f'{base} via coupon {self.subscription_bonus.code}'
+        return base
 
 
 class Policy (models.Model):

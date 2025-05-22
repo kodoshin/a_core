@@ -134,29 +134,31 @@
 
             <!-- Display the star rating only if a current chat is selected -->
         {% if current_chat %}
-            <div class="rating-container" style="margin-bottom: 20px;">
-                <span class="star" data-value="1" style="cursor: pointer;">&#9733;</span>
-                <span class="star" data-value="2" style="cursor: pointer;">&#9733;</span>
-                <span class="star" data-value="3" style="cursor: pointer;">&#9733;</span>
-                <span class="star" data-value="4" style="cursor: pointer;">&#9733;</span>
-                <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
-            </div>
-            <div style=" font-weight: bold; color: #cccccc;">{{ current_chat.chat_category.name }}</div>
-            <br>
+        <div class="rating-container" style="margin-bottom: 20px;">
+            <span class="star" data-value="1" style="cursor: pointer;">&#9733;</span>
+            <span class="star" data-value="2" style="cursor: pointer;">&#9733;</span>
+            <span class="star" data-value="3" style="cursor: pointer;">&#9733;</span>
+            <span class="star" data-value="4" style="cursor: pointer;">&#9733;</span>
+            <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
+        </div>
 
+        <div style="display: flex; align-items: center; gap: 1em;">
+  <div style="font-weight: bold; color: #cccccc;">
+    {{ current_chat.chat_category.name }}
+  </div>
 
-
-            <div class="regeneration-controls" style="margin-bottom:10px;">
-            {% if total_attempts > 1 %}
-              <button id="prev-attempt" type="button" style="background-color: unset" {% if selected_attempt <= 1 %}disabled{% endif %}>←</button>
-              <span>Attempt {{ selected_attempt }} of {{ total_attempts }}</span>
-              <button id="next-attempt" type="button" style="background-color: unset" {% if selected_attempt >= total_attempts %}disabled{% endif %}>→</button>
-            {% endif %}
-              <button id="regenerate-btn" type="button" style="background-color: unset; padding: 0; border: none;" {% if current_chat.regeneration_count >= 3 %}disabled title="Max regenerations reached"{% endif %}>
-                <span aria-hidden="true" style="font-size: xx-large">⟳</span>
-                <span class="sr-only">Regenerate</span>
-              </button>
-            </div>
+  <div class="regeneration-controls" style="display: flex; align-items: center;">
+    {% if total_attempts > 1 %}
+      <button id="prev-attempt" type="button" style="background-color: unset;" {% if selected_attempt <= 1 %}disabled{% endif %}>←</button>
+      <span style="margin: 0 0.5em;">Attempt {{ selected_attempt }} of {{ total_attempts }}</span>
+      <button id="next-attempt" type="button" style="background-color: unset;" {% if selected_attempt >= total_attempts %}disabled{% endif %}>→</button>
+    {% endif %}
+    <button id="regenerate-btn" type="button" style="background-color: unset; padding: 0; border: none;" {% if current_chat.regeneration_count >= 3 %}disabled title="Max regenerations reached"{% endif %}>
+      <span aria-hidden="true"  class="text-2xl relative -top-0.5 p-1 rounded transition-colors duration-200 hover:bg-gray-700" style="font-size: x-large; position: relative; top: -3px; color: #cccccc;">⟳</span>
+      <span class="sr-only">Regenerate</span>
+    </button>
+  </div>
+</div>
 
 
 
@@ -225,8 +227,8 @@
             </div>
 
             <br>
-            <div id="loading-spinner"></div>
-            <div id="loading-text" style="display:none; color: #c6cacb; font-weight: bold; margin-top: 10px;"></div>
+            <div id="loading-spinner" {% if not in_progress %}style="display:none;"{% endif %}></div>
+            <div id="loading-text"  {% if not in_progress %}style="display:none;"{% else %} style="display:none; color: #c6cacb; font-weight: bold; margin-top: 10px;" {% endif %}></div>
             <br>
             <form id="chat-form">
                 {% csrf_token %}
@@ -255,6 +257,7 @@
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 
 
@@ -624,6 +627,7 @@ $(document).ready(function() {
             // Show loader and clear previous text
             $('#loading-spinner').show();
             $('#loading-text').show().empty();
+            $('#loading-text').show().empty();
             // Start polling for AI processing updates
             pollUpdates();
             // Send the chat request
@@ -647,7 +651,17 @@ $(document).ready(function() {
 });
 </script>
 
-
+{% if in_progress %}
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+      $('#loading-spinner').show();
+      $('#loading-text').show().empty().text('Loading...');
+      if(typeof pollUpdates === 'function'){
+          pollUpdates();
+      }
+  });
+</script>
+{% endif %}
 
 
 
@@ -707,8 +721,9 @@ $(document).ready(function(){
         $('.steps-container').empty();
         $('.prev-step-btn, .next-step-btn').hide();
         // Show loading spinner and message
-        $('#loading-text').text('Regenerating...').show();
+
         $('#loading-spinner').show();
+        $('#loading-text').text('Regenerating...').append('<br>').show();
         // Start polling during regeneration
         if (typeof window.pollUpdates === 'function') {
             pollUpdates();

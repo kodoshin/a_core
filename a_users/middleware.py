@@ -7,11 +7,11 @@ class ProfileCompletionMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # Proceed only if the user is authenticated and the request is not targeting the onboarding page
         if request.user.is_authenticated:
+            ajax_url = reverse('ajax_load_regions')
             onboarding_url = reverse('profile-onboarding')
-            if request.path != onboarding_url:
-                # If the profile is not completed, redirect to the onboarding page
+            # Skip completion check for onboarding page and AJAX regions endpoint
+            if request.path not in (onboarding_url, ajax_url):
                 if not request.user.is_superuser and request.user.profile.profile_is_filled == 0:
                     return redirect('profile-onboarding')
         response = self.get_response(request)

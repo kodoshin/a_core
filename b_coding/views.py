@@ -32,6 +32,7 @@ async def code_chat_view(request):
     max_attempts = await sync_to_async(lambda: profile.current_plan.regeneration_attempts)()
     components = await sync_to_async(lambda: Component.objects.filter(file__project=default_project))()
     files = await sync_to_async(list)(File.objects.filter(project=default_project))
+    in_progress = False
     try :
         technology = await sync_to_async(lambda: default_project.technology)()
     except :
@@ -91,6 +92,9 @@ async def code_chat_view(request):
                 is_first_prompt = False
             else:
                 chat = await sync_to_async(CodingChat.objects.create)(user=user, project=default_project)
+                placeholder_title = prompt[:25] + '...' if len(prompt) > 25 else prompt
+                chat.title = placeholder_title
+                await sync_to_async(chat.save)()
                 is_first_prompt = True
             if available_credits >= default_chat_category.price:
                 #if chat.title is None :
@@ -99,7 +103,7 @@ async def code_chat_view(request):
 
                 title_task = (
                     asyncio.create_task(async_get_ai_title(prompt))
-                    if chat.title is None
+                    if chat.title is None or chat.regeneration_count == 0
                     else None
                 )
 
@@ -170,8 +174,7 @@ async def code_chat_view(request):
                 await sync_to_async(chat.save)()
                 return JsonResponse({'status': 'success', 'rate': chat.rate})
     else:
-        chats = await sync_to_async(
-            lambda: list(CodingChat.objects.filter(user=user, project=default_project).order_by('-created_on')))()
+        chats = await sync_to_async(lambda: list(CodingChat.objects.filter(user=user, project=default_project).order_by('-created_on')))()
         chat_id = request.GET.get('chat_id')
         if chat_id:
             # On récupère le chat et le nombre total d'essais
@@ -196,10 +199,13 @@ async def code_chat_view(request):
                 selected_attempt = total_attempts
 
             # On charge les messages pour l'essai sélectionné
-            raw_messages = await sync_to_async(lambda: list(
-                current_chat.messages.filter(attempt_number=selected_attempt,
-                                             type__in=['prompt', 'gpt-a', 'gpt-q']).order_by('id')
-            ))()
+            raw_messages = await sync_to_async(lambda: list(current_chat.messages.filter(attempt_number=selected_attempt, type__in=['prompt', 'gpt-a', 'gpt-q']).order_by('id')))()
+
+            has_ai = await sync_to_async(lambda: current_chat.messages
+                                         .filter(type='gpt-a', attempt_number=selected_attempt)
+                                         .exists())()
+            in_progress = not has_ai
+
             messages = []
             for msg in raw_messages:
                 msg_dict = {
@@ -218,10 +224,16 @@ async def code_chat_view(request):
             selected_attempt = 1
         chatcategories = await sync_to_async(lambda: list(ChatCategory.objects.all()))()
         context = {
-            'chats': chats, 'messages': messages, 'current_chat': current_chat,
-            'projects': projects, 'default_project': default_project, 'profile': profile,
+            'chats': chats,
+            'messages': messages,
+            'current_chat': current_chat,
+            'projects': projects,
+            'default_project': default_project,
+            'profile': profile,
             'chatcategories': chatcategories,
-            'selected_attempt': selected_attempt, 'total_attempts': total_attempts
+            'selected_attempt': selected_attempt,
+            'total_attempts': total_attempts,
+            'in_progress': in_progress,
         }
         return render(request, 'b_coding/code_chat.html', context)
 

@@ -14,7 +14,6 @@ class EmailForm(ModelForm):
         fields = ['email']
 
 
-
 class GithubKeyForm(ModelForm):
     class Meta:
         model = Profile
@@ -47,10 +46,27 @@ class GithubKeyForm(ModelForm):
 
 
 class ProfileForm(forms.ModelForm):
+    coupon_code = forms.CharField(
+        max_length=50,
+        required=False,
+        label='Coupon',
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Enter your code',
+            # largeur fixe, hauteur réduite, texte en noir
+            'style': (
+                'color: black; '
+                'width: 150px; '  # adapte la largeur à tes besoins
+                'height: 1.5em; '  # réduit la hauteur du champ
+                'line-height: 1.5em;'  # centre verticalement le texte
+            ),
+            'size': '10',  # optionnel : nombre de caractères visibles
+        })
+    )
 
     class Meta:
         model = Profile
-        fields = ['role', 'country', 'region', 'marketing_channel', 'accept_marketing_communication', 'accept_data_usage_policy','timezone', 'gmt_offset']
+        fields = ['role', 'country', 'region', 'marketing_channel', #'accept_marketing_communication',
+                  'accept_data_usage_policy','timezone', 'gmt_offset']
         widgets = {
             'role': forms.Select(attrs={'style': "color: black; font-weight: bold;"}),
             'country': forms.Select(attrs={'style': "color: black; font-weight: bold;"}),
@@ -59,7 +75,7 @@ class ProfileForm(forms.ModelForm):
                 'class': 'js-region-select'
             }),
             'marketing_channel': forms.Select(attrs={'style': "color: black;font-weight: bold;"}),
-            'accept_marketing_communication': forms.CheckboxInput(attrs={'style': "width: 20px;"}),
+            #'accept_marketing_communication': forms.CheckboxInput(attrs={'style': "width: 20px;"}),
             'timezone': forms.HiddenInput(),
             'gmt_offset': forms.HiddenInput(),
             'accept_data_usage_policy': forms.CheckboxInput(attrs={'style': 'width: 20px;'}),
@@ -70,13 +86,14 @@ class ProfileForm(forms.ModelForm):
 
         # Si le profil a déjà été rempli, on retire le champ de la politique
         if self.instance and self.instance.pk and self.instance.profile_is_filled:
-            self.fields.pop('accept_data_usage_policy', None)
+            for f in ['coupon_code', 'accept_data_usage_policy']:
+                self.fields.pop(f, None)
         else:
             self.fields['accept_data_usage_policy'].label = mark_safe(
                 "I accept the <a href='#' id='policy-link'>data usage policy</a>"
             )
 
-        label_width = '255px'
+        label_width = '220px'
         # On modifie le label de chaque champ pour inclure du style en ligne
         for field_name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
