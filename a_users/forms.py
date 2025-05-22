@@ -55,7 +55,7 @@ class ProfileForm(forms.ModelForm):
             # largeur fixe, hauteur réduite, texte en noir
             'style': (
                 'color: black; '
-                'width: 150px; '  # adapte la largeur à tes besoins
+                'width: 160px; '  # adapte la largeur à tes besoins
                 'height: 1.5em; '  # réduit la hauteur du champ
                 'line-height: 1.5em;'  # centre verticalement le texte
             ),
@@ -93,6 +93,11 @@ class ProfileForm(forms.ModelForm):
                 "I accept the <a href='#' id='policy-link'>data usage policy</a>"
             )
 
+        self.fields['country'].required = True
+        if 'accept_data_usage_policy' in self.fields:
+            self.fields['accept_data_usage_policy'].required = True
+
+
         label_width = '220px'
         # On modifie le label de chaque champ pour inclure du style en ligne
         for field_name, field in self.fields.items():
@@ -116,3 +121,5 @@ class ProfileForm(forms.ModelForm):
             self.fields['region'].queryset = Region.objects.filter(country=self.instance.country)
         else:
             self.fields['region'].queryset = Region.objects.none()
+
+

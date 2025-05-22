@@ -60,27 +60,32 @@
       wrapper.style.display = 'none';
 
       function updateRegions(countryId) {
-          if (countryId) {
-              fetch("{% url 'ajax_load_regions' %}?country=" + countryId, {
-                  headers: {
-                      'X-Requested-With': 'XMLHttpRequest'
-                  }
-              })
-              .then(res => res.json())
-              .then(data => {
-                  regionSelect.innerHTML = '<option value="">---------</option>';
-                  data.regions.forEach(p => {
-                      const opt = document.createElement('option');
-                      opt.value = p.id;
-                      opt.textContent = p.name;
-                      regionSelect.appendChild(opt);
-                  });
-                  wrapper.style.display = data.regions.length ? 'block' : 'none';
-              });
-          } else {
-              wrapper.style.display = 'none';
-              regionSelect.innerHTML = '<option value="">---------</option>';
-          }
+        if (countryId) {
+            fetch("{% url 'ajax_load_regions' %}?country=" + countryId, {
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            })
+            .then(res => res.json())
+            .then(data => {
+                regionSelect.innerHTML = '<option value="">---------</option>';
+                data.regions.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = p.name;
+                    regionSelect.appendChild(opt);
+                });
+                if (data.regions.length) {
+                    wrapper.style.display = 'block';
+                    regionSelect.setAttribute('required', 'required');
+                } else {
+                    wrapper.style.display = 'none';
+                    regionSelect.removeAttribute('required');
+                }
+            });
+        } else {
+            wrapper.style.display = 'none';
+            regionSelect.innerHTML = '<option value="">---------</option>';
+            regionSelect.removeAttribute('required');
+        }
       }
 
       countrySelect.addEventListener('change', function() {
