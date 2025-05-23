@@ -9,6 +9,9 @@ from .utils import parse_steps
 from django.views.decorators.http import require_POST
 from .ai_regular_processing_utils import ai_processing as regular_ai_processing
 from .ai_super_processing_utils import ai_processing as super_ai_processing
+from .ai_super_processing_utils_large import ai_processing as large_ai_processing
+from .ai_super_processing_utils_ultimate import ai_processing as ultimate_ai_processing
+from .ai_super_processing_utils_large_ultimate import ai_processing as supreme_ai_processing
 from django.views.decorators.csrf import csrf_exempt
 from management.ai_bases import async_get_ai_title
 from asgiref.sync import sync_to_async
@@ -63,9 +66,19 @@ async def code_chat_view(request):
                     # Call AI based on category
                     if chat.chat_category.type == 'regular':
                         ai_response = await regular_ai_processing(prompt, components, chat, True, technology, attempt_count)
-                    else:
+                    elif chat.chat_category.type == 'super':
                         print('regenerating super prompt')
                         ai_response = await super_ai_processing(prompt, files, components, chat, True, technology, attempt_count)
+                    elif chat.chat_category.type == 'large':
+                        print('regenerating large prompt')
+                        ai_response = await large_ai_processing(prompt, files, components, chat, True, technology, attempt_count)
+                    elif chat.chat_category.type == 'ultimate':
+                        print('regenerating ultimate prompt')
+                        ai_response = await ultimate_ai_processing(prompt, files, components, chat, True, technology, attempt_count)
+                    elif chat.chat_category.type == 'supreme':
+                        print('regenerating supreme prompt')
+                        ai_response = await supreme_ai_processing(prompt, files, components, chat, True, technology, attempt_count)
+
                     # Update regeneration count
                     chat.regeneration_count += 1
                     await sync_to_async(chat.save)()
@@ -116,6 +129,24 @@ async def code_chat_view(request):
                 elif default_chat_category.type == 'super':
                     response_task = asyncio.create_task(
                         super_ai_processing(
+                            prompt, files, components, chat, is_first_prompt, technology, attempt_no
+                        )
+                    )
+                elif default_chat_category.type == 'large':
+                    response_task = asyncio.create_task(
+                        large_ai_processing(
+                            prompt, files, components, chat, is_first_prompt, technology, attempt_no
+                        )
+                    )
+                elif default_chat_category.type == 'ultimate':
+                    response_task = asyncio.create_task(
+                        ultimate_ai_processing(
+                            prompt, files, components, chat, is_first_prompt, technology, attempt_no
+                        )
+                    )
+                elif default_chat_category.type == 'supreme':
+                    response_task = asyncio.create_task(
+                        supreme_ai_processing(
                             prompt, files, components, chat, is_first_prompt, technology, attempt_no
                         )
                     )

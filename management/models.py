@@ -24,6 +24,8 @@ class AIModel(models.Model):
 class APIKey(models.Model):
     KEY_TYPE_CHOICES = [
         ('chat', 'Chat'),
+        ('chat-large', 'Chat Large'),
+        ('chat-ultimate', 'Chat Ultimate'),
         ('title', 'Title'),
         ('ai1', 'AI1'),
         ('ai2', 'AI2'),

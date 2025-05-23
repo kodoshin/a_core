@@ -36,7 +36,7 @@ def get_gpt_output (content):
         return response.text
 
 
-#get_openai_response_ai_1 est pour retourner les components au bon format
+"""#get_openai_response_ai_1 est pour retourner les components au bon format
 def get_response_ai_1(prompt, chat):
     model = "o4-mini"
     url = "https://api.openai.com/v1/chat/completions"
@@ -108,6 +108,9 @@ def get_response_ai_2(prompt, chat):
     else:
         print(f"Request failed with status code {response.status_code}")
         return response.text
+"""
+
+
 
 
 async def async_get_gpt_output(content):
@@ -132,6 +135,15 @@ async def async_get_gpt_output(content):
         return response.text
     finally:
         await sync_to_async(release_api_key)(key)
+
+
+
+import httpx
+import tiktoken
+from asgiref.sync import sync_to_async
+
+
+
 
 async def async_get_response_ai_1(prompt, chat):
     key = await sync_to_async(get_api_key)('chat')
@@ -167,6 +179,7 @@ async def async_get_response_ai_1(prompt, chat):
     finally:
         await sync_to_async(release_api_key)(key)
 
+
 async def async_get_response_ai_2(prompt, chat):
     key = await sync_to_async(get_api_key)('chat')
     if not key:
@@ -200,6 +213,130 @@ async def async_get_response_ai_2(prompt, chat):
         return response.text
     finally:
         await sync_to_async(release_api_key)(key)
+
+
+
+
+async def async_get_response_ai_1_large(prompt: str, chat) -> str:
+    """
+    Send a prompt to the GPT-4.1 model asynchronously and record token usage.
+    """
+    # Retrieve and reserve an API key for chat usage
+    key = await sync_to_async(get_api_key)('chat-large')
+    if not key:
+        raise RuntimeError('No active API Key available for chat')
+
+    try:
+        api_url = 'https://api.openai.com/v1/chat/completions'
+        headers = {
+            'Authorization': f'Bearer {key.api_key}',
+            'Content-Type': 'application/json'
+        }
+
+        # Use GPT-4.1 model without unsupported flags
+        payload = {
+            'model': await sync_to_async(lambda k: k.ai_model.name)(key),
+            'messages': [
+                {'role': 'user', 'content': prompt}
+            ]
+        }
+
+        # Perform the asynchronous HTTP request
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            response = await client.post(api_url, headers=headers, json=payload)
+
+        # Handle successful response
+        if response.status_code == 200:
+            data = response.json()
+            ai_answer = data['choices'][0]['message']['content']
+
+            # Count tokens for prompt and response
+            encoder = tiktoken.get_encoding('cl100k_base')
+            prompt_tokens = len(encoder.encode(prompt))
+            response_tokens = len(encoder.encode(ai_answer))
+
+            # Persist token usage records
+            await sync_to_async(TokenUsage.objects.create)(
+                prompt=prompt,
+                tokens_used=prompt_tokens,
+                coding_chat=chat
+            )
+            await sync_to_async(TokenUsage.objects.create)(
+                prompt=ai_answer,
+                tokens_used=response_tokens,
+                coding_chat=chat
+            )
+
+            # Return cleaned answer
+            return ai_answer
+
+        # Propagate non-200 responses as text for debugging
+        response.raise_for_status()
+    finally:
+        # Release the API key back to the pool
+        await sync_to_async(release_api_key)(key)
+
+
+async def async_get_response_ai_2_ultimate(prompt: str, chat) -> str:
+    """
+    Send a prompt to the O3 model (with high reasoning effort) asynchronously and record token usage.
+    """
+    # Retrieve and reserve an API key for chat usage
+    key = await sync_to_async(get_api_key)('chat-ultimate')
+    if not key:
+        raise RuntimeError('No active API Key available for chat')
+
+    try:
+        api_url = 'https://api.openai.com/v1/chat/completions'
+        headers = {
+            'Authorization': f'Bearer {key.api_key}',
+            'Content-Type': 'application/json'
+        }
+
+        # Use O3 model with reasoning effort
+        payload = {
+            'model': await sync_to_async(lambda k: k.ai_model.name)(key),
+            'reasoning_effort': 'high',
+            'messages': [
+                {'role': 'user', 'content': prompt}
+            ]
+        }
+
+        # Perform the asynchronous HTTP request
+        async with httpx.AsyncClient(timeout=180.0) as client:
+            response = await client.post(api_url, headers=headers, json=payload)
+
+        # Handle successful response
+        if response.status_code == 200:
+            data = response.json()
+            ai_answer = data['choices'][0]['message']['content']
+
+            # Count tokens for prompt and response
+            encoder = tiktoken.get_encoding('cl100k_base')
+            prompt_tokens = len(encoder.encode(prompt))
+            response_tokens = len(encoder.encode(ai_answer))
+
+            # Persist token usage records
+            await sync_to_async(TokenUsage.objects.create)(
+                prompt=prompt,
+                tokens_used=prompt_tokens,
+                coding_chat=chat
+            )
+            await sync_to_async(TokenUsage.objects.create)(
+                prompt=ai_answer,
+                tokens_used=response_tokens,
+                coding_chat=chat
+            )
+
+            return ai_answer
+
+        # Propagate non-200 responses as exception
+        response.raise_for_status()
+    finally:
+        # Release the API key back to the pool
+        await sync_to_async(release_api_key)(key)
+
+
 
 async def async_get_ai_title(content):
     key = await sync_to_async(get_api_key)('title')
