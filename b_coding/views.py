@@ -257,7 +257,7 @@ async def code_chat_view(request):
             messages = []
             total_attempts = 1
             selected_attempt = 1
-        chatcategories = await sync_to_async(lambda: list(ChatCategory.objects.all()))()
+        chatcategories = await sync_to_async(lambda: list(ChatCategory.objects.all().order_by('price')))()
         context = {
             'chats': chats,
             'messages': messages,
@@ -269,6 +269,8 @@ async def code_chat_view(request):
             'selected_attempt': selected_attempt,
             'total_attempts': total_attempts,
             'in_progress': in_progress,
+            'access_large_models': await sync_to_async(lambda: profile.current_plan.large_models)(),
+            'access_advanced_models': await sync_to_async(lambda: profile.current_plan.advanced_models)(),
         }
         return render(request, 'b_coding/code_chat.html', context)
 

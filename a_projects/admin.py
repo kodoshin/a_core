@@ -12,7 +12,7 @@ admin.site.register(ComponentType)
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'technology', 'user')
+    list_display = ('id', 'name', 'technology', 'user', 'tokens_count', 'is_large')
 @admin.register(File)
 class FileAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'project', 'type')

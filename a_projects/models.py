@@ -37,11 +37,16 @@ class Project(models.Model):
     status = models.ForeignKey(Status, on_delete=models.CASCADE, null=True, blank=True)
     github_sync = models.BooleanField(default=False)
     tokens_count = models.PositiveIntegerField(default=0)
+    is_large = models.BooleanField(default=False)
 
     def update_tokens(self):
         total = self.file_set.aggregate(total=Sum('tokens_count'))['total'] or 0
         self.tokens_count = total
-        super().save(update_fields=['tokens_count'])
+        super().save(update_fields=['tokens_count', 'is_large'])
+
+    def save(self, *args, **kwargs):
+        self.is_large = self.tokens_count > 150_000
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

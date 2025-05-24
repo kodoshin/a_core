@@ -66,6 +66,8 @@
 </style>
 
 
+
+
 <!-- Wrap child containers in a parent container -->
 <div class="main-container" style="margin-top: 40px;">
 
@@ -142,7 +144,9 @@
             <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 1em;">
+<div style="display: flex; align-items: center; gap: 1em;">
+
+
   <div style="font-weight: bold; color: #cccccc;">
     {{ current_chat.chat_category.name }}
   </div>
@@ -164,12 +168,33 @@
 
             {% else %}
 
+
+
                 <!-- New dropdown for ChatCategory -->
                 <select id="chatcategory-dropdown" style="background-color: unset; max-width: 20vh; color: white; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
                     {% for category in chatcategories %}
-                        <option style="color: black" value="{{ category.id }}" {% if category.id == profile.default_chat_category.id %}selected{% endif %}>{{ category.name }} ({{ category.price }})</option>
+                        <option
+                          value="{{ category.id }}"
+                          {% if default_project.is_large and not category.is_large %}
+                              disabled style="color: #ccc;"
+                            {% elif not access_large_models and category.is_large %}
+                              disabled style="color: #ccc;"
+                            {% elif not access_advanced_models and category.is_advanced %}
+                              disabled style="color: #ccc;"
+                            {% else %}
+                               style="color: black;"
+                            {% endif %}
+                        >
+                          {{ category.name }} ({{ category.price }})
+                        </option>
                     {% endfor %}
                 </select>
+
+
+
+
+
+
                 <br><br>
             {% endif %}
 

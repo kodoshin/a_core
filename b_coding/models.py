@@ -11,6 +11,8 @@ class ChatCategory(models.Model):
     price = models.IntegerField(blank=True, null=True)
     price_secondary_prompt = models.IntegerField(blank=True, null=True)
     discount_percentage = models.IntegerField(default=0)
+    is_advanced = models.BooleanField(default=False)
+    is_large = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.type}"
