@@ -22,7 +22,7 @@ from django.utils.encoding import force_str
 import django.utils.encoding
 
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # en octets
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 2048 * 2048  # en octets
 
 
 
