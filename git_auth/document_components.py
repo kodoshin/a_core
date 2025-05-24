@@ -9,6 +9,7 @@ from a_projects.tech_doc_utils.r_doc_utils import r_document_r_file
 from a_projects.tech_doc_utils.nodejs_doc_utils import node_document_file
 from a_projects.tech_doc_utils.springboot_doc_utils import springboot_document_file
 from a_projects.tech_doc_utils.java_doc_utils import java_document_java_file
+from a_projects.tech_doc_utils.odoo_doc_utils import odoo_document_file
 from a_projects.tech_doc_utils.cs_doc_utils import get_csharp_docstring
 
 
@@ -18,6 +19,8 @@ def document_components (project, technology):
         Component.objects.filter(file=file).delete()
         if technology.name == 'Django':
             dj_document_file(file.content, file, file.name, technology)
+        elif technology.name == 'Odoo' :
+            odoo_document_file(file.content, file, file.name, technology)
         elif technology.name == 'Python' and file.name.endswith('.py') :
             py_document_python_file(file.content, file, file.name, technology)
         elif technology.name == 'React':

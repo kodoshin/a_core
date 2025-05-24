@@ -1,6 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 import re
+import tiktoken
+from django.db.models import Sum
+
+
+_encoding = tiktoken.get_encoding("cl100k_base")
 
 
 class Status(models.Model):
@@ -31,10 +36,15 @@ class Project(models.Model):
     git_repo_url = models.URLField()
     status = models.ForeignKey(Status, on_delete=models.CASCADE, null=True, blank=True)
     github_sync = models.BooleanField(default=False)
+    tokens_count = models.PositiveIntegerField(default=0)
+
+    def update_tokens(self):
+        total = self.file_set.aggregate(total=Sum('tokens_count'))['total'] or 0
+        self.tokens_count = total
+        super().save(update_fields=['tokens_count'])
 
     def __str__(self):
         return self.name
-
 
 
 class File(models.Model):
@@ -48,6 +58,7 @@ class File(models.Model):
     header = models.TextField(blank=True, null=True)
     status = models.ForeignKey(Status, on_delete=models.CASCADE, null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True, null=True, blank=True)
+    tokens_count = models.PositiveIntegerField(default=0)
     def extract_header(self):
         if self.extension == '.py':
             # Extrait les lignes d'importation dans un fichier Python
@@ -58,6 +69,13 @@ class File(models.Model):
             extends = re.search(r'{%\s*extends\s+["\']([^"\']+)["\']\s*%}', self.content)
             return extends.group(0) if extends else None
         return None
+
+    def save(self, *args, **kwargs):
+        raw = self.content or ''
+        self.tokens_count = len(_encoding.encode(raw))
+        super().save(*args, **kwargs)
+        # Met à jour le total de tokens du projet
+        self.project.update_tokens()
 
     def __str__(self):
         return self.name
