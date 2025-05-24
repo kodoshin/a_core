@@ -277,6 +277,23 @@ document.addEventListener('DOMContentLoaded', function(){
 
 </style>
 
+<style>
+  /* Responsive fix for the CTA section */
+  @media (max-width: 768px) {
+    .cta-container {
+      margin: 0 1rem;   /* almost full-width */
+      padding: 2rem;
+    }
+    .cta-buttons {
+      flex-direction: column; /* stack buttons */
+      gap: 1rem;
+    }
+    .cta-buttons .btn {
+      width: 100%;      /* each button fills the line */
+    }
+  }
+</style>
+
 {% if not user.is_authenticated %}
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <br><br><br><br>
@@ -357,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function(){
       Seamless Workflow
   </h1>
 </div>
-<div style="display: flex; justify-content: center;">
+<div class="workflow-schema" style="display: flex; justify-content: center;">
   <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/process.png" style="width: 30%; height: auto">
 </div>
 

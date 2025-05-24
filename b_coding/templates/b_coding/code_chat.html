@@ -109,12 +109,12 @@
                 <ul style="width: 25vh">
                     {% for chat in chats %}
                         <li style="margin-top: 10px;">
-                            <span {% if chat.id == current_chat.id %}class="selected-chat"{% endif %}>
-                            <a href="?chat_id={{ chat.id }}" style="color: white; font-size: small; font-weight: bold;">{{ chat.title }}</a>
+                            <span {% if chat.public_id == current_chat.public_id %}class="selected-chat"{% endif %}>
+                            <a href="?chat_id={{ chat.public_id }}" style="color: white; font-size: small; font-weight: bold;">{{ chat.title }}</a>
                             </span>
-                            <span class="delete-chat" data-chat-id="{{ chat.id }}" style="cursor:pointer; color:red; margin-left:0px; float: right;">&#x1F5D1;</span>
-                            <span class="cancel-delete" data-chat-id="{{ chat.id }}" style="display:none; cursor:pointer; color:gray; margin-left:0px; float: right;">&#x274C;</span>
-                            <span class="confirm-delete" data-chat-id="{{ chat.id }}" style="display:none; cursor:pointer; color:green; margin-left:0px; float: right;">&#x2714;</span>
+                            <span class="delete-chat" data-chat-id="{{ chat.public_id }}" style="cursor:pointer; color:red; margin-left:0px; float: right;">&#x1F5D1;</span>
+                            <span class="cancel-delete" data-chat-id="{{ chat.public_id }}" style="display:none; cursor:pointer; color:gray; margin-left:0px; float: right;">&#x274C;</span>
+                            <span class="confirm-delete" data-chat-id="{{ chat.public_id }}" style="display:none; cursor:pointer; color:green; margin-left:0px; float: right;">&#x2714;</span>
 
                         </li>
                     {% empty %}
@@ -232,7 +232,7 @@
             <br>
             <form id="chat-form">
                 {% csrf_token %}
-                <input type="hidden" name="chat_id" value="{{ current_chat.id }}" id="chat_id">
+                <input type="hidden" name="chat_id" value="{{ current_chat.public_id }}" id="chat_id">
 
                 {% if current_chat %}
                     <div>({{ current_chat.chat_category.price_secondary_prompt }} credits for next prompts)</div> <br>
@@ -441,7 +441,7 @@ $(document).ready(function() {
       stars.forEach(star => {
           star.addEventListener("click", function () {
               const rating = this.getAttribute("data-value");
-              const chatId = "{{ current_chat.id }}";
+              const chatId = "{{ current_chat.public_id }}";
               if (!chatId) {
                   console.error("Chat ID non défini.");
                   return;
@@ -492,22 +492,22 @@ $(document).ready(function() {
                             response.chats.forEach(function(chat) {
                                 var li = $('<li>').css('margin-top','10px');
                                 var link = $('<a>')
-                                    .attr('href', '?chat_id=' + chat.id)
+                                    .attr('href', '?chat_id=' + chat.public_id)
                                     .text(chat.title)
                                     .css({'color':'white','font-size':'small','font-weight':'bold'});
                                 var deleteSpan = $('<span>')
                                     .addClass('delete-chat')
-                                    .attr('data-chat-id', chat.id)
+                                    .attr('data-chat-id', chat.public_id)
                                     .css({'cursor':'pointer','color':'red','margin-left':'0','float':'right'})
                                     .html('&#x1F5D1;');
                                 var cancelSpan = $('<span>')
                                     .addClass('cancel-delete')
-                                    .attr('data-chat-id', chat.id)
+                                    .attr('data-chat-id', chat.public_id)
                                     .css({'display':'none','cursor':'pointer','color':'gray','margin-left':'0','float':'right'})
                                     .html('&#x274C;');
                                 var confirmSpan = $('<span>')
                                     .addClass('confirm-delete')
-                                    .attr('data-chat-id', chat.id)
+                                    .attr('data-chat-id', chat.public_id)
                                     .css({'display':'none','cursor':'pointer','color':'green','margin-left':'0','float':'right'})
                                     .html('&#x2714;');
                                 li.append(link, deleteSpan, cancelSpan, confirmSpan);
@@ -569,13 +569,27 @@ $(document).ready(function() {
 // Polls management
 $(document).ready(function() {
     var lastAiMessageId = 0;
+    window.pollingStopped = false;
 
     function pollUpdates() {
+        if(window.pollingStopped){ return; }
         var chatId = $('#chat_id').val();
         $.ajax({
             url: '{% url "code_chat_updates" %}',
             data: { chat_id: chatId, last_id: lastAiMessageId },
             success: function(data) {
+
+                /* ---------- ⬇️  NEW : stop on error  ---------- */
+                if (data.error) {
+                    $('#loading-text').append(
+                        '<span style="color:red;font-weight:bold;">'+ data.error +'</span><br>'
+                    );
+                    $('#loading-spinner').hide();
+                    window.pollingStopped = true;      // prevent further loops
+                    return;                            // exit success handler
+                }
+                /* ----------  END NEW PART  ---------- */
+
                 data.messages.forEach(function(msg) {
                     var parser = new DOMParser();
                     var xmlDoc = parser.parseFromString(msg.content, 'application/xml');
@@ -603,7 +617,10 @@ $(document).ready(function() {
                 });
             },
             complete: function() {
-                setTimeout(pollUpdates, 2000);
+                // ⬇️ keep polling only if not stopped
+                if(!window.pollingStopped){
+                    setTimeout(pollUpdates, 2000);
+                }
             }
         });
     }
@@ -733,12 +750,12 @@ $(document).ready(function(){
             method: "POST",
             data: {
                 regenerate: 1,
-                chat_id: "{{ current_chat.id }}",
+                chat_id: "{{ current_chat.public_id }}",
                 csrfmiddlewaretoken: "{{ csrf_token }}"
             },
             success: function(data){
                 if(data.status === 'success'){
-                    window.location.href = '?chat_id={{ current_chat.id }}&attempt=' + ({{ total_attempts }} + 1);
+                    window.location.href = '?chat_id={{ current_chat.public_id }}&attempt=' + ({{ total_attempts }} + 1);
                 } else {
                     alert(data.message);
                 }
@@ -760,7 +777,7 @@ $(document).ready(function(){
 <script>
 $(function(){
   console.log('DOM ready, binding regenerate');
-  var chatId = "{{ current_chat.id }}";
+  var chatId = "{{ current_chat.public_id }}";
   $('#prev-attempt').on('click', function(){
     window.location.href = '?chat_id='+chatId+'&attempt=' + ({{ selected_attempt }} - 1);
   });

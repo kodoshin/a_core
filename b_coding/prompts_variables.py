@@ -67,7 +67,8 @@ Develop the solution then please format the instructions in order to respect thi
 ----------------------------------------------------------------------    
 Constraints:
 Do not include any additional text or explanations outside of the specified XML format.
-Do not modify the structure of the XML formats provided, and make sure to include the coding language inside <code></code> balise.
+Do not modify the structure of the XML formats provided, and make sure to include the coding language inside <code></code> balise, if no language, please use <text></text>.
+It is crucial that you respect the same components and files names in your solution, please don't change the name of any function, model or variable.
 Make sure to respect code indentations and line breaks.
 Make sure to include the full path of the file.
 Please include the steps of creation of new resources or non existed files, apps or components

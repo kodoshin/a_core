@@ -64,6 +64,8 @@ class SubscriptionPlan(models.Model):
     advantages = models.TextField(null=True, blank=True)
     duration_days = models.PositiveIntegerField(default=366)
     regeneration_attempts = models.PositiveIntegerField(default=0)
+    large_models = models.BooleanField(default=False)
+    advanced_models = models.BooleanField(default=False)
 
     stripe_tax_code = models.CharField(
         max_length=50,

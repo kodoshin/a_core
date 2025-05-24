@@ -2,6 +2,7 @@ from django.db import models
 from a_projects.models import Project
 from management.models import AIModel, APIKey
 from django.contrib.auth.models import User
+import uuid
 
 
 class ChatCategory(models.Model):
@@ -16,6 +17,7 @@ class ChatCategory(models.Model):
 
 
 class CodingChat(models.Model):
+    public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='coding_chat_user')
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='coding_chat_project')
     created_on = models.DateTimeField(auto_now_add=True)
@@ -30,8 +32,8 @@ class CodingChat(models.Model):
     def __str__(self):
         return f"CodingChat {self.id} - User: {self.user.username}"
 
-    class Meta:
-        ordering = ['created_on']
+    #class Meta:
+    #    ordering = ['created_on']
 
 
 class TokenUsage(models.Model):

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from a_users.models import Profile
 from a_projects.models import Project, Component, File
-from .models import CodingChat, ProcessingStep, CodingChatMessage, ChatCategory
+from .models import CodingChat, ProcessingStep, CodingChatMessage, ChatCategory, ProcessingError
 from django.http import JsonResponse
 #from management.ai_bases import get_gpt_output
 from .utils import parse_steps
@@ -49,9 +49,9 @@ async def code_chat_view(request):
         if 'regenerate' in request.POST:
             print('regenerating')
             try:
-                chat_id = int(request.POST.get('chat_id'))
+                chat_id = request.POST.get('chat_id')
                 # Load chat with its category in a non-blocking way
-                chat = await sync_to_async(CodingChat.objects.select_related('chat_category').get)(id=chat_id,
+                chat = await sync_to_async(CodingChat.objects.select_related('chat_category').get)(public_id=chat_id,
                                                                                                    user=user)
                 # Count existing messages without blocking
                 msg_count = await sync_to_async(chat.messages.count)()
@@ -83,7 +83,7 @@ async def code_chat_view(request):
                     chat.regeneration_count += 1
                     await sync_to_async(chat.save)()
                     # Prepare processing steps map
-                    return JsonResponse({'status': 'success', 'chat_id': chat.id})
+                    return JsonResponse({'status': 'success', 'chat_id': chat.public_id})
                 else:
                     return JsonResponse({'status': 'error', 'message': 'Max regenerations reached'})
             except Exception as e:
@@ -91,16 +91,16 @@ async def code_chat_view(request):
 
         ################################################## FIRST PROMPT #########################################
         if 'prompt' in request.POST and 'regenerate' not in request.POST:
-            print('PROMPT !!!')
+            #print('PROMPT !!!')
             prompt = request.POST.get('prompt')
             chat_id = request.POST.get('chat_id')
             try:
                 attempt_no = int(request.POST.get('attempt_no', '1'))
             except ValueError:
                 attempt_no = 1
-            print(attempt_no)
+            #print(attempt_no)
             if chat_id:
-                chat = await sync_to_async(CodingChat.objects.get)(id=chat_id, user=user)
+                chat = await sync_to_async(CodingChat.objects.get)(public_id=chat_id, user=user)
                 default_chat_category = await sync_to_async(lambda: chat.chat_category)()
                 is_first_prompt = False
             else:
@@ -109,6 +109,7 @@ async def code_chat_view(request):
                 chat.title = placeholder_title
                 await sync_to_async(chat.save)()
                 is_first_prompt = True
+
             if available_credits >= default_chat_category.price:
                 #if chat.title is None :
                 #    chat.title = prompt[:25] + '...' if len(prompt) >= 28 else prompt
@@ -170,7 +171,7 @@ async def code_chat_view(request):
                     'user_message': prompt,
                     'ai_response': ai_response,
                     'ai_message': ai_response,
-                    'chat_id': chat.id,
+                    'chat_id': chat.public_id,
                     'steps': steps
                 })
             else:
@@ -193,14 +194,14 @@ async def code_chat_view(request):
                     'user_message': prompt,
                     'ai_response': ai_response,
                     'ai_message': ai_response,
-                    'chat_id': chat.id,
+                    'chat_id': chat.public_id,
                     'steps': steps
                 })
         elif 'rate' in request.POST:
             chat_id = request.POST.get('chat_id')
             if chat_id:
                 rating_value = int(request.POST.get('rate'))
-                chat = await sync_to_async(CodingChat.objects.get)(id=chat_id, user=user)
+                chat = await sync_to_async(CodingChat.objects.get)(public_id=chat_id, user=user)
                 chat.rate = rating_value
                 await sync_to_async(chat.save)()
                 return JsonResponse({'status': 'success', 'rate': chat.rate})
@@ -210,7 +211,7 @@ async def code_chat_view(request):
         if chat_id:
             # On récupère le chat et le nombre total d'essais
             try :
-                current_chat = await sync_to_async(lambda: CodingChat.objects.select_related('chat_category').get(id=chat_id, user=user))()
+                current_chat = await sync_to_async(lambda: CodingChat.objects.select_related('chat_category').get(public_id=chat_id, user=user))()
             except CodingChat.DoesNotExist:
                 return redirect('code_chat_view')
             total_attempts = current_chat.regeneration_count + 1
@@ -235,7 +236,10 @@ async def code_chat_view(request):
             has_ai = await sync_to_async(lambda: current_chat.messages
                                          .filter(type='gpt-a', attempt_number=selected_attempt)
                                          .exists())()
-            in_progress = not has_ai
+            has_error = await sync_to_async(lambda: ProcessingError.objects
+                                         .filter(coding_chat=current_chat)
+                                         .exists())()
+            in_progress = not (has_ai or has_error)
 
             messages = []
             for msg in raw_messages:
@@ -284,7 +288,7 @@ def update_default_project(request):
         chats_data = []
         for chat in chats:
             chats_data.append({
-                'id': chat.id,
+                'id': chat.public_id,
                 'title': chat.title,
             })
 
@@ -314,11 +318,12 @@ def update_default_chatcategory(request):
 
 
 @csrf_exempt
+@login_required
 def delete_chat(request):
     if request.method == 'POST':
         chat_id = request.POST.get('chat_id')
         try:
-            chat = CodingChat.objects.get(pk=chat_id)
+            chat = CodingChat.objects.get(public_id=chat_id, user=request.user)
             chat.delete()
             return JsonResponse({'status': 'success'})
         except Chat.DoesNotExist:
@@ -330,7 +335,7 @@ async def get_processing_updates(request):
     await asyncio.sleep(5)
     chat_id = request.GET.get('chat_id')
     if chat_id:
-        latest_chat = await sync_to_async(lambda: CodingChat.objects.filter(id=chat_id, user=request.user).first())()
+        latest_chat = await sync_to_async(lambda: CodingChat.objects.filter(public_id=chat_id, user=request.user).first())()
     else:
         latest_chat = await sync_to_async(
             lambda: CodingChat.objects.filter(user=request.user).order_by('-created_on').first())()
@@ -347,4 +352,6 @@ async def get_processing_updates(request):
         .order_by('id')
         .values('id', 'content')
     ))()
+
+
     return JsonResponse({'messages': messages})
