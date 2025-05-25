@@ -206,13 +206,13 @@
                 {% for message in messages %}
                     {% if message.type == 'prompt' and message.attempt_number == selected_attempt%}
 
-                        <div class="message user">
+                        <div class="message-user">
                             <br>
                             <p style="font-weight: bold;"><img style="width:2.2em;height:2.2em;display: inline;" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/profile-icon.png"/> {{ message.content|linebreaksbr }}</p>
                         </div>
                     {% elif message.type == 'gpt-a' and message.attempt_number == selected_attempt %}
                         <div class="message ai">
-                            <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/avatar.png" alt="IA" style="width:2em;height:3em;display: inline;margin-right: 2em">
+                            <img class="ai-avatar-img" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/avatar.png" alt="IA" style="width:2em;height:3em;display: inline;margin-right: 2em">
                             <!-- Display steps here -->
                             {% if message.steps|length > 1 %}
                             <button class="prev-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-weight: bold;">Previous</button>
@@ -809,7 +809,7 @@ $(document).ready(function(){
         e.preventDefault();
         // Clear previous steps and hide controls
         $('.steps-container').empty();
-        $('.prev-step-btn, .next-step-btn').hide();
+        $('.prev-step-btn, .next-step-btn, .message-user, .ai-avatar-img').hide();
         // Show loading spinner and message
 
         $('#loading-spinner').show();
