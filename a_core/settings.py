@@ -44,7 +44,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
 STRIPE_PUBLIC_KEY = 'pk_test_XXXXXXXXXXXXXXXXXXXXXXXX' #os.getenv('STRIPE_PUBLISHABLE_KEY')
 STRIPE_WEBHOOK_SECRET = 'whsec_XXXXXXXXXXXXXXXXXXXXXXXX' #os.getenv('STRIPE_WEBHOOK_SECRET')
-DOMAIN = 'https://acore-production.up.railway.app'
+DOMAIN = 'https://kodoshin.ai'
 
 stripe.api_key = STRIPE_SECRET_KEY
 
@@ -70,7 +70,7 @@ else:
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = [ 'https://acore-production.up.railway.app' ]
+CSRF_TRUSTED_ORIGINS = [ 'https://kodoshin.ai' ]
 
 # Application definition
 
@@ -277,4 +277,4 @@ ACCOUNT_EMAIL_REQUIRED = True
 ENCRYPTION_KEY = "wj67r5s6sxIHe5tkqvC6ZJ7L6ekr61S5lS3CXXjXXgA="
 
 
-GITHUB_WEBHOOK_URL = "https://acore-production.up.railway.app/projects/github/webhook/"
+GITHUB_WEBHOOK_URL = "https://kodoshin.ai/projects/github/webhook/"
