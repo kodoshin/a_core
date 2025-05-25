@@ -468,7 +468,7 @@ $(document).ready(function() {
               const rating = this.getAttribute("data-value");
               const chatId = "{{ current_chat.public_id }}";
               if (!chatId) {
-                  console.error("Chat ID non défini.");
+                  console.error("Chat ID is not defined.");
                   return;
               }
               fetch("{% url 'code_chat_view' %}", {
@@ -485,10 +485,10 @@ $(document).ready(function() {
               .then(response => response.json())
               .then(data => {
                   if (data.status === "success") {
-                      console.log("Note enregistrée :", data.rate);
+                      console.log("Note saved :", data.rate);
                       highlightStars(rating);
                   } else {
-                      console.error("Erreur lors de l'enregistrement de la note.");
+                      console.error("Error while saving the note.");
                   }
               })
               .catch(error => console.error("Erreur AJAX :", error));
@@ -498,86 +498,87 @@ $(document).ready(function() {
 </script>
 
 <script>
-    $(document).ready(function() {
-        $('#project-dropdown').on('change', function() {
-            var selectedProjectId = $(this).val();
-            $.ajax({
-                url: '{% url "update_default_project" %}',
-                type: 'POST',
-                data: {
-                    'project_id': selectedProjectId,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    if (response.status === 'success') {
-                        window.hasDefaultProject = true;
-                        var chatList = $('#chats-list ul');
-                        chatList.empty();
-                        if (response.chats && response.chats.length > 0) {
-                            response.chats.forEach(function(chat) {
-                                var li = $('<li>').css('margin-top','10px');
-                                var link = $('<a>')
-                                    .attr('href', '?chat_id=' + chat.public_id)
-                                    .text(chat.title)
-                                    .css({'color':'white','font-size':'small','font-weight':'bold'});
-                                var deleteSpan = $('<span>')
-                                    .addClass('delete-chat')
-                                    .attr('data-chat-id', chat.public_id)
-                                    .css({'cursor':'pointer','color':'red','margin-left':'0','float':'right'})
-                                    .html('&#x1F5D1;');
-                                var cancelSpan = $('<span>')
-                                    .addClass('cancel-delete')
-                                    .attr('data-chat-id', chat.public_id)
-                                    .css({'display':'none','cursor':'pointer','color':'gray','margin-left':'0','float':'right'})
-                                    .html('&#x274C;');
-                                var confirmSpan = $('<span>')
-                                    .addClass('confirm-delete')
-                                    .attr('data-chat-id', chat.public_id)
-                                    .css({'display':'none','cursor':'pointer','color':'green','margin-left':'0','float':'right'})
-                                    .html('&#x2714;');
-                                li.append(link, deleteSpan, cancelSpan, confirmSpan);
-                                chatList.append(li);
-                            });
-                        } else {
-                            chatList.append(
-                                $('<li>')
-                                    .text('No Chats.')
-                                    .css('font-weight','bold')
-                            );
-                        }
+$(document).ready(function() {
+    $('#project-dropdown').on('change', function() {
+        var selectedProjectId = $(this).val();
+        $.ajax({
+            url: '{% url "update_default_project" %}',
+            type: 'POST',
+            data: {
+                'project_id': selectedProjectId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Rebuild chats list
+                    window.hasDefaultProject = true;
+                    var chatList = $('#chats-list ul');
+                    chatList.empty();
+                    if (response.chats && response.chats.length > 0) {
+                        response.chats.forEach(function(chat) {
+                            var li = $('<li>').css('margin-top','10px');
+                            var link = $('<a>')
+                                .attr('href', '?chat_id=' + chat.public_id)
+                                .text(chat.title)
+                                .css({'color':'white','font-size':'small','font-weight':'bold'});
+                            var deleteSpan = $('<span>')
+                                .addClass('delete-chat')
+                                .attr('data-chat-id', chat.public_id)
+                                .css({'cursor':'pointer','color':'red','margin-left':'0','float':'right'})
+                                .html('&#x1F5D1;');
+                            var cancelSpan = $('<span>')
+                                .addClass('cancel-delete')
+                                .attr('data-chat-id', chat.public_id)
+                                .css({'display':'none','cursor':'pointer','color':'gray','margin-left':'0','float':'right'})
+                                .html('&#x274C;');
+                            var confirmSpan = $('<span>')
+                                .addClass('confirm-delete')
+                                .attr('data-chat-id', chat.public_id)
+                                .css({'display':'none','cursor':'pointer','color':'green','margin-left':'0','float':'right'})
+                                .html('&#x2714;');
+                            li.append(link, deleteSpan, cancelSpan, confirmSpan);
+                            chatList.append(li);
+                        });
                     } else {
-                        alert('Erreur lors de la mise à jour du projet par défaut.');
+                        chatList.append(
+                            $('<li>').text('No Chats.').css('font-weight','bold')
+                        );
                     }
-                },
-                error: function() {
-                    alert('Erreur côté serveur lors de la mise à jour.');
-                }
-            });
-        });
 
-
-        $('#chatcategory-dropdown').on('change', function() {
-            var selectedChatCategoryId = $(this).val();
-            $.ajax({
-                url: '{% url "update_default_chatcategory" %}',
-                type: 'POST',
-                data: {
-                    'chatcategory_id': selectedChatCategoryId,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function(data) {
-                    if(data.status === 'success') {
-                        console.log('Default c hat category updated successfully!');
-                    } else {
-                        alert('Error: ' + data.message);
+                    // Rebuild chatcategory dropdown if it exists
+                    var catSelect = $('#chatcategory-dropdown');
+                    if (catSelect.length) {
+                        catSelect.empty();
+                        response.chatcategories.forEach(function(category) {
+                            var disabled = false;
+                            if (response.default_project_is_large && !category.is_large) {
+                                disabled = true;
+                            } else if (!response.access_large_models && category.is_large) {
+                                disabled = true;
+                            } else if (!response.access_advanced_models && category.is_advanced) {
+                                disabled = true;
+                            }
+                            var option = $('<option>')
+                                .val(category.id)
+                                .text(category.name + ' (' + category.price + ')');
+                            if (disabled) {
+                                option.prop('disabled', true).css('color', '#ccc');
+                            } else {
+                                option.css('color', 'black');
+                            }
+                            catSelect.append(option);
+                        });
                     }
-                },
-                error: function() {
-                    alert('An error has occurred while updating chat category.');
+                } else {
+                    alert('Error while updating default project.');
                 }
-            });
+            },
+            error: function() {
+                alert('Server error while updating default project.');
+            }
         });
     });
+});
 </script>
 
 <script>
@@ -786,7 +787,7 @@ $(document).ready(function(){
                 }
             },
             error: function(){
-                alert('Erreur lors de la régénération.');
+                alert('Error while regenerating.');
             },
             complete: function(){
                 $('#loading-spinner').hide();

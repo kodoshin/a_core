@@ -294,9 +294,30 @@ def update_default_project(request):
                 'title': chat.title,
             })
 
+        # Prepare chat categories
+        chatcategories = ChatCategory.objects.all().order_by('price')
+        chatcategories_data = []
+        for cat in chatcategories:
+            chatcategories_data.append({
+                'id': cat.id,
+                'name': cat.name,
+                'price': str(cat.price),
+                'is_large': cat.is_large,
+                'is_advanced': cat.is_advanced,
+            })
+
+        # Permission flags
+        access_large = profile.current_plan.large_models
+        access_advanced = profile.current_plan.advanced_models
+        default_is_large = project.is_large
+
         return JsonResponse({
             'status': 'success',
             'chats': chats_data,
+            'chatcategories': chatcategories_data,
+            'default_project_is_large': default_is_large,
+            'access_large_models': access_large,
+            'access_advanced_models': access_advanced,
         })
     except Project.DoesNotExist:
         return JsonResponse({'status': 'error'}, status=400)
