@@ -111,7 +111,7 @@
                 <ul style="width: 25vh">
                     {% for chat in chats %}
                         <li style="margin-top: 10px;">
-                            <span {% if chat.public_id == current_chat.public_id %}class="selected-chat"{% endif %}>
+                            <span {% if chat.public_id == current_chat.public_id %}class="selected-chat" style="background-color: #9CA3AF " {% endif %}>
                             <a href="?chat_id={{ chat.public_id }}" style="color: white; font-size: small; font-weight: bold;">{{ chat.title }}</a>
                             </span>
                             <span class="toggle-important" data-chat-id="{{ chat.public_id }}" style="cursor:pointer; color:{% if chat.important %}gold{% else %}gray{% endif %}; margin-left:5px; float: right;">&#9733;</span>

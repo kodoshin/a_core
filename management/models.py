@@ -9,13 +9,14 @@ from django.utils import timezone
 class AIModel(models.Model):
     PROVIDER_CHOICES = [
         ('openai', 'OpenAI'),
-        ('claude', 'Claude AI'),
+        ('claude', 'Anthropic'),
         ('gemini', 'Google Gemini'),
         ('other', 'Other'),
     ]
 
     provider = models.CharField(max_length=20, choices=PROVIDER_CHOICES)
     name = models.CharField(max_length=20)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.get_provider_display()} - {self.name}"

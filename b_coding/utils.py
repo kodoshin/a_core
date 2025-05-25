@@ -34,9 +34,18 @@ def parse_steps(message_content):
 
         # Extract code
         code_match = re.search(r'<code>\s*<(.*?)>(.*?)</\1>\s*</code>', step_content, re.DOTALL)
+        code_content = None
         if code_match:
-            code_language = code_match.group(1)
-            code_content = code_match.group(2)
+            if code_match.group(1):
+                code_language = code_match.group(1)
+                code_content = code_match.group(2)
+
+        if code_content == None:
+            code_match = re.search(r'<code>(.*?)</code>', step_content, re.DOTALL)
+            if code_match:
+                code_language = 'text'
+                code_content = code_match.group(1)
+
             # Suppression de l'indentation excessive
             #code_content = re.sub(r'^\s{4}|\t', '', code_content, flags=re.MULTILINE)
             lines = code_content.splitlines()
@@ -55,6 +64,7 @@ def parse_steps(message_content):
                 'content': adjusted_code_content
             }
         else:
+
             step['code'] = None
 
         steps.append(step)
