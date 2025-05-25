@@ -19,7 +19,7 @@ class GithubKeyForm(ModelForm):
         model = Profile
         fields = ['github_access_key']
         widgets = {
-            'github_access_key': forms.TextInput(attrs={'autocomplete': 'off'}),
+            'github_access_key': forms.TextInput(attrs={'autocomplete': 'off', "style": "height:10px"}),
         }
 
     def __init__(self, *args, **kwargs):
