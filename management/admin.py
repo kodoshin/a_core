@@ -18,7 +18,7 @@ class APIKeyAdmin(admin.ModelAdmin):
 
 @admin.register(SubscriptionPlan)
 class SubscriptionPlanAdmin(admin.ModelAdmin):
-    list_display = ('name', 'monthly_price', 'yearly_price', 'original_monthly_price', 'original_yearly_price')
+    list_display = ('name', 'monthly_price', 'yearly_price', 'original_monthly_price', 'original_yearly_price', 'is_yearly')
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):

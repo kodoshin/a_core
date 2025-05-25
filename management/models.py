@@ -66,6 +66,7 @@ class SubscriptionPlan(models.Model):
     regeneration_attempts = models.PositiveIntegerField(default=0)
     large_models = models.BooleanField(default=False)
     advanced_models = models.BooleanField(default=False)
+    is_yearly = models.BooleanField(default=False)
 
     stripe_tax_code = models.CharField(
         max_length=50,
@@ -93,11 +94,11 @@ class Subscription(models.Model):
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField()
     active = models.BooleanField(default=True)
-
     amount_subtotal = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     tax_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     amount_total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     currency = models.CharField(max_length=3, null=True, blank=True)
+    is_yearly = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.end_date:

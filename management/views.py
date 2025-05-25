@@ -15,10 +15,12 @@ from django.contrib.auth.models import User
 
 
 def pricing_credits(request):
-    subscription_plans = SubscriptionPlan.objects.order_by('original_yearly_price')
+    monthly_plans = SubscriptionPlan.objects.filter(is_yearly=False).order_by('original_yearly_price')
+    yearly_plans = SubscriptionPlan.objects.filter(is_yearly=True).order_by('original_yearly_price')
     credit_offers = CreditOffer.objects.order_by('original_price')
     context = {
-        'subscription_plans': subscription_plans,
+        'monthly_plans': monthly_plans,
+        'yearly_plans':  yearly_plans,
         'credit_offers': credit_offers,
         'stripe_public_key': settings.STRIPE_PUBLIC_KEY
     }
@@ -70,7 +72,7 @@ def create_checkout_session_plan(request, plan_id):
                 # use plan-specific tax code or fallback to digital services code
                 'tax_code': plan.stripe_tax_code or None,
             },
-            'unit_amount': int(plan.yearly_price * 100),
+            'unit_amount': int((plan.yearly_price if plan.is_yearly else plan.monthly_price) * 100),
             'tax_behavior': 'exclusive',
         },
         'quantity': 1,
