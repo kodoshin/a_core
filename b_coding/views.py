@@ -266,6 +266,7 @@ async def code_chat_view(request):
             'default_project': default_project,
             'profile': profile,
             'chatcategories': chatcategories,
+            'default_chat_category': default_chat_category,
             'selected_attempt': selected_attempt,
             'total_attempts': total_attempts,
             'in_progress': in_progress,
@@ -378,3 +379,17 @@ async def get_processing_updates(request):
 
 
     return JsonResponse({'messages': messages})
+
+
+@require_POST
+@login_required
+def toggle_chat_importance(request):
+    chat_id = request.POST.get('chat_id')
+    try:
+        chat = CodingChat.objects.get(public_id=chat_id, user=request.user)
+        chat.important = not chat.important
+        chat.save()
+        return JsonResponse({'status': 'success', 'important': chat.important})
+    except CodingChat.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Chat not found.'}, status=404)
+

@@ -30,6 +30,7 @@ class CodingChat(models.Model):
     prompts_count = models.IntegerField(default=0)
     chat_category = models.ForeignKey(ChatCategory, on_delete=models.DO_NOTHING, blank=True, null=True)
     regeneration_count = models.PositiveSmallIntegerField(default=0)
+    important = models.BooleanField(default=False)
 
     def __str__(self):
         return f"CodingChat {self.id} - User: {self.user.username}"

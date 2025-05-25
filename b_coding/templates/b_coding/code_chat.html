@@ -114,6 +114,7 @@
                             <span {% if chat.public_id == current_chat.public_id %}class="selected-chat"{% endif %}>
                             <a href="?chat_id={{ chat.public_id }}" style="color: white; font-size: small; font-weight: bold;">{{ chat.title }}</a>
                             </span>
+                            <span class="toggle-important" data-chat-id="{{ chat.public_id }}" style="cursor:pointer; color:{% if chat.important %}gold{% else %}gray{% endif %}; margin-left:5px; float: right;">&#9733;</span>
                             <span class="delete-chat" data-chat-id="{{ chat.public_id }}" style="cursor:pointer; color:red; margin-left:0px; float: right;">&#x1F5D1;</span>
                             <span class="cancel-delete" data-chat-id="{{ chat.public_id }}" style="display:none; cursor:pointer; color:gray; margin-left:0px; float: right;">&#x274C;</span>
                             <span class="confirm-delete" data-chat-id="{{ chat.public_id }}" style="display:none; cursor:pointer; color:green; margin-left:0px; float: right;">&#x2714;</span>
@@ -175,12 +176,15 @@
                     {% for category in chatcategories %}
                         <option
                           value="{{ category.id }}"
-                          {% if default_project.is_large and not category.is_large %}
+                            {% if default_project.is_large and not category.is_large %}
                               disabled style="color: #ccc;"
+                            {% elif category.id == default_chat_category.id %}
+                              selected style="color: black;"
                             {% elif not access_large_models and category.is_large %}
                               disabled style="color: #ccc;"
                             {% elif not access_advanced_models and category.is_advanced %}
                               disabled style="color: #ccc;"
+
                             {% else %}
                                style="color: black;"
                             {% endif %}
@@ -284,6 +288,33 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
+<script>
+$(document).ready(function(){
+    // Toggle important status on star click
+    $(document).on('click', '.toggle-important', function(){
+        var $star = $(this);
+        var chatId = $star.data('chat-id');
+        $.ajax({
+            url: '{% url "toggle_chat_importance" %}',
+            type: 'POST',
+            data: {
+                'chat_id': chatId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response){
+                if(response.status === 'success'){
+                    $star.css('color', response.important ? 'gold' : 'gray');
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(){
+                alert('An error occurred while toggling importance.');
+            }
+        });
+    });
+});
+</script>
 
 
 <script> //Next & Previous buttons with right left arrows
@@ -495,6 +526,22 @@ $(document).ready(function() {
           });
       });
   });
+</script>
+
+<script>
+    $(document).ready(function() {
+    $('#chatcategory-dropdown').on('change', function() {
+        var SelectedChatCategoryId = $(this).val();
+        $.ajax({
+            url: '{% url "update_default_chatcategory" %}',
+            type: 'POST',
+            data: {
+                'chatcategory_id': SelectedChatCategoryId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+                }
+            })
+        })
+    });
 </script>
 
 <script>

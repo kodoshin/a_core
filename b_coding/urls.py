@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import code_chat_view, update_default_project, update_default_chatcategory, delete_chat, get_processing_updates
+from .views import code_chat_view, update_default_project, update_default_chatcategory, delete_chat, get_processing_updates, toggle_chat_importance
 
 urlpatterns = [
     path('kenshi/', code_chat_view, name="code_chat_view"),
@@ -7,4 +7,5 @@ urlpatterns = [
     path('update_default_project/', update_default_project, name='update_default_project'),
     path('update_default_chatcategory/', update_default_chatcategory, name="update_default_chatcategory"),
     path('delete_chat/', delete_chat, name='delete_chat'),
+    path('toggle_importance/', toggle_chat_importance, name='toggle_chat_importance'),
 ]
