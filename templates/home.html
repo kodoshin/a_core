@@ -527,8 +527,9 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="card mb-4" style="{% if persona.status == 'coming_soon' %}background-color: #d3d3d3; opacity: 0.6; pointer-events: none;{% endif %}">
           <img src="{{ persona.image.url }}" class="card-img-top" alt="{{ persona.title }}">
           <div class="card-body">
-            <h2 class="card-title">{{ persona.title }}</h2>
             <p class="card-text">{{ persona.subtitle }}</p>
+            <h2 class="card-title">{{ persona.title }}</h2>
+
             {% if persona.status == 'active' %}
               <p class="text-success font-weight-bold">Active</p>
             {% endif %}

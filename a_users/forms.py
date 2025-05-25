@@ -63,10 +63,15 @@ class ProfileForm(forms.ModelForm):
         })
     )
 
+    allow_data_usage_for_anonymous_ai_training = forms.BooleanField(
+        required=False,
+        label=mark_safe("<a href='#' id='data-usage-link'>I allow my anonymized data to be used for AI training</a>")
+    )
+
     class Meta:
         model = Profile
         fields = ['role', 'country', 'region', 'marketing_channel', #'accept_marketing_communication',
-                  'accept_data_usage_policy','timezone', 'gmt_offset']
+                  'accept_data_usage_policy', 'allow_data_usage_for_anonymous_ai_training','timezone', 'gmt_offset']
         widgets = {
             'role': forms.Select(attrs={'style': "color: black; font-weight: bold;"}),
             'country': forms.Select(attrs={'style': "color: black; font-weight: bold;"}),
@@ -79,6 +84,7 @@ class ProfileForm(forms.ModelForm):
             'timezone': forms.HiddenInput(),
             'gmt_offset': forms.HiddenInput(),
             'accept_data_usage_policy': forms.CheckboxInput(attrs={'style': 'width: 20px;'}),
+            'allow_data_usage_for_anonymous_ai_training': forms.CheckboxInput(attrs={'style': 'width: 20px'}),
         }
 
     def __init__(self, *args, **kwargs):

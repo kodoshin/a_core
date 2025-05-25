@@ -13,6 +13,7 @@ class ChatCategory(models.Model):
     discount_percentage = models.IntegerField(default=0)
     is_advanced = models.BooleanField(default=False)
     is_large = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.type}"

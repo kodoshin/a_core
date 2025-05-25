@@ -257,7 +257,7 @@ async def code_chat_view(request):
             messages = []
             total_attempts = 1
             selected_attempt = 1
-        chatcategories = await sync_to_async(lambda: list(ChatCategory.objects.all().order_by('price')))()
+        chatcategories = await sync_to_async(lambda: list(ChatCategory.objects.filter(is_active=True).order_by('price')))()
         context = {
             'chats': chats,
             'messages': messages,

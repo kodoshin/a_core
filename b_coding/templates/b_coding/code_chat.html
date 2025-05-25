@@ -72,7 +72,7 @@
 <div class="main-container" style="margin-top: 40px;">
 
 
-    <button id="toggle-chats" class="toggle-chats-btn">&#x226A;</button>
+    <button id="toggle-chats" class="toggle-chats-btn" style="margin-left: 22vh; font-size: xx-large">&#x22B2;</button>
 
 
 
@@ -360,9 +360,12 @@ document.addEventListener("DOMContentLoaded", function() {
         sidebar.classList.toggle("collapsed");
         // Switch icon between ◀ and ▶
         if (sidebar.classList.contains("collapsed")) {
-            toggleBtn.innerHTML = "&#x226B;"; // ▶
+            toggleBtn.innerHTML = "&#x22B3;"; // ▶
+            toggleBtn.style.left      = "0";
+            toggleBtn.style.marginLeft = "0";
         } else {
-            toggleBtn.innerHTML = "&#x226A;"; // ◀
+            toggleBtn.innerHTML = "&#x22B2;"; // ◀
+            toggleBtn.style.left      = "22vh";
         }
     });
 });

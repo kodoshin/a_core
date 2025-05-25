@@ -33,19 +33,11 @@ def parse_steps(message_content):
             step['file'] = ''
 
         # Extract code
-        code_match = re.search(r'<code>\s*<(.*?)>(.*?)</\1>\s*</code>', step_content, re.DOTALL)
         code_content = None
+        code_match = re.search(r'<code>\s*<(.*?)>(.*?)</\1>\s*</code>', step_content, re.DOTALL)
         if code_match:
-            if code_match.group(1):
-                code_language = code_match.group(1)
-                code_content = code_match.group(2)
-
-        if code_content == None:
-            code_match = re.search(r'<code>(.*?)</code>', step_content, re.DOTALL)
-            if code_match:
-                code_language = 'text'
-                code_content = code_match.group(1)
-
+            code_language = code_match.group(1)
+            code_content = code_match.group(2)
             # Suppression de l'indentation excessive
             #code_content = re.sub(r'^\s{4}|\t', '', code_content, flags=re.MULTILINE)
             lines = code_content.splitlines()
@@ -63,8 +55,27 @@ def parse_steps(message_content):
                 'language': code_language,
                 'content': adjusted_code_content
             }
-        else:
 
+        elif code_content == None :
+            code_match = re.search(r'<code>(.*?)</code>', step_content, re.DOTALL)
+            code_language = 'text'
+            code_content = code_match.group(1)
+            lines = code_content.splitlines()
+            indent_levels = [len(re.match(r'^\s*', line).group(0)) for line in lines if line.strip()]
+            min_indent = min(indent_levels) if indent_levels else 0
+
+            # Supprimer l'indentation minimale de toutes les lignes
+            adjusted_lines = [line[min_indent:] for line in lines]
+
+            if adjusted_lines and adjusted_lines[0].strip() == "":
+                adjusted_lines = adjusted_lines[1:]
+
+            adjusted_code_content = "\n".join(adjusted_lines)
+            step['code'] = {
+                'language': code_language,
+                'content': adjusted_code_content
+            }
+        else:
             step['code'] = None
 
         steps.append(step)

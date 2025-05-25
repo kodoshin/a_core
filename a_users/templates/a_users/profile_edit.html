@@ -4,6 +4,12 @@
 
 {% block content %}
 
+<style>
+    input{
+        width: 20px;
+    }
+</style>
+
 {% if onboarding %}
 <h1 class="mb-8" style="color: white">Complete your Profile</h1>
 {% else %}
@@ -30,10 +36,11 @@
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
+
     <button type="submit" >Submit</button>
     {% if not onboarding %}
 
-    <a class="button button-gray ml-1" href="{{ request.META.HTTP_REFERER }}">Cancel</a>
+    <a class="button button-gray ml-1" style="color: black" href="{{ request.META.HTTP_REFERER }}">Cancel</a>
     {% endif %}
 </form>
 <br><br>
@@ -59,6 +66,8 @@
       const wrapper = regionSelect.parentElement;
       wrapper.style.display = 'none';
 
+      const initialRegion = "{{ profile.region.id|default:'' }}";
+
       function updateRegions(countryId) {
         if (countryId) {
             fetch("{% url 'ajax_load_regions' %}?country=" + countryId, {
@@ -73,6 +82,9 @@
                     opt.textContent = p.name;
                     regionSelect.appendChild(opt);
                 });
+                if (initialRegion) {
+                    regionSelect.value = initialRegion;
+                }
                 if (data.regions.length) {
                     wrapper.style.display = 'block';
                     regionSelect.setAttribute('required', 'required');

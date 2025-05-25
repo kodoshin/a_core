@@ -76,6 +76,10 @@ class Profile(models.Model):
     timezone = models.CharField(max_length=50, blank=True, null=True, help_text="User timezone detected automatically.")
     gmt_offset = models.CharField(max_length=10, blank=True, null=True, help_text="Difference between GMT and user timezone (e.g., GMT+01:00).")
     daily_credit_claim_date = models.DateField(null=True, blank=True)
+    allow_data_usage_for_anonymous_ai_training = models.BooleanField(
+        default=False,
+        verbose_name='Allow data usage for anonymous AI training'
+    )
 
     def __str__(self):
         return str(self.user)
