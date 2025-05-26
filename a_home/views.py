@@ -7,7 +7,7 @@ from .ai_tools_radar_chart import create_ai_tools_radar_chart
 def home(request):
     personas = Persona.objects.all()
     radar_chart = create_ai_tools_radar_chart()
-    technologies = Technology.objects.exclude(name='Other')
+    technologies = Technology.objects.exclude(name='Other').exclude(status__name='inactive')
     try:
         status = Status.objects.get(code=1)
     except :

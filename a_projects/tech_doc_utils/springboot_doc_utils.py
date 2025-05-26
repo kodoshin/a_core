@@ -39,6 +39,21 @@ def springboot_document_file(file_content: str, file_instance, file_name: str, T
         if not created:
             component.content = file_content
             component.save()
+
+    elif file_name.endswith('.xml'):
+        comp_type, _ = ComponentType.objects.get_or_create(name="XML", technology=Technology)
+        component, created = Component.objects.get_or_create(
+            file=file_instance,
+            component_type=comp_type,
+            name=file_name,
+            description="XML File",
+            start_line=1,
+            defaults={'content': file_content, 'end_line': len(file_content.splitlines())}
+        )
+        if not created:
+            component.content = file_content
+            component.save()
+
     # Pour les fichiers de style CSS
     elif file_name.endswith('.css'):
         comp_type, _ = ComponentType.objects.get_or_create(name="Styling", technology=Technology)

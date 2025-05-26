@@ -3,6 +3,7 @@
 
 
 {% block content %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> <!-- for trash icon -->
 <style>
     /* Ensure main container can position the toggle button */
     .prev-step-btn,
@@ -115,9 +116,11 @@
                             <a href="?chat_id={{ chat.public_id }}" style="color: white; font-size: small; font-weight: bold;">{{ chat.title }}</a>
                             </span>
                             <span class="toggle-important" data-chat-id="{{ chat.public_id }}" style="cursor:pointer; color:{% if chat.important %}gold{% else %}gray{% endif %}; margin-left:5px; float: right;">&#9733;</span>
-                            <span class="delete-chat" data-chat-id="{{ chat.public_id }}" style="cursor:pointer; color:red; margin-left:0px; float: right;">&#x1F5D1;</span>
+                            <span class="delete-chat glyphicon" data-chat-id="{{ chat.public_id }}" style="cursor:pointer; color:white; margin-left:0px; float: right;">&#xe020;</span>
                             <span class="cancel-delete" data-chat-id="{{ chat.public_id }}" style="display:none; cursor:pointer; color:gray; margin-left:0px; float: right;">&#x274C;</span>
                             <span class="confirm-delete" data-chat-id="{{ chat.public_id }}" style="display:none; cursor:pointer; color:green; margin-left:0px; float: right;">&#x2714;</span>
+
+                            <!--<span class="glyphicon">&#x1F5D1;</span> -->
 
                         </li>
                     {% empty %}

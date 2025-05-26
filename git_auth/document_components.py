@@ -14,8 +14,10 @@ from a_projects.tech_doc_utils.cs_doc_utils import get_csharp_docstring
 
 
 def document_components (project, technology):
+    print('documenting project components')
     files = File.objects.filter(project=project)
     for file in files :
+        print(file.name)
         Component.objects.filter(file=file).delete()
         if technology.name == 'Django':
             dj_document_file(file.content, file, file.name, technology)
@@ -33,7 +35,7 @@ def document_components (project, technology):
             fl_document_file(file.content, file, file.name, technology)
         elif technology.name == 'FastAPI':
             fa_document_file(file.content, file, file.name, technology)
-        elif technology.name == 'Springboot':
+        elif technology.name == 'Spring Boot':
             springboot_document_file(file.content, file, file.name, technology)
         elif technology.name == 'R':
             r_document_r_file(file.content, file, file.name, technology)
