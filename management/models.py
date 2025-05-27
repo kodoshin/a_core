@@ -75,6 +75,18 @@ class SubscriptionPlan(models.Model):
         blank=True,
         help_text='Stripe Tax Code for automatic_tax (e.g., txcd_56151200 for digital services)'
     )
+    stripe_monthly_price_id = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text="Price ID Stripe pour l'abonnement mensuel"
+    )
+    stripe_yearly_price_id = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text="Price ID Stripe pour l'abonnement annuel"
+    )
 
     def __str__(self):
         return self.name
@@ -100,6 +112,13 @@ class Subscription(models.Model):
     amount_total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     currency = models.CharField(max_length=3, null=True, blank=True)
     is_yearly = models.BooleanField(default=False)
+
+    stripe_subscription_id = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text="Identifiant de l'abonnement Stripe pour gestion auto-renouvellement"
+    )
 
     def save(self, *args, **kwargs):
         if not self.end_date:
