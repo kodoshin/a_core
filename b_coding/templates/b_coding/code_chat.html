@@ -73,7 +73,7 @@
 <div class="main-container" style="margin-top: 40px;">
 
 
-    <button id="toggle-chats" class="toggle-chats-btn" style="margin-left: 22vh; font-size: xx-large">&#x22B2;</button>
+    <button id="toggle-chats" class="toggle-chats-btn" style="margin-left: 22vh; font-size: x-large; margin-top: 1vh;">&#x226A;</button>
 
 
 
@@ -85,15 +85,15 @@
     <br>
         <div class="sidebar">
 
-        <br> <br>
-        <select id="project-dropdown" style="background-color: #c6cacb; width: 25vh ; color: #1f1e23; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
+
+        <select id="project-dropdown" style="background-color: #c6cacb; width: 20vh ; color: #1f1e23; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
             <option disabled selected value>–– Select a project ––</option>
               {% for project in projects %}
                 <option
                   value="{{ project.id }}"
                   {% if default_project and project.id == default_project.id %}selected{% endif %}
                 >
-                  {{ project.name }}
+                  {{ project.name }} {% if project.is_large %} (L) {% endif %}
                 </option>
               {% endfor %}
         </select>
@@ -115,7 +115,7 @@
                             <span {% if chat.public_id == current_chat.public_id %}class="selected-chat" style="background-color: #9CA3AF " {% endif %}>
                             <a href="?chat_id={{ chat.public_id }}" style="color: white; font-size: small; font-weight: bold;">{{ chat.title }}</a>
                             </span>
-                            <span class="toggle-important" data-chat-id="{{ chat.public_id }}" style="cursor:pointer; color:{% if chat.important %}gold{% else %}gray{% endif %}; margin-left:5px; float: right;">&#9733;</span>
+                            <span class="toggle-important" data-chat-id="{{ chat.public_id }}" data-important="{{ chat.important|yesno:'true,false' }}" style="cursor:pointer; color:{% if chat.important %}gold{% else %}gray{% endif %}; margin-left:5px; float: right;">&#9733;</span>
                             <span class="delete-chat glyphicon" data-chat-id="{{ chat.public_id }}" style="cursor:pointer; color:white; margin-left:0px; float: right;">&#xe020;</span>
                             <span class="cancel-delete" data-chat-id="{{ chat.public_id }}" style="display:none; cursor:pointer; color:gray; margin-left:0px; float: right;">&#x274C;</span>
                             <span class="confirm-delete" data-chat-id="{{ chat.public_id }}" style="display:none; cursor:pointer; color:green; margin-left:0px; float: right;">&#x2714;</span>
@@ -135,149 +135,140 @@
 
     <div class="chat-area-container" style="margin-left: 1em">
 
-        <br>
-        <div class="chat-area">
+<br>
+<div class="chat-area">
 
-            <!-- Display the star rating only if a current chat is selected -->
-        {% if current_chat %}
-        <div class="rating-container" style="margin-bottom: 20px;">
-            <span class="star" data-value="1" style="cursor: pointer;">&#9733;</span>
-            <span class="star" data-value="2" style="cursor: pointer;">&#9733;</span>
-            <span class="star" data-value="3" style="cursor: pointer;">&#9733;</span>
-            <span class="star" data-value="4" style="cursor: pointer;">&#9733;</span>
-            <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
-        </div>
-
-<div style="display: flex; align-items: center; gap: 1em;">
+    <!-- Display the star rating only if a current chat is selected -->
+    {% if current_chat %}
 
 
-  <div style="font-weight: bold; color: #cccccc;">
-    {{ current_chat.chat_category.name }}
-  </div>
-
-  <div class="regeneration-controls" style="display: flex; align-items: center;">
-    {% if total_attempts > 1 %}
-      <button id="prev-attempt" type="button" style="background-color: unset;" {% if selected_attempt <= 1 %}disabled{% endif %}>←</button>
-      <span style="margin: 0 0.5em;">Attempt {{ selected_attempt }} of {{ total_attempts }}</span>
-      <button id="next-attempt" type="button" style="background-color: unset;" {% if selected_attempt >= total_attempts %}disabled{% endif %}>→</button>
-    {% endif %}
-    <button id="regenerate-btn" type="button" style="background-color: unset; padding: 0; border: none;" {% if current_chat.regeneration_count >= 3 %}disabled title="Max regenerations reached"{% endif %}>
-      <span aria-hidden="true"  class="text-2xl relative -top-0.5 p-1 rounded transition-colors duration-200 hover:bg-gray-700" style="font-size: x-large; position: relative; top: -3px; color: #cccccc;">⟳</span>
-      <span class="sr-only">Regenerate</span>
-    </button>
-  </div>
-</div>
+    <div style="display: flex; align-items: center; gap: 1em;">
 
 
+      <div style="font-weight: bold; color: #cccccc;">
+        {{ current_chat.chat_category.name }}
+      </div>
 
-            {% else %}
-
-
-
-                <!-- New dropdown for ChatCategory -->
-                <select id="chatcategory-dropdown" style="background-color: unset; max-width: 20vh; color: white; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
-                    {% for category in chatcategories %}
-                        <option
-                          value="{{ category.id }}"
-                            {% if default_project.is_large and not category.is_large %}
-                              disabled style="color: #ccc;"
-                            {% elif category.id == default_chat_category.id %}
-                              selected style="color: black;"
-                            {% elif not access_large_models and category.is_large %}
-                              disabled style="color: #ccc;"
-                            {% elif not access_advanced_models and category.is_advanced %}
-                              disabled style="color: #ccc;"
-
-                            {% else %}
-                               style="color: black;"
-                            {% endif %}
-                        >
-                          {{ category.name }} ({{ category.price }})
-                        </option>
-                    {% endfor %}
-                </select>
-
-
-
-
-
-
-                <br><br>
-            {% endif %}
-
-            <div class="message-container" id="message-container" style="width: 80%">
-                {% for message in messages %}
-                    {% if message.type == 'prompt' and message.attempt_number == selected_attempt%}
-
-                        <div class="message-user">
-                            <br>
-                            <p style="font-weight: bold;"><img style="width:2.2em;height:2.2em;display: inline;" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/profile-icon.png"/> {{ message.content|linebreaksbr }}</p>
-                        </div>
-                    {% elif message.type == 'gpt-a' and message.attempt_number == selected_attempt %}
-                        <div class="message ai">
-                            <img class="ai-avatar-img" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/avatar.png" alt="IA" style="width:2em;height:3em;display: inline;margin-right: 2em">
-                            <!-- Display steps here -->
-                            {% if message.steps|length > 1 %}
-                            <button class="prev-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-weight: bold;">Previous</button>
-                            <button class="next-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-weight: bold;">Next</button>
-
-                            {% endif %}
-                            <div class="steps-container">
-                                {% for step in message.steps %}
-                                    <div class="step" data-step-number="{{ forloop.counter0 }}" {% if not forloop.first %}style="display:none;"{% endif %}>
-                                        {% if message.steps|length > 1 %}
-                                        <br>
-                                        <p><strong>Step {{ step.step_number }}/{{ message.steps|length }}:</strong></p>
-                                        {% endif %}
-                                        <p>{{ step.justification }}</p>
-
-                                        {% if step.file|length > 0 %}
-                                        <p><strong>Location :</strong> {{ step.file }}</p>
-                                        {% endif %}
-                                        {% if step.code %}
-                                            <div class="code-container">
-                                                <button class="copy-code-btn" style="margin-left: 10px">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                                    </svg>
-                                                    Copy
-                                                </button>
-                                                <pre style="max-width: 160vh"><code class="language-{{ step.code.language }}">{{ step.code.content|escape }}</code></pre>
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                {% endfor %}
-
-
-
-
-                            </div>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-
-            <br>
-            <div id="loading-spinner" {% if not in_progress %}style="display:none;"{% endif %}></div>
-            <div id="loading-text"  {% if not in_progress %}style="display:none;"{% else %} style="display:none; color: #c6cacb; font-weight: bold; margin-top: 10px;" {% endif %}></div>
-            <br>
-            <form id="chat-form">
-                {% csrf_token %}
-                <input type="hidden" name="chat_id" value="{{ current_chat.public_id }}" id="chat_id">
-
-                {% if current_chat %}
-                    <div>({{ current_chat.chat_category.price_secondary_prompt }} credits for next prompts)</div> <br>
-                {% endif %}
-                <input type="hidden" name="attempt_no" value="{{ selected_attempt }}" id="attempt_no">
-                <textarea name="prompt" id="prompt" rows="3" style="width: 80%; background-color: #c6cacb; color: #1f1e23; overflow:hidden;"></textarea><br><br>
-                <button type="submit" style="height: 2em; width: 4em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff';">>>> </button>
-            </form>
-
-
-
-        </div>
+      <div class="regeneration-controls" style="display: flex; align-items: center;">
+        {% if total_attempts > 1 %}
+          <button id="prev-attempt" type="button" style="background-color: unset;" {% if selected_attempt <= 1 %}disabled{% endif %}>←</button>
+          <span style="margin: 0 0.5em;">Attempt {{ selected_attempt }} of {{ total_attempts }}</span>
+          <button id="next-attempt" type="button" style="background-color: unset;" {% if selected_attempt >= total_attempts %}disabled{% endif %}>→</button>
+        {% endif %}
+        <button id="regenerate-btn" type="button" style="background-color: unset; padding: 0; border: none;" {% if current_chat.regeneration_count >= 3 %}disabled title="Max regenerations reached"{% endif %}>
+          <span aria-hidden="true"  class="text-2xl relative -top-0.5 p-1 rounded transition-colors duration-200 hover:bg-gray-700" style="font-size: x-large; position: relative; top: -3px; color: #cccccc;">⟳</span>
+          <span class="sr-only">Regenerate</span>
+        </button>
+      </div>
     </div>
+
+
+
+    {% else %}
+
+
+
+    <!-- New dropdown for ChatCategory -->
+    <select id="chatcategory-dropdown" style="background-color: unset; max-width: 20vh; color: white; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
+        {% for category in chatcategories %}
+            <option
+              value="{{ category.id }}"
+                {% if default_project.is_large and not category.is_large %}
+                  disabled style="color: #ccc;"
+                {% elif category.id == default_chat_category.id %}
+                  selected style="color: black;"
+                {% elif not access_large_models and category.is_large %}
+                  disabled style="color: #ccc;"
+                {% elif not access_advanced_models and category.is_advanced %}
+                  disabled style="color: #ccc;"
+
+                {% else %}
+                   style="color: black;"
+                {% endif %}
+            >
+              {{ category.name }} ({{ category.price }})
+            </option>
+        {% endfor %}
+    </select>
+
+
+
+    <br><br>
+    {% endif %}
+    <div class="rating-container" style="margin-bottom: 20px;">
+        <span class="star" data-value="1" style="cursor: pointer;">&#9733;</span>
+        <span class="star" data-value="2" style="cursor: pointer;">&#9733;</span>
+        <span class="star" data-value="3" style="cursor: pointer;">&#9733;</span>
+        <span class="star" data-value="4" style="cursor: pointer;">&#9733;</span>
+        <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
+    </div>
+    <div class="message-container" id="message-container" style="width: 80%">
+        {% for message in messages %}
+            {% if message.type == 'prompt' and message.attempt_number == selected_attempt%}
+                <div class="message-user">
+                    <br>
+                    <p style="font-weight: bold;"><img style="width:2.2em;height:2.2em;display: inline;" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/profile-icon.png"/> {{ message.content|linebreaksbr }}</p>
+                </div>
+            {% elif message.type == 'gpt-a' and message.attempt_number == selected_attempt %}
+                <div class="message ai">
+                    <img class="ai-avatar-img" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/avatar.png" alt="IA" style="width:2em;height:3em;display: inline;margin-right: 2em">
+                    <!-- Display steps here -->
+                    {% if message.steps|length > 1 %}
+                    <button class="prev-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-weight: bold;">Previous</button>
+                    <button class="next-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-weight: bold;">Next</button>
+                    {% endif %}
+                    <div class="steps-container">
+                        {% for step in message.steps %}
+                            <div class="step" data-step-number="{{ forloop.counter0 }}" {% if not forloop.first %}style="display:none;"{% endif %}>
+                                {% if message.steps|length > 1 %}
+                                <br>
+                                <p><strong>Step {{ step.step_number }}/{{ message.steps|length }}:</strong></p>
+                                {% endif %}
+                                <p>{{ step.justification }}</p>
+
+                                {% if step.file|length > 0 %}
+                                <p><strong>Location :</strong> {{ step.file }}</p>
+                                {% endif %}
+                                {% if step.code %}
+                                    <div class="code-container">
+                                        <button class="copy-code-btn" style="margin-left: 10px">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                            </svg>
+                                            Copy
+                                        </button>
+                                        <pre style="max-width: 160vh"><code class="language-{{ step.code.language }}">{{ step.code.content|escape }}</code></pre>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <br>
+    <div id="loading-spinner" {% if not in_progress %}style="display:none;"{% endif %}></div>
+    <div id="loading-text"  {% if not in_progress %}style="display:none;"{% else %} style="display:none; color: #c6cacb; font-weight: bold; margin-top: 10px;" {% endif %}></div>
+    <br>
+    <form id="chat-form">
+        {% csrf_token %}
+        <input type="hidden" name="chat_id" value="{{ current_chat.public_id }}" id="chat_id">
+
+        {% if current_chat %}
+            <div>({{ current_chat.chat_category.price_secondary_prompt }} credits for next prompts)</div> <br>
+        {% endif %}
+        <input type="hidden" name="attempt_no" value="{{ selected_attempt }}" id="attempt_no">
+        <textarea name="prompt" id="prompt" rows="3" style="width: 80%; background-color: #c6cacb; color: #1f1e23; overflow:hidden;"></textarea><br><br>
+        <button type="submit" style="height: 2em; width: 4em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-family: 'DynaPuff';">>>> </button>
+    </form>
+
+
+
+</div>
+</div>
 
 </div>
 
@@ -363,11 +354,11 @@ document.addEventListener("DOMContentLoaded", function() {
         sidebar.classList.toggle("collapsed");
         // Switch icon between ◀ and ▶
         if (sidebar.classList.contains("collapsed")) {
-            toggleBtn.innerHTML = "&#x22B3;"; // ▶
+            toggleBtn.innerHTML = "&#x226B;"; //"&#x22B3;"; // ▶
             toggleBtn.style.left      = "0";
             toggleBtn.style.marginLeft = "0";
         } else {
-            toggleBtn.innerHTML = "&#x22B2;"; // ◀
+            toggleBtn.innerHTML = "&#x226A;"; // "&#x22B2;"; // ◀
             toggleBtn.style.left      = "22vh";
         }
     });
@@ -568,28 +559,37 @@ $(document).ready(function() {
                     var chatList = $('#chats-list ul');
                     chatList.empty();
                     if (response.chats && response.chats.length > 0) {
+                        console.log(response.chats)
                         response.chats.forEach(function(chat) {
+                            console.log(chat.important)
+
                             var li = $('<li>').css('margin-top','10px');
                             var link = $('<a>')
-                                .attr('href', '?chat_id=' + chat.public_id)
+                                .attr('href', '?chat_id=' + chat.id)
                                 .text(chat.title)
                                 .css({'color':'white','font-size':'small','font-weight':'bold'});
+
+                            var toggleImportantSpan = $('<span>')
+                                .addClass('toggle-important')
+                                .attr('data-chat-id', chat.id)
+                                .html('&#9733;')
+                                .css({'cursor':'pointer', 'margin-left':'5px', 'float': 'right', 'color': chat.important === true ? 'gold' : 'gray' }) ;
                             var deleteSpan = $('<span>')
-                                .addClass('delete-chat')
-                                .attr('data-chat-id', chat.public_id)
-                                .css({'cursor':'pointer','color':'red','margin-left':'0','float':'right'})
-                                .html('&#x1F5D1;');
+                                .addClass('delete-chat glyphicon')
+                                .attr('data-chat-id', chat.id)
+                                .css({'cursor':'pointer','color':'white','margin-left':'0','float':'right'})
+                                .html('&#xe020;');
                             var cancelSpan = $('<span>')
                                 .addClass('cancel-delete')
-                                .attr('data-chat-id', chat.public_id)
+                                .attr('data-chat-id', chat.id)
                                 .css({'display':'none','cursor':'pointer','color':'gray','margin-left':'0','float':'right'})
                                 .html('&#x274C;');
                             var confirmSpan = $('<span>')
                                 .addClass('confirm-delete')
-                                .attr('data-chat-id', chat.public_id)
+                                .attr('data-chat-id', chat.id)
                                 .css({'display':'none','cursor':'pointer','color':'green','margin-left':'0','float':'right'})
                                 .html('&#x2714;');
-                            li.append(link, deleteSpan, cancelSpan, confirmSpan);
+                            li.append(link, toggleImportantSpan, deleteSpan, cancelSpan, confirmSpan);
                             chatList.append(li);
                         });
                     } else {

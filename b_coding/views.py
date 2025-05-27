@@ -293,6 +293,7 @@ def update_default_project(request):
             chats_data.append({
                 'id': chat.public_id,
                 'title': chat.title,
+                'important': chat.important,
             })
 
         # Prepare chat categories
