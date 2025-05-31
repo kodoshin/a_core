@@ -2,7 +2,7 @@
     <div>
         <a class="flex items-center gap-2" href="/">
 
-             <img class="max-h-12 min-w-24 w-auto max-w-full" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/Kodoshin logo.png" alt="Logo"/>
+             <img class="max-h-12 min-w-24 w-auto max-w-full" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748605954/My%20Brand/Kodoshin_logo_uoe1n5.png" alt="Logo"/>
              <!--<img class="h-14" src="/static/images/ninjas.png" alt="Logo"/>
              <h1 style="color: #ffffff;">Kodoshin</h1> -->
 
@@ -36,14 +36,14 @@
 
 
             <span style="display: inline; font-weight: bold; padding-right: 5px; padding-left: 10px">{{ user.profile.available_credits }} </span>
-            <img style="max-width: 18px;  display: inline;" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/gold-coin.png" alt="magic"  >
+            <img style="max-width: 18px;  display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748720709/Empty-Gold-Coin_ssbjlp.png" alt="magic"  >
 
 
 
 
             <li x-data="{ dropdownOpen: false }" class="relative" style="font-weight: bold;">
                 <a @click="dropdownOpen = !dropdownOpen" @click.away="dropdownOpen = false" class="cursor-pointer select-none">
-                    <img class="h-8 w-8 rounded-full object-cover" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/profile-icon.png"/>
+                    <img class="h-8 w-8 rounded-full object-cover" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748720813/Github-512_ckwtpp.webp"/>
                     {{ user.profile.name }}
                     <img x-bind:class="dropdownOpen && 'rotate-180 duration-300'" class="w-4" src="https://img.icons8.com/small/32/ffffff/expand-arrow.png"/>
                 </a>
@@ -55,7 +55,7 @@
                     <ul class="hoverlist [&>li>a]:justify-end">
                         <li><a style="color: black" href="{% url 'profile' %}">My Profile</a></li>
                         <li><a style="color: black" href="{% url 'profile-settings' %}">Settings</a></li>
-                        <li><a style="color: black" href="{% url 'pricing_credits' %}">Plans & Credits</a></li>
+                        <li><a style="color: black" href="{% url 'pricing_credits' %}">Plans</a></li>
                         <li><a style="color: black" href="{% url 'account_logout' %}">Log Out</a></li>
                     </ul>
                 </div>

@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 import re
 import tiktoken
 from django.db.models import Sum
+from cloudinary.models import CloudinaryField
+
 
 
 _encoding = tiktoken.get_encoding("cl100k_base")
@@ -19,7 +21,8 @@ class Status(models.Model):
 class Technology(models.Model):
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, blank=True, null=True)
-    image = models.ImageField(upload_to='technologies/', null=True, blank=True)
+    #image = models.ImageField(upload_to='technologies/', null=True, blank=True)
+    image = CloudinaryField('image', blank=True, null=True)
     status = models.ForeignKey(Status, on_delete=models.CASCADE, null=True, blank=True)
     prompt_example = models.TextField(blank=True, null=True)
 

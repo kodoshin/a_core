@@ -112,7 +112,7 @@
                 <ul style="width: 25vh">
                     {% for chat in chats %}
                         <li style="margin-top: 10px;">
-                            <span {% if chat.public_id == current_chat.public_id %}class="selected-chat" style="background-color: #9CA3AF " {% endif %}>
+                            <span {% if chat.public_id == current_chat.public_id %}class="selected-chat" style="color: white; font-size: xx-large " {% endif %}>
                             <a href="?chat_id={{ chat.public_id }}" style="color: white; font-size: small; font-weight: bold;">{{ chat.title }}</a>
                             </span>
                             <span class="toggle-important" data-chat-id="{{ chat.public_id }}" data-important="{{ chat.important|yesno:'true,false' }}" style="cursor:pointer; color:{% if chat.important %}gold{% else %}gray{% endif %}; margin-left:5px; float: right;">&#9733;</span>
@@ -195,23 +195,17 @@
 
     <br><br>
     {% endif %}
-    <div class="rating-container" style="margin-bottom: 20px;">
-        <span class="star" data-value="1" style="cursor: pointer;">&#9733;</span>
-        <span class="star" data-value="2" style="cursor: pointer;">&#9733;</span>
-        <span class="star" data-value="3" style="cursor: pointer;">&#9733;</span>
-        <span class="star" data-value="4" style="cursor: pointer;">&#9733;</span>
-        <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
-    </div>
+
     <div class="message-container" id="message-container" style="width: 80%">
         {% for message in messages %}
             {% if message.type == 'prompt' and message.attempt_number == selected_attempt%}
                 <div class="message-user">
                     <br>
-                    <p style="font-weight: bold;"><img style="width:2.2em;height:2.2em;display: inline;" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/profile-icon.png"/> {{ message.content|linebreaksbr }}</p>
+                    <p style="font-weight: bold;"><img style="width:2.2em;height:2.2em;display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748726826/6594712_ljqxyj.webp"/> {{ message.content|linebreaksbr }}</p>
                 </div>
             {% elif message.type == 'gpt-a' and message.attempt_number == selected_attempt %}
                 <div class="message ai">
-                    <img class="ai-avatar-img" src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/avatar.png" alt="IA" style="width:2em;height:3em;display: inline;margin-right: 2em">
+                    <img class="ai-avatar-img" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748726600/Kenshi_a7zk40.png" alt="IA" style="width:2em;height:3em;display: inline;margin-right: 2em">
                     <!-- Display steps here -->
                     {% if message.steps|length > 1 %}
                     <button class="prev-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-weight: bold;">Previous</button>
@@ -222,6 +216,16 @@
                             <div class="step" data-step-number="{{ forloop.counter0 }}" {% if not forloop.first %}style="display:none;"{% endif %}>
                                 {% if message.steps|length > 1 %}
                                 <br>
+
+                                <div class="rating-container" style="margin-bottom: 20px;">
+                                    <span class="star" data-value="1" style="cursor: pointer;">&#9733;</span>
+                                    <span class="star" data-value="2" style="cursor: pointer;">&#9733;</span>
+                                    <span class="star" data-value="3" style="cursor: pointer;">&#9733;</span>
+                                    <span class="star" data-value="4" style="cursor: pointer;">&#9733;</span>
+                                    <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
+                                </div>
+
+
                                 <p><strong>Step {{ step.step_number }}/{{ message.steps|length }}:</strong></p>
                                 {% endif %}
                                 <p>{{ step.justification }}</p>

@@ -1,4 +1,6 @@
 from django.db import models
+from cloudinary.models import CloudinaryField
+
 
 
 class Persona(models.Model):
@@ -7,7 +9,8 @@ class Persona(models.Model):
         ('inactive', 'inactive'),
         ('coming_soon', 'coming soon'),
     ]
-    image = models.ImageField(upload_to='personas/')
+    #image = models.ImageField(upload_to='personas/')
+    image = CloudinaryField('image', blank=True, null=True)
     title = models.CharField(max_length=255)
     subtitle = models.CharField(max_length=255)
     slug = models.CharField(max_length=255, null=True, blank=True)
