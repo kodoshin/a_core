@@ -1,123 +1,228 @@
-import javalang
+import re
+from pathlib import Path
+
 from django.db import transaction
 from a_projects.models import Component, ComponentType
 
+###########################################################################
+# Java (generic) FILE DOCUMENTATION UTILITIES – v2                         #
+# ----------------------------------------------------------------------- #
+#  * Detects Java classes, interfaces, enums, tests.                      #
+#  * Handles Maven/Gradle build files, resources, configs, assets.        #
+#  * Picks up JAX‑RS (@Path) or Spring‑like @RequestMapping endpoints.    #
+###########################################################################
+
+# ---------------------------------------------------------------------------
+# Regular expressions
+# ---------------------------------------------------------------------------
+CLASS_RE = re.compile(r"\bclass\s+(?P<name>[A-Z][A-Za-z0-9_]*)")
+INTERFACE_RE = re.compile(r"\binterface\s+(?P<name>[A-Z][A-Za-z0-9_]*)")
+ENUM_RE = re.compile(r"\benum\s+(?P<name>[A-Z][A-Za-z0-9_]*)")
+
+# JAX‑RS style endpoints: @Path("/resource")
+JAX_PATH_RE = re.compile(r"@Path\(\s*\"(?P<path>[^\"]+)\"\s*\)")
+# Spring style @RequestMapping / @GetMapping("/foo") etc.
+SPRING_MAPPING_RE = re.compile(
+    r'@(?:RequestMapping|GetMapping|PostMapping|PutMapping|DeleteMapping)\s*'  # annotation
+    r'\(\s*"'                                                             # literal ("
+    r'(?P<path>[^"]+)'                                                    # capture path
+    r'"\)'                                                                # literal ")
+)
+
+
 @transaction.atomic
-def java_document_java_file(file_content: str, file_instance, file_name: str, Technology):
-    """
-    Documente un fichier Java en extrayant les définitions de classes et de méthodes.
+def java_document_file(file_content: str, file_instance, file_name: str, technology):
+    """Entry point to classify and document Java‑ecosystem files."""
+    file_path = Path(file_name)
+    ext = file_path.suffix.lower()
+    lower_path = file_name.lower()
 
-    Pour chaque classe, interface ou enum détectée, un composant est créé dans la base de données,
-    avec les informations suivantes :
-      - name: le nom de la classe (ou interface, ou enum),
-      - content: une partie du code source extrait (basé sur la ligne de déclaration),
-      - description: le commentaire associé (non extrait ici, mais potentiellement récupérable en
-                     analysant les commentaires préalables),
-      - start_line et end_line : le numéro de la première (et ici approximativement de la dernière) ligne.
-
-    Pour chaque méthode détectée au sein d'une classe/interface/enum, un composant est créé de même.
-
-    Si aucune définition n'est détectée, le fichier entier est enregistré comme composant de type "Java File".
-
-    :param file_content: Contenu textuel du fichier Java.
-    :param file_instance: Instance du modèle File auquel rattacher le composant.
-    :param file_name: Nom (ou chemin) du fichier.
-    :param Technology: Technologie associée au composant.
-    """
-    try:
-        tree = javalang.parse.parse(file_content)
-    except javalang.parser.JavaSyntaxError as e:
-        comp_type, _ = ComponentType.objects.get_or_create(name="Java File", technology=Technology)
-        component, created = Component.objects.get_or_create(
-            file=file_instance,
-            component_type=comp_type,
-            name=file_name,
-            defaults={
-                'content': file_content,
-                'start_line': 1,
-                'end_line': len(file_content.splitlines()),
-                'description': "Java file is not parsable : " + str(e)
-            }
+    # ------------------------- BUILD CONFIGS -----------------------------
+    if file_path.name in {"pom.xml", "build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts"}:
+        _mark_generic(
+            comp_type="Build Config",
+            component_name=file_path.name,
+            description="Fichier de configuration Maven / Gradle",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
         )
-        if not created:
-            component.content = file_content
-            component.description = "Java file is not parsable : " + str(e)
-            component.save()
         return
 
-    extracted = False
-    lines = file_content.splitlines()
+    # ---------------------------- JAVA SOURCE ---------------------------
+    if ext == ".java":
+        if _is_test(lower_path):
+            _mark_generic(
+                comp_type="Tests",
+                component_name=file_path.name,
+                description="Test JUnit / TestNG",
+                file_content=file_content,
+                file_instance=file_instance,
+                technology=technology,
+            )
+        else:
+            _document_java_source(file_content, file_instance, file_name, technology)
+        return
 
-    # Parcours des types (classes, interfaces, enums) définis dans le fichier
-    for type_decl in tree.types:
-        if isinstance(type_decl, (javalang.tree.ClassDeclaration,
-                                  javalang.tree.InterfaceDeclaration,
-                                  javalang.tree.EnumDeclaration)):
-            extracted = True
-            # Pour l'instant, on ne traite pas les javadoc – on peut imaginer les extraire en analysant les commentaires.
-            docstring = ""
-            start_line = type_decl.position.line if type_decl.position else 1
-            # Ici, nous estimons la fin à la même ligne (améliorable avec une logique dédiée)
-            end_line = start_line
-            # Extraction simple : on prend la ligne de déclaration
-            source = lines[start_line - 1] if start_line - 1 < len(lines) else ""
-            comp_type, _ = ComponentType.objects.get_or_create(name="Java Classes", technology=Technology)
+    # ---------------------- KOTLIN / GROOVY SOURCE ----------------------
+    if ext in {".kt", ".kts"}:
+        _mark_generic(
+            comp_type="Kotlin Source",
+            component_name=file_path.name,
+            description="Fichier Kotlin",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
+        )
+        return
+    if ext == ".groovy":
+        _mark_generic(
+            comp_type="Groovy Source",
+            component_name=file_path.name,
+            description="Fichier Groovy",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
+        )
+        return
+
+    # --------------------------- RESOURCES ------------------------------
+    if ext in {".properties", ".yaml", ".yml", ".xml"}:
+        comp = "Config" if any(k in file_path.name for k in ("application", "config", "settings")) else "Resources"
+        _mark_generic(
+            comp_type=comp,
+            component_name=file_path.name,
+            description="Fichier de configuration / ressource",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
+        )
+        return
+
+    # --------------------------- STATIC / OTHER -------------------------
+    if any(seg in lower_path for seg in ("/static/", "\\static\\", "/public/", "\\public\\")):
+        comp_type = "Static Files"
+    else:
+        comp_type = "Other"
+    _mark_generic(
+        comp_type=comp_type,
+        component_name=file_path.name,
+        description=f"Fichier catégorisé {comp_type}",
+        file_content=file_content,
+        file_instance=file_instance,
+        technology=technology,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Helper functions
+# ---------------------------------------------------------------------------
+
+def _is_test(path: str) -> bool:
+    return (
+        "/src/test/" in path
+        or "\\src\\test\\" in path
+        or path.endswith("Test.java")
+        or path.endswith("Tests.java")
+    )
+
+
+def _mark_generic(*, comp_type: str, component_name: str, description: str, file_content: str, file_instance, technology):
+    comp_type_obj, _ = ComponentType.objects.get_or_create(name=comp_type, technology=technology)
+    component, created = Component.objects.get_or_create(
+        file=file_instance,
+        component_type=comp_type_obj,
+        name=component_name,
+        defaults={
+            "content": file_content,
+            "start_line": 1,
+            "end_line": len(file_content.splitlines()),
+            "description": description,
+        },
+    )
+    if not created:
+        component.content = file_content
+        component.end_line = len(file_content.splitlines())
+        component.description = description
+        component.save()
+
+
+# ---------------------------------------------------------------------------
+# Java source detailed parsing
+# ---------------------------------------------------------------------------
+
+def _document_java_source(file_content: str, file_instance, file_name: str, technology):
+    lines = file_content.splitlines()
+    any_found = False
+
+    # Classes, interfaces, enums
+    any_found |= _extract_pattern(lines, CLASS_RE, "Classes", file_instance, technology, "Class definition")
+    any_found |= _extract_pattern(lines, INTERFACE_RE, "Interfaces", file_instance, technology, "Interface definition")
+    any_found |= _extract_pattern(lines, ENUM_RE, "Enums", file_instance, technology, "Enum definition")
+
+    # Endpoints (JAX‑RS / Spring)
+    _extract_endpoints(lines, file_instance, technology)
+
+    if not any_found:
+        _mark_generic(
+            comp_type="Module",
+            component_name=file_name,
+            description="Fichier Java (aucune entité détectée)",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
+        )
+
+
+def _extract_pattern(lines, regex, comp_type_name, file_instance, technology, description):
+    comp_type, _ = ComponentType.objects.get_or_create(name=comp_type_name, technology=technology)
+    found = False
+    for idx, line in enumerate(lines, start=1):
+        match = regex.search(line)
+        if match:
+            name = match.group("name")
             component, created = Component.objects.get_or_create(
                 file=file_instance,
                 component_type=comp_type,
-                name=type_decl.name,
+                name=name,
                 defaults={
-                    'content': source,
-                    'start_line': start_line,
-                    'end_line': end_line,
-                    'description': docstring
-                }
+                    "content": line,
+                    "start_line": idx,
+                    "end_line": idx,
+                    "description": description,
+                },
             )
             if not created:
-                component.content = source
-                component.description = docstring
+                component.content = line
+                component.start_line = idx
+                component.end_line = idx
+                component.description = description
                 component.save()
+            found = True
+    return found
 
-            # Extraction des méthodes au sein du type (si disponible)
-            if hasattr(type_decl, 'methods'):
-                for method in type_decl.methods:
-                    extracted = True
-                    docstring = ""
-                    start_line = method.position.line if method.position else 1
-                    end_line = start_line
-                    comp_type_method, _ = ComponentType.objects.get_or_create(name="Java Methods", technology=Technology)
-                    source = lines[start_line - 1] if start_line - 1 < len(lines) else ""
-                    component, created = Component.objects.get_or_create(
-                        file=file_instance,
-                        component_type=comp_type_method,
-                        name=method.name,
-                        defaults={
-                            'content': source,
-                            'start_line': start_line,
-                            'end_line': end_line,
-                            'description': docstring
-                        }
-                    )
-                    if not created:
-                        component.content = source
-                        component.description = docstring
-                        component.save()
 
-    # Si aucune classe ou méthode n'est détectée, on enregistre le fichier entier
-    if not extracted:
-        comp_type, _ = ComponentType.objects.get_or_create(name="Java File", technology=Technology)
-        component, created = Component.objects.get_or_create(
-            file=file_instance,
-            component_type=comp_type,
-            name=file_name,
-            defaults={
-                'content': file_content,
-                'start_line': 1,
-                'end_line': len(lines),
-                'description': "No Classes or Methods detected in this file."
-            }
-        )
-        if not created:
-            component.content = file_content
-            component.description = "No Classes or Methods detected in this file."
-            component.save()
+def _extract_endpoints(lines, file_instance, technology):
+    comp_type, _ = ComponentType.objects.get_or_create(name="Endpoints", technology=technology)
+    for idx, line in enumerate(lines, start=1):
+        path_match = JAX_PATH_RE.search(line) or SPRING_MAPPING_RE.search(line)
+        if path_match:
+            path = path_match.group("path")
+            name = f"Endpoint {path}"
+            component, created = Component.objects.get_or_create(
+                file=file_instance,
+                component_type=comp_type,
+                name=name,
+                defaults={
+                    "content": line,
+                    "start_line": idx,
+                    "end_line": idx,
+                    "description": f"Route {path}",
+                },
+            )
+            if not created:
+                component.content = line
+                component.start_line = idx
+                component.end_line = idx
+                component.description = f"Route {path}"
+                component.save()

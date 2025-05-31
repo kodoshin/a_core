@@ -1,220 +1,315 @@
 import ast
-import re
+from pathlib import Path
+
 from django.db import transaction
 from a_projects.models import Component, ComponentType
 
+###############################################################################
+# Flask FILE DOCUMENTATION UTILITIES – v3                                     #
+# --------------------------------------------------------------------------- #
+#  * Detects endpoints declared with:                                          #
+#       - @app.route("/...")  (+ methods=[...])                               #
+#       - @blueprint.route("/...")                                            #
+#       - @app.<http-method>("/...") (get / post / put / delete / patch …)    #
+#       - Multiple decorators on the same function                             #
+#  * Supports Marshmallow schemas, templates, static files, configs, tests.    #
+#  * Fixes previous bug where AST Constant / Str attributes were swapped.      #
+###############################################################################
+
+_HTTP_METHODS = {
+    "get",
+    "post",
+    "put",
+    "delete",
+    "patch",
+    "options",
+    "head",
+}
+
+
+# ---------------------------------------------------------------------------
+# Public entry point
+# ---------------------------------------------------------------------------
+
+
 @transaction.atomic
-def fl_document_file(file_content: str, file_instance, file_name: str, Technology):
-    """
-    Documente le contenu d'un fichier d'un projet Flask et enregistre les composants trouvés
-    dans la table Component.
+def fl_document_file(file_content: str, file_instance, file_name: str, technology):
+    """Route *file_content* to the right Flask parser / classifier."""
 
-    Les composants documentés sont :
-        - Routes
-        - Models
-        - Templates
-        - Static Files
-        - Blueprints
-        - Functions
-        - Python Classes
+    file_path = Path(file_name)
+    ext = file_path.suffix.lower()
+    lower_name = file_name.lower()
 
-    :param file_content: Le contenu textuel du fichier.
-    :param file_instance: L'instance du modèle File auquel rattacher les composants.
-    :param file_name: Le nom (ou chemin) du fichier (utile pour détecter le type).
-    :param Technology: L'instance de la technologie (ici Flask).
-    """
-    # Si le fichier est un fichier Python, on le parse avec ast
-    if file_name.endswith('.py'):
-        fl_document_python_file(file_content, file_instance, file_name, Technology)
-    # Si c'est un template (fichier HTML)
-    elif file_name.endswith('.html'):
-        comp_type, _ = ComponentType.objects.get_or_create(name="Templates", technology=Technology)
-        component, created = Component.objects.get_or_create(
-            file=file_instance,
-            component_type=comp_type,
-            name=file_name,
-            description="Template File",
-            start_line=1,
-            defaults={'content': file_content, 'end_line': len(file_content.splitlines())}
-        )
-        if not created:
-            component.content = file_content
-            component.save()
-    # Pour les fichiers de style CSS
-    elif file_name.endswith('.css'):
-        comp_type, _ = ComponentType.objects.get_or_create(name="Styling", technology=Technology)
-        component, created = Component.objects.get_or_create(
-            file=file_instance,
-            component_type=comp_type,
-            name=file_name,
-            description="Fichier CSS",
-            start_line=1,
-            defaults={'content': file_content, 'end_line': len(file_content.splitlines())}
-        )
-        if not created:
-            component.content = file_content
-            component.save()
-    else:
-        # Pour d'autres fichiers, distinguer les fichiers statiques et médias
-        if "static" in file_name.lower():
-            comp_type_name = "Static Files"
-        elif "media" in file_name.lower():
-            comp_type_name = "Media Files"
+    # ----------------------------- PYTHON SOURCE ----------------------------
+    if ext == ".py":
+        if _is_test_file(lower_name):
+            _create_component(
+                comp_type_name="Tests",
+                component_name=file_path.name,
+                description="(pytest) Test File",
+                file_content=file_content,
+                file_instance=file_instance,
+                technology=technology,
+            )
         else:
-            comp_type_name = "Other"
-        comp_type, _ = ComponentType.objects.get_or_create(name=comp_type_name, technology=Technology)
-        component, created = Component.objects.get_or_create(
-            file=file_instance,
-            component_type=comp_type,
-            name=file_name,
-            description=f"Fichier de type {comp_type_name}",
-            start_line=1,
-            defaults={'content': file_content, 'end_line': len(file_content.splitlines())}
-        )
-        if not created:
-            component.content = file_content
-            component.save()
-
-
-def fl_document_python_file(file_content: str, file_instance, file_name: str, Technology):
-    """
-    Documente un fichier Python d'un projet Flask en extrayant :
-        - Les définitions de classes (avec détection des modèles)
-        - Les définitions de fonctions (en distinguant les routes via le décorateur @route)
-        - Les blueprints (via des assignations à un appel à Blueprint)
-    et enregistre ces éléments dans la table Component.
-
-    :param file_content: Le contenu du fichier Python.
-    :param file_instance: L'instance du modèle File.
-    :param file_name: Le nom (ou chemin) du fichier.
-    :param Technology: L'instance de la technologie (ici Flask).
-    """
-    try:
-        tree = ast.parse(file_content)
-    except SyntaxError as e:
-        # En cas d'erreur de parsing, on enregistre l'ensemble du fichier comme composant
-        comp_type, _ = ComponentType.objects.get_or_create(name="Python", technology=Technology)
-        component, created = Component.objects.get_or_create(
-            file=file_instance,
-            component_type=comp_type,
-            name=file_name,
-            start_line=1,
-            defaults={
-                'content': file_content,
-                'end_line': len(file_content.splitlines()),
-                'description': "Fichier Python non parsable : " + str(e)
-            }
-        )
-        if not created:
-            component.content = file_content
-            component.description = "Fichier Python non parsable : " + str(e)
-            component.save()
+            _document_python_file(file_content, file_instance, file_name, technology)
         return
 
-    # Recherche des blueprints (assignations qui appellent Blueprint)
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Assign):
-            if isinstance(node.value, ast.Call):
-                call_node = node.value
-                func = call_node.func
-                blueprint_called = False
-                if isinstance(func, ast.Name) and func.id == "Blueprint":
-                    blueprint_called = True
-                elif isinstance(func, ast.Attribute) and func.attr == "Blueprint":
-                    blueprint_called = True
-                if blueprint_called:
-                    # On récupère le nom du blueprint depuis l'assignation
-                    blueprint_name = None
-                    if node.targets and isinstance(node.targets[0], ast.Name):
-                        blueprint_name = node.targets[0].id
-                    else:
-                        blueprint_name = "Unnamed Blueprint"
-                    comp_type, _ = ComponentType.objects.get_or_create(name="Blueprints", technology=Technology)
-                    try:
-                        source = ast.unparse(node)
-                    except Exception:
-                        lines = file_content.splitlines()
-                        source = "\n".join(lines[node.lineno - 1: node.lineno])
-                    component, created = Component.objects.get_or_create(
-                        file=file_instance,
-                        component_type=comp_type,
-                        name=blueprint_name,
-                        defaults={'content': source, 'start_line': node.lineno, 'end_line': node.lineno}
-                    )
-                    if not created:
-                        component.content = source
-                        component.save()
+    # ---------------------------- TEMPLATES ---------------------------------
+    if ext in {".html", ".htm", ".jinja", ".j2", ".jinja2"}:
+        _create_component(
+            comp_type_name="Templates",
+            component_name=file_path.name,
+            description="Jinja/HTML Template",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
+        )
+        return
 
-    # Parcours de l'AST pour extraire classes et fonctions
+    # ---------------------- CONFIGURATION / DEPENDENCIES --------------------
+    CONFIG_FILES = {"settings.py", "config.py", ".env", "requirements.txt", "pyproject.toml"}
+    if ext in {".env", ".ini", ".toml"} or file_path.name in CONFIG_FILES:
+        _create_component(
+            comp_type_name="Config",
+            component_name=file_path.name,
+            description="Config / Dependencies File",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
+        )
+        return
+
+    # ---------------------------- STYLES ------------------------------------
+    if ext in {".css", ".scss", ".sass"}:
+        _create_component(
+            comp_type_name="Styling",
+            component_name=file_path.name,
+            description="Styling File",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
+        )
+        return
+
+    # ------------------------ STATIC / MEDIA / OTHER ------------------------
+    if any(seg in lower_name for seg in ("/static/", "\\static\\", "/assets/", "\\assets\\")):
+        comp_type = "Static Files"
+    elif any(seg in lower_name for seg in ("/media/", "\\media\\")):
+        comp_type = "Media Files"
+    else:
+        comp_type = "Other"
+
+    _create_component(
+        comp_type_name=comp_type,
+        component_name=file_path.name,
+        description=f"Classified as {comp_type}",
+        file_content=file_content,
+        file_instance=file_instance,
+        technology=technology,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Helpers – generic
+# ---------------------------------------------------------------------------
+
+def _is_test_file(path: str) -> bool:
+    return (
+        "/tests/" in path
+        or "\\tests\\" in path
+        or path.endswith("_test.py")
+        or path.startswith("test_")
+    )
+
+
+def _create_component(*, comp_type_name: str, component_name: str, description: str, file_content: str, file_instance, technology):
+    """Create or update a Component entry, idempotently."""
+    comp_type, _ = ComponentType.objects.get_or_create(name=comp_type_name, technology=technology)
+
+    component, created = Component.objects.get_or_create(
+        file=file_instance,
+        component_type=comp_type,
+        name=component_name,
+        defaults={
+            "content": file_content,
+            "start_line": 1,
+            "end_line": len(file_content.splitlines()),
+            "description": description,
+        },
+    )
+    if not created:
+        component.content = file_content
+        component.end_line = len(file_content.splitlines())
+        component.description = description
+        component.save()
+
+
+# ---------------------------------------------------------------------------
+# Python-specific parsing (Flask source)
+# ---------------------------------------------------------------------------
+
+def _document_python_file(file_content: str, file_instance, file_name: str, technology):
+    """Parse a Flask Python source file for endpoints & Marshmallow schemas."""
+    try:
+        tree = ast.parse(file_content)
+    except SyntaxError as exc:
+        _create_component(
+            comp_type_name="Python File",
+            component_name=file_name,
+            description=f"Python file not parsable: {exc}",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
+        )
+        return
+
+    lines = file_content.splitlines()
+
+    # --- Endpoints ---------------------------------------------------------
+    _extract_flask_endpoints(tree, lines, file_instance, technology)
+
+    # --- Marshmallow Schemas ----------------------------------------------
+    _extract_marshmallow_schemas(tree, lines, file_instance, technology)
+
+    # Fallback if nothing stored
+    if not Component.objects.filter(file=file_instance).exists():
+        _create_component(
+            comp_type_name="Module",
+            component_name=file_name,
+            description="Python File (no class/endpoint detected)",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Endpoint extraction utilities
+# ---------------------------------------------------------------------------
+
+def _literal_str(node: ast.AST):
+    """Return Python str literal value if *node* is a literal string."""
+    if isinstance(node, ast.Str):
+        return node.s
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    return None
+
+
+def _first_str_arg(call: ast.Call):
+    for arg in call.args:
+        val = _literal_str(arg)
+        if val is not None:
+            return val
+    # Some devs use named arg ``rule="/foo"`` or ``path="/foo"``
+    for name in ("rule", "path"):
+        kw = next((kw for kw in call.keywords if kw.arg == name), None)
+        if kw:
+            val = _literal_str(kw.value)
+            if val is not None:
+                return val
+    return "<dynamic>"
+
+
+def _extract_methods_kw(call: ast.Call):
+    kw = next((kw for kw in call.keywords if kw.arg == "methods"), None)
+    if kw and isinstance(kw.value, (ast.List, ast.Tuple)):
+        methods: list[str] = []
+        for elt in kw.value.elts:
+            lit = _literal_str(elt)
+            if lit:
+                methods.append(lit.upper())
+        return methods
+    return []
+
+
+def _parse_endpoint_decorator(deco: ast.AST):
+    """Return (path, [methods]) if *deco* is a Flask route decorator."""
+    if not isinstance(deco, ast.Call):
+        return None
+
+    # Dotted attribute like ``app.route`` or ``bp.get``
+    if isinstance(deco.func, ast.Attribute):
+        attr = deco.func.attr.lower()
+        if attr == "route":
+            path = _first_str_arg(deco)
+            methods = _extract_methods_kw(deco) or ["GET"]
+            return path, methods
+        if attr in _HTTP_METHODS:
+            path = _first_str_arg(deco)
+            return path, [attr.upper()]
+    return None
+
+
+def _extract_flask_endpoints(tree: ast.AST, lines: list[str], file_instance, technology):
     for node in ast.walk(tree):
-        # --- Traitement des classes ---
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.decorator_list:
+            for deco in node.decorator_list:
+                result = _parse_endpoint_decorator(deco)
+                if result:
+                    route_path, http_methods = result
+                    _store_endpoint(node, route_path, http_methods, lines, file_instance, technology)
+                    # Do *not* break – a function can legitimately have several decorators
+
+
+def _store_endpoint(func_node: ast.AST, route_path: str, http_methods: list[str], lines: list[str], file_instance, technology):
+    start_line = func_node.lineno
+    end_line = getattr(func_node, "end_lineno", start_line)
+    source = "\n".join(lines[start_line - 1 : end_line])
+    comp_type, _ = ComponentType.objects.get_or_create(name="Endpoints", technology=technology)
+
+    for method in http_methods:
+        name = f"{method} {route_path}"
+        component, created = Component.objects.get_or_create(
+            file=file_instance,
+            component_type=comp_type,
+            name=name,
+            defaults={
+                "content": source,
+                "start_line": start_line,
+                "end_line": end_line,
+                "description": f"Endpoint {method} {route_path}",
+            },
+        )
+        if not created:
+            component.content = source
+            component.start_line = start_line
+            component.end_line = end_line
+            component.description = f"Endpoint {method} {route_path}"
+            component.save()
+
+
+# ---------------------------------------------------------------------------
+# Marshmallow schema extraction
+# ---------------------------------------------------------------------------
+
+def _extract_marshmallow_schemas(tree: ast.AST, lines: list[str], file_instance, technology):
+    for node in ast.walk(tree):
         if isinstance(node, ast.ClassDef):
-            docstring = ast.get_docstring(node) or ""
-            start_line = node.lineno
-            end_line = getattr(node, "end_lineno", start_line)
-
-            # Déduire le type de composant : si le fichier s'appelle models.py ou si la classe hérite de Model
-            comp_type_name = None
-            if "models.py" in file_name:
-                comp_type_name = "Models"
-            else:
-                for base in node.bases:
-                    base_name = ""
-                    if isinstance(base, ast.Attribute):
-                        base_name = base.attr
-                    elif isinstance(base, ast.Name):
-                        base_name = base.id
-                    if base_name in ["Model", "db.Model"]:
-                        comp_type_name = "Models"
-                        break
-            if not comp_type_name:
-                comp_type_name = "Python Classes"
-
-            comp_type, _ = ComponentType.objects.get_or_create(name=comp_type_name, technology=Technology)
-            try:
-                source = ast.unparse(node)
-            except Exception:
-                lines = file_content.splitlines()
-                source = "\n".join(lines[start_line - 1: end_line])
-            component, created = Component.objects.get_or_create(
-                file=file_instance,
-                component_type=comp_type,
-                name=node.name,
-                defaults={'content': source, 'start_line': start_line, 'end_line': end_line, 'description': docstring}
-            )
-            if not created:
-                component.content = source
-                component.description = docstring
-                component.save()
-
-        # --- Traitement des fonctions ---
-        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            docstring = ast.get_docstring(node) or ""
-            start_line = node.lineno
-            end_line = getattr(node, "end_lineno", start_line)
-
-            # Vérifier si la fonction possède un décorateur route (@app.route ou @blueprint.route)
-            is_route = False
-            for decorator in node.decorator_list:
-                if isinstance(decorator, ast.Call):
-                    func = decorator.func
-                    if isinstance(func, ast.Attribute) and func.attr == "route":
-                        is_route = True
-                        break
-            comp_type_name = "Routes" if is_route else "Functions"
-            comp_type, _ = ComponentType.objects.get_or_create(name=comp_type_name, technology=Technology)
-            try:
-                source = ast.unparse(node)
-            except Exception:
-                lines = file_content.splitlines()
-                source = "\n".join(lines[start_line - 1: end_line])
-            component, created = Component.objects.get_or_create(
-                file=file_instance,
-                component_type=comp_type,
-                name=node.name,
-                defaults={'content': source, 'start_line': start_line, 'end_line': end_line, 'description': docstring}
-            )
-            if not created:
-                component.content = source
-                component.description = docstring
-                component.save()
+            if any(
+                (isinstance(base, ast.Name) and base.id == "Schema")
+                or (isinstance(base, ast.Attribute) and base.attr == "Schema")
+                for base in node.bases
+            ):
+                start_line = node.lineno
+                end_line = getattr(node, "end_lineno", start_line)
+                source = "\n".join(lines[start_line - 1 : end_line])
+                comp_type, _ = ComponentType.objects.get_or_create(name="Marshmallow Schemas", technology=technology)
+                component, created = Component.objects.get_or_create(
+                    file=file_instance,
+                    component_type=comp_type,
+                    name=node.name,
+                    defaults={
+                        "content": source,
+                        "start_line": start_line,
+                        "end_line": end_line,
+                        "description": "Marshmallow schema",
+                    },
+                )
+                if not created:
+                    component.content = source
+                    component.start_line = start_line
+                    component.end_line = end_line
+                    component.description = "Marshmallow schema"
+                    component.save()

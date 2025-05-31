@@ -1,152 +1,209 @@
 import re
 from pathlib import Path
-from typing import List
 
-from a_projects.models import Component, ComponentType  # Ajustez l'import selon votre projet
+from django.db import transaction
+from a_projects.models import Component, ComponentType
+
+############################################################################
+# React FILE DOCUMENTATION UTILITIES – v2                                 #
+# ---------------------------------------------------------------------- #
+#  * Detects React components (functional, arrow, class) & hooks          #
+#  * Identifies Storybook stories, tests, styling modules, configs, assets#
+############################################################################
 
 
-def react_document_file(file_content: str, file_instance, technology) -> List[Component]:
-    """Analyse un fichier React/TSX et crée des entrées *Component* en base.
+# ----------------------------------------------------------------------------
+# Regex patterns
+# ----------------------------------------------------------------------------
 
-    - Prend en charge les extensions .js, .jsx, .ts, .tsx, .html, .css/.scss
-    - Détecte : classes, fonctions, arrow-functions, composant via forwardRef, annotations React.FC & generics.
-    - Estime les numéros de ligne pour chaque composant.
+FUNC_COMPONENT_RE = re.compile(r"(?:export\s+)?function\s+([A-Z][A-Za-z0-9_]*)\s*\(")
+ARROW_COMPONENT_RE = re.compile(r"(?:export\s+)?(?:const|let|var)\s+([A-Z][A-Za-z0-9_]*)\s*=\s*\(?.*?=>")
+CLASS_COMPONENT_RE = re.compile(r"class\s+([A-Z][A-Za-z0-9_]*)\s+extends\s+React\.(?:PureComponent|Component)")
+HOOK_RE = re.compile(r"(?:export\s+)?function\s+(use[A-Z][A-Za-z0-9_]*)\s*\(")
 
-    Args:
-        file_content: Contenu complet du fichier.
-        file_instance: Instance File (clé étrangère vers le modèle Component).
-        technology: Objet *Technology* (clé étrangère vers ComponentType).
 
-    Returns:
-        Liste des instances *Component* créées.
-    """
-    file_name = file_instance.name
-    extension = Path(file_name).suffix.lower()
+@transaction.atomic
+def react_document_file(file_content: str, file_instance, file_name: str, technology):
+    """Main router for React project files."""
+    file_path = Path(file_name)
+    ext = file_path.suffix.lower()
+    lower_name = file_name.lower()
 
-    # --- Gestion des fichiers non-JS/TS -------------------------------------------------------
-    if extension in {".html", ".htm"}:
-        comp_type, _ = ComponentType.objects.get_or_create(name="Template", technology=technology)
-        return [Component.objects.create(
-            file=file_instance,
-            component_type=comp_type,
-            name=file_name,
-            content=file_content,
-            description="HTML/Template file",
-            start_line=1,
-            end_line=len(file_content.splitlines()),
-        )]
+    # -------------------------------- CODE ----------------------------------
+    if ext in {".js", ".jsx", ".ts", ".tsx"}:
+        if _is_test_file(lower_name):
+            _mark_generic(
+                comp_type="Tests",
+                component_name=file_path.name,
+                description="Testing File (Jest / Vitest)",
+                file_content=file_content,
+                file_instance=file_instance,
+                technology=technology,
+            )
+        elif _is_story_file(lower_name):
+            _mark_generic(
+                comp_type="Stories",
+                component_name=file_path.name,
+                description="Storybook story",
+                file_content=file_content,
+                file_instance=file_instance,
+                technology=technology,
+            )
+        else:
+            _document_react_code(file_content, file_instance, file_name, technology)
+        return
 
-    if extension in {".css", ".scss", ".sass", ".less"}:
-        comp_type, _ = ComponentType.objects.get_or_create(name="Styling", technology=technology)
-        return [Component.objects.create(
-            file=file_instance,
-            component_type=comp_type,
-            name=file_name,
-            content=file_content,
-            description="Stylesheet",
-            start_line=1,
-            end_line=len(file_content.splitlines()),
-        )]
+    # ----------------------------- STYLES -----------------------------------
+    if ext in {".css", ".scss", ".sass", ".less"} or lower_name.endswith(".module.css") or lower_name.endswith(".module.scss"):
+        _mark_generic(
+            comp_type="Styling Module" if ".module." in lower_name else "Styling",
+            component_name=file_path.name,
+            description="Styling File",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
+        )
+        return
 
-    # --- Détection des composants JS / TS -----------------------------------------------------
-    # Pré-compilation des motifs (écrits pour couvrir la plupart des syntaxes courantes)
-    regex_flags = re.MULTILINE | re.DOTALL
+    # ------------------------------ CONFIG ----------------------------------
+    if file_path.name in {"vite.config.js", "vite.config.ts", "webpack.config.js", ".eslintrc", ".eslintrc.js", ".eslintrc.cjs", ".prettierrc", ".prettierrc.js"}:
+        _mark_generic(
+            comp_type="Build Config",
+            component_name=file_path.name,
+            description="Config tooling file (Vite/Webpack/ESLint/Prettier)",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
+        )
+        return
 
-    PATTERNS = [
-        # 1. Classe (avec éventuels exports, alias React, génériques <P,S>)
-        (re.compile(r"(?:export\s+(?:default\s+)?)?class\s+(?P<name>\w+)\s+extends\s+[A-Za-z0-9_.]*Component(?:<[^>{]+>)?\s*{", regex_flags),
-         "ClassComponent"),
+    # --------------------------- MARKDOWN / MDX -----------------------------
+    if ext in {".md", ".mdx"}:
+        _mark_generic(
+            comp_type="Docs",
+            component_name=file_path.name,
+            description="Markdown/MDX Documentation",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
+        )
+        return
 
-        # 2. Fonction nommée (générique possible)
-        (re.compile(r"(?:export\s+(?:default\s+)?)?function\s+(?P<name>\w+)(?:<[^>{]+>)?\s*\(.*?\)\s*{", regex_flags),
-         "FunctionComponent"),
+    # ----------------------- STATIC / ASSETS -------------------------------
+    if any(seg in lower_name for seg in ("/static/", "/public/", "\\static\\", "\\public\\")):
+        comp_type = "Static Files"
+    elif any(lower_name.endswith(ext) for ext in (".png", ".jpg", ".jpeg", ".svg", ".webp")):
+        comp_type = "Assets"
+    else:
+        comp_type = "Other"
 
-        # 3. Arrow function stockée dans une const (React.FC | FunctionComponent | VFC, ou aucune annotation)
-        (re.compile(r"(?:export\s+)?const\s+(?P<name>\w+)(?:\s*:\s*React\.[A-Za-z]*\s*<[^>]*>)?\s*=\s*\(.*?\)\s*=>\s*(?:{|<)", regex_flags),
-         "FunctionComponent"),
+    _mark_generic(
+        comp_type=comp_type,
+        component_name=file_path.name,
+        description=f"Out of Principal Categories ({comp_type})",
+        file_content=file_content,
+        file_instance=file_instance,
+        technology=technology,
+    )
 
-        # 4. React.forwardRef
-        (re.compile(r"(?:export\s+)?const\s+(?P<name>\w+)\s*=\s*(?:React\.)?forwardRef(?:<[^>]+>)?\s*\(", regex_flags),
-         "ForwardRefComponent"),
-    ]
 
-    # Recherche de tous les composants et tri par position dans le fichier
-    matches = []
-    for pattern, comp_type in PATTERNS:
-        for m in pattern.finditer(file_content):
-            matches.append((m.start(), m.group("name"), comp_type))
+# ----------------------------------------------------------------------------
+# Helpers
+# ----------------------------------------------------------------------------
 
-    matches.sort(key=lambda x: x[0])
+def _is_test_file(path: str) -> bool:
+    return any(
+        path.endswith(suffix)
+        for suffix in (
+            ".test.js",
+            ".test.jsx",
+            ".test.ts",
+            ".test.tsx",
+            ".spec.js",
+            ".spec.jsx",
+            ".spec.ts",
+            ".spec.tsx",
+        )
+    ) or "/__tests__/" in path or "\\__tests__\\" in path
 
-    # Si aucun composant détecté, on enregistre tout le fichier comme "Module"
-    if not matches:
-        comp_type, _ = ComponentType.objects.get_or_create(name="Module", technology=technology)
-        return [Component.objects.create(
-            file=file_instance,
-            component_type=comp_type,
-            name=file_name,
-            content=file_content,
-            description="Fichier sans composants React explicites",
-            start_line=1,
-            end_line=len(file_content.splitlines()),
-        )]
 
-    # --- Patterns d'analyse pour enrichir la description --------------------------------------
-    analysis_patterns = {
-        "Props": r"\bprops\b",
-        "State": r"\bthis\.state\b|\buseState\b",
-        "Hooks": r"\buse[A-Z]\w+\b",
-        "Context": r"\bReact\.createContext\b|\buseContext\b",
-        "Routing": r"\b<Route\b|\breact-router\b|\bBrowserRouter\b|\bSwitch\b",
-        "State Management": r"\bredux\b|\bcreateStore\b|\bdispatch\b|\bProvider\b",
-        "Lifecycle": r"\bcomponentDid(Mount|Update|Unmount)\b|\bgetDerivedStateFromProps\b",
-        "Events": r"\bon(?:Click|Change|Submit)\b",
-        "Styling": r"\bclassName\b|\bstyled\(",
-        "Forms": r"\b<form\b|\bonSubmit\b",
-        "API Integration": r"\baxios\b|\bfetch\(",
-        "Testing": r"\b(jest|vitest)\b|\btest\(",
-        "Error Handling": r"\btry\s*{",
-        "Optimization": r"\bReact\.memo\b|\buse(Memo|Callback)\b",
-        "Rendering": r"\brender\s*\(",
-        "Build Tools": r"\bwebpack\b|\bBabel\b",
-    }
+def _is_story_file(path: str) -> bool:
+    return ".stories." in path or path.endswith(".story.tsx") or path.endswith(".story.jsx")
 
-    # Méthode utilitaire pour obtenir le numéro de ligne d'un index
-    newline_positions = [pos for pos, ch in enumerate(file_content) if ch == "\n"]
-    def get_line_number(pos: int) -> int:
-        """Retourne la ligne (1-indexed) correspondant à l'index *pos*."""
-        # recherche binaire approximative
-        low, high = 0, len(newline_positions)
-        while low < high:
-            mid = (low + high) // 2
-            if newline_positions[mid] < pos:
-                low = mid + 1
-            else:
-                high = mid
-        return low + 1  # +1 car lignes commencent à 1
 
-    created_components: List[Component] = []
+def _mark_generic(*, comp_type: str, component_name: str, description: str, file_content: str, file_instance, technology):
+    comp_type_obj, _ = ComponentType.objects.get_or_create(name=comp_type, technology=technology)
+    component, created = Component.objects.get_or_create(
+        file=file_instance,
+        component_type=comp_type_obj,
+        name=component_name,
+        defaults={
+            "content": file_content,
+            "start_line": 1,
+            "end_line": len(file_content.splitlines()),
+            "description": description,
+        },
+    )
+    if not created:
+        component.content = file_content
+        component.end_line = len(file_content.splitlines())
+        component.description = description
+        component.save()
 
-    for i, (start_idx, comp_name, comp_type_name) in enumerate(matches):
-        end_idx = matches[i + 1][0] if i + 1 < len(matches) else len(file_content)
-        bloc = file_content[start_idx:end_idx]
 
-        start_line = get_line_number(start_idx)
-        end_line = get_line_number(end_idx)
+# ----------------------------------------------------------------------------
+# React code parsing
+# ----------------------------------------------------------------------------
 
-        aspects = [name for name, pat in analysis_patterns.items() if re.search(pat, bloc)]
-        description = f"Utilise : {', '.join(aspects)}" if aspects else ""
+def _document_react_code(file_content: str, file_instance, file_name: str, technology):
+    lines = file_content.splitlines()
+    detected = False
 
-        comp_type_obj, _ = ComponentType.objects.get_or_create(name=comp_type_name, technology=technology)
+    # Functional components
+    detected |= _extract_pattern(lines, FUNC_COMPONENT_RE, "Components", file_instance, technology, desc="Functional component")
 
-        created_components.append(Component.objects.create(
-            file=file_instance,
-            component_type=comp_type_obj,
-            name=comp_name,
-            content=bloc,
-            description=description,
-            start_line=start_line,
-            end_line=end_line,
-        ))
+    # Arrow components
+    detected |= _extract_pattern(lines, ARROW_COMPONENT_RE, "Components", file_instance, technology, desc="Arrow component")
 
-    return created_components
+    # Class components
+    detected |= _extract_pattern(lines, CLASS_COMPONENT_RE, "Components", file_instance, technology, desc="Class component")
+
+    # Custom hooks
+    _extract_pattern(lines, HOOK_RE, "Hooks", file_instance, technology, desc="Custom hook")
+
+    if not detected:
+        _mark_generic(
+            comp_type="Module",
+            component_name=file_name,
+            description="JS/TS File (no components detected)",
+            file_content=file_content,
+            file_instance=file_instance,
+            technology=technology,
+        )
+
+
+def _extract_pattern(lines, regex, comp_type_name, file_instance, technology, *, desc):
+    comp_type, _ = ComponentType.objects.get_or_create(name=comp_type_name, technology=technology)
+    found_any = False
+    for idx, line in enumerate(lines, start=1):
+        for match in regex.finditer(line):
+            name = match.group(1)
+            component, created = Component.objects.get_or_create(
+                file=file_instance,
+                component_type=comp_type,
+                name=name,
+                defaults={
+                    "content": line,
+                    "start_line": idx,
+                    "end_line": idx,
+                    "description": desc,
+                },
+            )
+            if not created:
+                component.content = line
+                component.start_line = idx
+                component.end_line = idx
+                component.description = desc
+                component.save()
+            found_any = True
+    return found_any
