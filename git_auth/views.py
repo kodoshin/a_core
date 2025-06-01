@@ -241,7 +241,7 @@ def process_selected_files(request, git_repo_id, repo_name):
             project.status = status
             project.save()
             profile = request.user.profile
-            profile.default_project = project
+            #profile.default_project = project
             profile.save()
 
         return StreamingHttpResponse(stream(), content_type="text/plain")
