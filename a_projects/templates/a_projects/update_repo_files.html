@@ -39,6 +39,9 @@
         <button type="submit">Submit</button>
     </div>
 </form>
+<div id="progress-container" style="display:none; margin-top:20px; margin-left: 20%;">
+    <p>Progress: <span id="progress-count">0/0</span></p>
+</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -55,6 +58,47 @@ document.addEventListener("DOMContentLoaded", function() {
             if (subUl) {
                 subUl.classList.toggle('hidden');
             }
+        });
+    });
+
+    // Streaming progress logic
+    const form = document.querySelector('form');
+    const progressContainer = document.getElementById('progress-container');
+    const progressCount = document.getElementById('progress-count');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        progressContainer.style.display = 'block';
+        const formData = new FormData(form);
+        const url = form.getAttribute('action');
+
+        fetch(url, {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            function read() {
+                reader.read().then(({ done, value }) => {
+                    if (done) {
+                        window.location = "{% url 'home' %}";
+                        return;
+                    }
+                    buffer += decoder.decode(value, { stream: true });
+                    let lines = buffer.split('\n');
+                    buffer = lines.pop();
+                    lines.forEach(line => {
+                        if (line.trim()) {
+                            const obj = JSON.parse(line);
+                            progressCount.innerText = obj.count + '/' + obj.total;
+                        }
+                    });
+                    read();
+                });
+            }
+            read();
         });
     });
 });
