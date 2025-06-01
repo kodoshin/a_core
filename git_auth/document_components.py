@@ -18,8 +18,11 @@ from a_projects.tech_doc_utils.cs_doc_utils import get_csharp_docstring
 
 
 def document_components (project, technology):
-    print('documenting project components')
     files = File.objects.filter(project=project)
+    total = files.count()
+    count = 0
+    # initial progress
+    yield {"count": count, "total": total}
     for file in files :
         print(file.name)
         Component.objects.filter(file=file).delete()
@@ -53,4 +56,7 @@ def document_components (project, technology):
             vue_document_file(file.content, file, file.name, technology)
         elif technology.name == 'Svelte':
             sveltekit_document_file(file.content, file, file.name, technology)
+
+        count += 1
+        yield {"count": count, "total": total}
 

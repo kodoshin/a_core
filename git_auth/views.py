@@ -237,11 +237,13 @@ def process_selected_files(request, git_repo_id, repo_name):
                 document_tech(git_repo_id)
 
             project = get_object_or_404(Project, git_repo_id=git_repo_id)
-            document_components(project, project.technology)
+            #document_components(project, project.technology)
+            for progress in document_components(project, project.technology):
+                yield json.dumps(progress) + "\n"
             project.status = status
             project.save()
             profile = request.user.profile
-            #profile.default_project = project
+            profile.default_project = profile.default_project
             profile.save()
 
         return StreamingHttpResponse(stream(), content_type="text/plain")
