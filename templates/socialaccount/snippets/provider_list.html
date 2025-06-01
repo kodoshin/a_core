@@ -3,10 +3,53 @@
 {% load static %}
 {% load socialaccount %}
 <link rel="stylesheet" href="{% static 'css/custom_login.css' %}">
+<style>
+.github-login-button {
+    display: inline-flex;
+    align-items: center;
+    background-color: #24292e;
+    color: #ffffff;
+    padding: 10px 20px;
+    text-decoration: none !important;
+    border-radius: 5px;
+}
+
+.github-login-button:hover {
+    background-color: #444d56;
+    color: #ffffff;
+}
+
+.github-logo {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    text-decoration: none !important;
+}.github-login-button {
+    display: inline-flex;
+    align-items: center;
+    background-color: #24292e;
+    color: #ffffff;
+    padding: 10px 20px;
+    text-decoration: none !important;
+    border-radius: 5px;
+}
+
+.github-login-button:hover {
+    background-color: #444d56;
+    color: #ffffff;
+}
+
+.github-logo {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    text-decoration: none !important;
+}
+</style>
 <ul>
     <li>
         <a href="{% provider_login_url provider.id %}" class="github-login-button">
-            <img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/github-white-logo.png" alt="GitHub Logo" class="github-logo">
+            <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748720813/Github-512_ckwtpp.webp" alt="GitHub Logo" class="github-logo">
             Sign in with GitHub
         </a>
     </li>
