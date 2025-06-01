@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from allauth.socialaccount.models import SocialToken
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from a_projects.ai_utils import document_tech
 from django.shortcuts import get_object_or_404
 from .document_components import document_components
@@ -10,6 +10,7 @@ from a_projects.models import Project, Status, File
 from .models import AllowedFile
 import re
 import os
+import json
 from django.http import JsonResponse
 import tiktoken
 
@@ -194,58 +195,57 @@ def view_repo_files(request, git_repo_id, repo_name):
     return render(request, 'git_auth/view_repo_files.html', {'file_tree': file_tree, 'project':project})
 
 
-def process_selected_files (request, git_repo_id, repo_name):
-    #print('Processing FILES')
+def process_selected_files(request, git_repo_id, repo_name):
     if request.method == 'POST':
         project_id = request.POST.get('project_id')
-        project = Project.objects.get(id=project_id)  # Récupérer le projet associé
-        selected_files = request.POST.getlist('file-checkbox')
-        for file_str in selected_files:
-            file_dict = eval(file_str)  # Convertir la chaîne en dictionnaire
-            file_name = file_dict['name']
-            file_path = file_dict.get('path', '')
-            file_content = file_dict.get('content', '')
-            file_extension = os.path.splitext(file_name)[1].lower()
-            file_type = re.search(r'(\.[^.]+)$', file_name).group(1) if re.search(r'(\.[^.]+)$', file_name) else None
-            if (file_extension != '') and (file_content.replace(' ','') != '' ):
-                file_instance, created = File.objects.update_or_create(
-                    project=project,
-                    name=file_name,
-                    path=file_path,
-                    extension = file_extension,
-                    type = file_type,
-                    defaults={
-                        'content': file_content,
-                    }
-                )
-                if created:
-                    print(f"File '{file_name}' created successfully.")
-                else:
-                    print(f"File '{file_name}' updated successfully.")
-        #documenter la technologie :
-        deleted_files = request.POST.getlist('deleted_file')
-        #print('DELETED FILES')
-        #print(deleted_files)
-        if len(deleted_files)>0:
-            for path in deleted_files:
-                File.objects.filter(project=project, path=path).delete()
 
-        if project.technology == None :
-            print('Documenting Tech')
-            document_tech(git_repo_id)
-        else :
-            print('Tech already documented')
-            pass
+        selected_files = request.POST.getlist('file-checkbox')
+        total = len(selected_files)
+        deleted_files = request.POST.getlist('deleted_file')
         status = Status.objects.get(code=1)
-        project = get_object_or_404(Project, git_repo_id=git_repo_id)
-        #print('Documenting Components')
-        document_components(project, project.technology)
-        project.status = status
-        project.save()
-        profile = request.user.profile  # Assurez-vous que l'utilisateur a un profil lié
-        profile.default_project = project
-        profile.save()
-        return redirect('home')
+
+        def stream():
+            project = Project.objects.get(id=project_id)
+            count = 0
+            yield json.dumps({"count": count, "total": total}) + "\n"
+            for file_str in selected_files:
+                file_dict = eval(file_str)
+                file_name = file_dict["name"]
+                file_path = file_dict.get("path", "")
+                file_content = file_dict.get("content", "")
+                file_extension = os.path.splitext(file_name)[1].lower()
+                file_type = re.search(r"(\.[^.]+)$", file_name)
+                file_type = file_type.group(1) if file_type else None
+
+                if file_extension and file_content.replace(" ", ""):
+                    File.objects.update_or_create(
+                        project=project,
+                        name=file_name,
+                        path=file_path,
+                        extension=file_extension,
+                        type=file_type,
+                        defaults={"content": file_content}
+                    )
+                count += 1
+                yield json.dumps({"count": count, "total": total}) + "\n"
+
+            if deleted_files:
+                for path in deleted_files:
+                    File.objects.filter(project=project, path=path).delete()
+
+            if project.technology is None:
+                document_tech(git_repo_id)
+
+            project = get_object_or_404(Project, git_repo_id=git_repo_id)
+            document_components(project, project.technology)
+            project.status = status
+            project.save()
+            profile = request.user.profile
+            profile.default_project = project
+            profile.save()
+
+        return StreamingHttpResponse(stream(), content_type="text/plain")
+
     return HttpResponse("No files are selected")
 
 

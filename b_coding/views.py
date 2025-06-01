@@ -154,6 +154,7 @@ async def code_chat_view(request):
 
                 # Await the AI response
                 ai_response = await response_task
+                ai_response = ai_response.replace("&gt;", ">").replace("&lt;", "<")
 
                 if title_task:
                     ai_title = await title_task
