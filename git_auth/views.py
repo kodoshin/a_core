@@ -205,7 +205,7 @@ def view_repo_files(request, git_repo_id, repo_name):
 def process_selected_files(request, git_repo_id, repo_name):
     if request.method == 'POST':
         project_id = request.POST.get('project_id')
-
+        git_branch = request.POST.get('git_branch')
         selected_files = request.POST.getlist('file-checkbox')
         total = len(selected_files)
         deleted_files = request.POST.getlist('deleted_file')
@@ -213,6 +213,9 @@ def process_selected_files(request, git_repo_id, repo_name):
 
         def stream():
             project = Project.objects.get(id=project_id)
+            if git_branch:
+                project.git_branch = git_branch
+                project.save(update_fields=['git_branch'])
             count = 0
             yield json.dumps({"count": count, "total": total}) + "\n"
             for file_str in selected_files:

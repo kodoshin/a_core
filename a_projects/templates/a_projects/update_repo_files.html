@@ -28,6 +28,7 @@
                 {% for deleted_file in deleted_files %}
                     <li style="color:#444d56">{{ deleted_file }}</li>
                     <input type="hidden" name="deleted_file" value="{{ deleted_file }}">
+                    <input type="hidden" name="git_branch" value="{{ selected_branch }}">
                 {% endfor %}
             {% else %}
                 <li style="color:#444d56">0 files</li>
