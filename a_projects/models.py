@@ -43,6 +43,8 @@ class Project(models.Model):
     is_large = models.BooleanField(default=False)
     git_branch = models.CharField(max_length=100, null=True, blank=True)
 
+    class Meta:
+        unique_together = ("user", "git_repo_id", "git_branch")
     def update_tokens(self):
         total = self.file_set.aggregate(total=Sum('tokens_count'))['total'] or 0
         self.tokens_count = total

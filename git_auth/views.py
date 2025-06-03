@@ -72,7 +72,7 @@ def list_repos(request):
 
 
 def view_repo_files(request, git_repo_id, repo_name):
-    branch = request.GET.get('branch')
+    branch = request.GET.get('branch') or "main"
     allowed_extensions = tuple(AllowedFile.objects.values_list('extension', flat=True))
     #print('view repo files')
     print('BRANCHES :')
@@ -178,12 +178,13 @@ def view_repo_files(request, git_repo_id, repo_name):
     git_repo_id = response_repo.json().get('id')
     git_repo_name = repo_name
     git_repo_url = f'https://github.com/{request.user.username}/{repo_name}'
-    existing_project = Project.objects.filter(user=user, git_repo_id=git_repo_id).first()
+    existing_project = Project.objects.filter(user=user, git_repo_id=git_repo_id, git_branch=branch).first()
     if existing_project:
         # Si un projet existe, le mettre à jour
         existing_project.name = name
         existing_project.git_repo_name = git_repo_name
         existing_project.git_repo_url = git_repo_url
+        existing_project.git_branch = branch
         existing_project.save()  # Sauvegarder les changements
         project = existing_project
     else:
@@ -195,6 +196,7 @@ def view_repo_files(request, git_repo_id, repo_name):
             git_repo_id=git_repo_id,
             git_repo_name=git_repo_name,
             git_repo_url=git_repo_url,
+            git_branch=branch,
             status = status
         )
         new_project.save()
