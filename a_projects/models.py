@@ -41,6 +41,7 @@ class Project(models.Model):
     github_sync = models.BooleanField(default=False)
     tokens_count = models.PositiveIntegerField(default=0)
     is_large = models.BooleanField(default=False)
+    git_branch = models.CharField(max_length=100, null=True, blank=True)
 
     def update_tokens(self):
         total = self.file_set.aggregate(total=Sum('tokens_count'))['total'] or 0

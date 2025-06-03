@@ -72,6 +72,7 @@ def list_repos(request):
 
 
 def view_repo_files(request, git_repo_id, repo_name):
+    branch = request.GET.get('branch')
     allowed_extensions = tuple(AllowedFile.objects.values_list('extension', flat=True))
     #print('view repo files')
     print('BRANCHES :')
@@ -79,19 +80,20 @@ def view_repo_files(request, git_repo_id, repo_name):
     token = get_github_token(request.user)
     headers = {'Authorization': f'token {token}',
                "Accept": "application/vnd.github.v3+json"}
+    def build_url(path=''):
+        base = f'https://api.github.com/repos/{request.user.username}/{repo_name}/contents/{path}'
+        return f'{base}?ref={branch}' if branch else base
+
     def fetch_directory_contents(path=''):
-        url = f'https://api.github.com/repos/{request.user.username}/{repo_name}/contents/{path}'
-        response = requests.get(url, headers=headers)
+        response = requests.get(build_url(path), headers=headers)
         if response.status_code == 200:
             return response.json()
         return []
-    def fetch_file_content(path):
-        url = f'https://api.github.com/repos/{request.user.username}/{repo_name}/contents/{path}'
-        response = requests.get(url, headers=headers)
 
+    def fetch_file_content(path):
+        response = requests.get(build_url(path), headers=headers)
         if response.status_code == 200:
             content_data = response.json()
-            # Le contenu du fichier est encodé en base64, il faut donc le décoder
             file_content = base64.b64decode(content_data['content']).decode('utf-8')
             return file_content
         return None
@@ -197,7 +199,7 @@ def view_repo_files(request, git_repo_id, repo_name):
         )
         new_project.save()
         project = new_project
-    return render(request, 'git_auth/view_repo_files.html', {'file_tree': file_tree, 'project':project})
+    return render(request, 'git_auth/view_repo_files.html', {'file_tree': file_tree, 'project':project, 'selected_branch': branch})
 
 
 def process_selected_files(request, git_repo_id, repo_name):

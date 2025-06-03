@@ -127,11 +127,16 @@ function redirectToRepo() {
     const selectedRepoOption = repoSelect.options[repoSelect.selectedIndex];
     const repoName  = selectedRepoOption.getAttribute('data-name');
     const repoId    = selectedRepoOption.getAttribute('data-id');
-    const branch    = branchSelect.value;
+
+    /* Récupère proprement la branche éventuellement sélectionnée */
+    let branch = '';
+    if (branchSelect && branchSelect.selectedIndex > 0) {
+        branch = branchSelect.options[branchSelect.selectedIndex].value;
+    }
 
     if (repoName && repoId) {
         let url = `/git/repos/${repoId}/${repoName}/`;
-        if (branch) {  // we append the branch if user selected one
+        if (branch) {
             url += `?branch=${encodeURIComponent(branch)}`;
         }
         window.location.href = url;
