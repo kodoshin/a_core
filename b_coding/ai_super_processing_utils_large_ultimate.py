@@ -144,6 +144,7 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt, techno
             #print('EP2 !!!!!!!!!!!!!')
             #print(engineered_prompt_2)
             ai_answer_2 = await async_get_response_ai_2_ultimate(engineered_prompt_2, chat)
+            ai_answer_2 = ai_answer_2.replace("&gt;", ">").replace("&lt;", "<")
             #print('AI ANSWER 2!!!!!!')
             #print(ai_answer_2)
             max_order = await sync_to_async(
@@ -161,6 +162,7 @@ async def ai_processing(prompt, files, components, chat, is_first_prompt, techno
             last_ai_answer = last_ai_answer_obj.content
             engineered_adjustment_prompt = await build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_ai_answer,prompt, chat_category, processing_steps, attempt)
             ai_adjustment_answer = await async_get_response_ai_2_ultimate(engineered_adjustment_prompt, chat)
+            ai_adjustment_answer = ai_adjustment_answer.replace("&gt;", ">").replace("&lt;", "<")
             max_order = await sync_to_async(lambda: CodingChatMessage.objects.filter(chat=chat).aggregate(Max('order'))['order__max'])()
             await sync_to_async(CodingChatMessage.objects.create)(
                 chat=chat, type='gpt-a', content=ai_adjustment_answer, order=max_order + 1, api_key=None,
@@ -337,6 +339,7 @@ async def get_final_solution(engineered_prompt_2, chat, chat_category_id, proces
         return no_components_answer
     else:
         ai_response = await async_get_response_ai_2_ultimate(engineered_prompt_2, chat)
+        ai_response = ai_response.replace("&gt;", ">").replace("&lt;", "<")
         await sync_to_async(CodingChatMessage.objects.create)(
             chat=chat,
             type='gpt-a',
@@ -368,6 +371,7 @@ async def build_engineered_adjustment_prompt(chat, last_engineered_prompt, last_
 async def get_adjusted_solution(chat, engineered_adjustment_prompt, chat_category_id, processing_steps, attempt_number):
     # appel à l'API IA
     ai_response = await async_get_response_ai_2_ultimate(engineered_adjustment_prompt, chat)
+    ai_response = ai_response.replace("&gt;", ">").replace("&lt;", "<")
     max_order = await sync_to_async(
         lambda: CodingChatMessage.objects.filter(chat=chat)
         .aggregate(Max('order'))['order__max']

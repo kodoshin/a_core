@@ -34,6 +34,11 @@ def get_repo_branches(request, repo_name):
         branches = response.json()
     else:
         branches = []
+
+    print('BRANCHES :')
+    print(branches)
+    print(url)
+    print(repo_name)
     return JsonResponse({'branches': branches})
 
 def list_repos(request):

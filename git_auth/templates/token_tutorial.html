@@ -1,4 +1,4 @@
-<title>Token Tuto</title>
+<title>Generate Github Token</title>
 
 {% extends 'layouts/blank.html' %}
 
@@ -21,29 +21,40 @@
 
 <div class="content-wrapper">
 <br><br><br>
-<h2>Generate github token</h2>
+<h2>Generate a github fine-grained secure token in less than 1 minute</h2>
 <br><br>
-<p style="color: white">1. Navigate to your Git account settings, then <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer"> Developer Settings </a>Click the Personal access tokens menu, then click Generate new token.</p>
+<p style="color: white">1. Navigate to your Git account settings, then <a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener noreferrer"> Developer Settings </a>Click the Personal access tokens menu, then click Generate new token.</p>
 <br><br>
-<img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/tokentuto0001.png" alt="Capture 1">
+<img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748914641/github-token-1_cvjpry.png" alt="Capture 1">
 <br><br>
-<p style="color: white">2. Select repo as the scope. Select admin:repo_hook if you want to activate real time synchronization.</p>
-<p style="color: white">- Tokens (classic) : The token will be applicable for all the specified actions in your repositories.</p>
-<p style="color: white">- Fine-grained tokens : The token will be applicable for all the specified actions only in the repositories that you choose.</p>
+<p style="color: white">2. Write a name for your token.</p>
+<p style="color: white">- Select 'Only Select Repositories'.</p>
+<p style="color: white">- Select the repositories that you want to work on with Kodoshin.</p>
 
 
 <br><br>
-<img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/tokentuto0002.png" alt="Capture 2">
+<img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748914640/github-token-2_mmjphn.png" alt="Capture 2">
 <br><br>
-<p style="color: white">3. Click Generate Token. GitHub will display the personal access token only once. Ensure that you copy the token and store it in a safe space.</p>
+<p style="color: white">3. Give 'Read Only' permission to 'Content'.</p>
 <br><br>
-<img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/tokentuto0003.png" alt="Capture 3">
+<img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748914640/github-token-3_mrhv9g.png" alt="Capture 3">
 <br><br>
-<p style="color: white">4. Now you will add the token in the secure fields in your <a href="{% url 'profile-settings' %}" target="_blank" rel="noopener noreferrer">settings</a> form.</p>
+<p style="color: white">4. Give 'Read and Write' permission to webhooks (Webhooks are essential for activating real time synchronization between github code changes and AI processing) </p>
 <br><br>
-<img src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/tokentuto0004.png" alt="Capture 3" style="max-height: 400px">
+<img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748914640/github-token-4_nl9k5x.png" alt="Capture 3" style="max-height: 400px">
 <br><br>
-
+<p style="color: white">5. Generate the token </p>
+<br><br>
+<img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748914640/github-token-5_qhdg7r.png" alt="Capture 3" style="max-height: 400px">
+<br><br>
+    <p style="color: white">6. Copy the token </p>
+<br><br>
+<img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748914640/github-token-6_uxbd1p.png" alt="Capture 3" style="max-height: 400px">
+<br><br>
+    <p style="color: white">7. Copy the token in your profile <a href="{% url 'profile-settings' %}" target="_blank" rel="noopener noreferrer">settings</a> </p>
+<br><br>
+<img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748914640/github-token-7_d72fjr.png" alt="Capture 3" style="max-height: 400px">
+<br><br>
 {# ajoutez autant de <img> que nécessaire #}
 
 {% endblock %}

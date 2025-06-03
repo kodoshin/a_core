@@ -29,7 +29,7 @@
 
         <div id="branch-container" style="display:none; margin-top:10px;">
             <label for="branch">Select a Branch:</label>
-            <select name="branch" id="branch">
+            <select name="branch" id="branch" style="color: black;">
                 <option value="" disabled selected>Select a branch</option>
             </select>
         </div>
@@ -66,43 +66,78 @@
 
 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            console.log("DOM fully loaded and parsed");
-            const repoSelector = document.getElementById('repo');
+<!--  … everything that was already in the template stays unchanged up to the JS … -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const repoSelector   = document.getElementById('repo');
+    const branchWrapper  = document.getElementById('branch-container');
+    const branchSelector = document.getElementById('branch');
 
-            repoSelector.addEventListener('change', function() {
-                const selectedRepo = repoSelector.options[repoSelector.selectedIndex];
-                console.log("Selected Repo:", selectedRepo);
+    repoSelector.addEventListener('change', async function () {
+        const selectedRepo = repoSelector.options[repoSelector.selectedIndex];
 
-                if (selectedRepo.value) {
-                    console.log("Create date:");
-                    console.log(selectedRepo.dataset);
-                    document.getElementById('repo-name').textContent = selectedRepo.dataset.name;
-                    document.getElementById('repo-title').textContent = selectedRepo.dataset.title || 'No description available';
-                    document.getElementById('repo-url').href = selectedRepo.dataset.url;
-                    document.getElementById('repo-created').textContent =  selectedRepo.dataset.created;
-                    document.getElementById('repo-details').style.display = 'block';
-                } else {
-                    document.getElementById('repo-details').style.display = 'none';
-                }
-            });
-        });
-
-        function redirectToRepo() {
-            var selectElement = document.getElementById('repo');
-            var selectedOption = selectElement.options[selectElement.selectedIndex];
-            var repoName = selectedOption.getAttribute('data-name');
-            var repoId = selectedOption.getAttribute('data-id');
-
-            if (repoName && repoId) {
-                // Assurez-vous que l'URL ici correspond à la route dans votre urls.py
-                var url = '/git/repos/' + repoId + '/' + repoName + '/';
-                window.location.href = url;
-            } else {
-                alert("Please select a repository.");
-            }
+        if (!selectedRepo.value) {
+            /* hide branch selector & repo details if no repo is selected */
+            branchWrapper.style.display = 'none';
+            document.getElementById('repo-details').style.display = 'none';
+            return;
         }
-    </script>
 
+        /* -----------------------------
+           Fill repo information section
+        ------------------------------*/
+        document.getElementById('repo-name').textContent    = selectedRepo.dataset.name;
+        document.getElementById('repo-title').textContent   = selectedRepo.dataset.title || 'No description available';
+        document.getElementById('repo-url').href            = selectedRepo.dataset.url;
+        document.getElementById('repo-created').textContent = selectedRepo.dataset.created;
+        document.getElementById('repo-details').style.display = 'block';
+
+        /* -----------------------------
+           Retrieve & populate branches
+        ------------------------------*/
+        branchSelector.innerHTML =
+            '<option value="" disabled selected>Select a branch</option>';  // reset
+
+        try {
+            const response = await fetch(`/git/ajax/branches/${selectedRepo.dataset.name}/`);
+            const data = await response.json();
+
+            if (data.branches && data.branches.length) {
+                data.branches.forEach(branch => {
+                    const opt = document.createElement('option');
+                    opt.value = branch.name;
+                    opt.text  = branch.name;
+                    branchSelector.appendChild(opt);
+                });
+                branchWrapper.style.display = 'block';
+            } else {
+                branchWrapper.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error while fetching branches:', error);
+            branchWrapper.style.display = 'none';
+        }
+    });
+});
+
+function redirectToRepo() {
+    const repoSelect   = document.getElementById('repo');
+    const branchSelect = document.getElementById('branch');
+
+    const selectedRepoOption = repoSelect.options[repoSelect.selectedIndex];
+    const repoName  = selectedRepoOption.getAttribute('data-name');
+    const repoId    = selectedRepoOption.getAttribute('data-id');
+    const branch    = branchSelect.value;
+
+    if (repoName && repoId) {
+        let url = `/git/repos/${repoId}/${repoName}/`;
+        if (branch) {  // we append the branch if user selected one
+            url += `?branch=${encodeURIComponent(branch)}`;
+        }
+        window.location.href = url;
+    } else {
+        alert("Please select a repository.");
+    }
+}
+</script>
 {% endblock %}
