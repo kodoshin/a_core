@@ -14,7 +14,7 @@ def home(request):
         status = None
 
     if request.user.is_authenticated:
-        user_projects = Project.objects.filter(user=request.user, status=status)
+        user_projects = Project.objects.filter(user=request.user, status=status).order_by('-id')
         plan_limit = request.user.profile.current_plan.project_limits
         can_create = user_projects.count() < plan_limit
         context = {

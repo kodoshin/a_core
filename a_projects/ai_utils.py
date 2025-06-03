@@ -5,8 +5,8 @@ import concurrent.futures
 
 
 
-def predict_tech(git_repo_id):
-    file_paths = get_project_file_paths(git_repo_id)
+def predict_tech(project_id):
+    file_paths = get_project_file_paths(project_id)
     prompt = 'Here are my files paths in my git_repo_id of my project : /n'
     for path in file_paths:
         prompt += f"{path}/n"
@@ -21,29 +21,29 @@ def predict_tech(git_repo_id):
     gpt_output = get_gpt_output(prompt)
     return gpt_output.split('<techno>')[-1].split('</techno>')[0]
 
-def get_consensus_tech(git_repo_id):
+def get_consensus_tech(project_id):
     while True:
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            futures = [executor.submit(predict_tech, git_repo_id) for _ in range(2)]
+            futures = [executor.submit(predict_tech, project_id) for _ in range(2)]
             results = [f.result() for f in futures]
         if len(results) == 2 and results[0] == results[1]:
             return results[0]
 
 
-def document_tech(git_repo_id) :
-    # Run two parallel predictions until they match
-    project_tech_name = get_consensus_tech(git_repo_id)
+def document_tech(project_id):
+    """Détecte et enregistre la technologie utilisée pour UN projet (id unique)."""
+    project_tech_name = get_consensus_tech(project_id)  # consensus sur le même projet
     tech = get_object_or_404(Technology, name=project_tech_name)
-    project = get_object_or_404(Project, git_repo_id=git_repo_id)
+    project = get_object_or_404(Project, id=project_id)
     try:
         project.technology = tech
         project.save()
     except Exception:
         pass
 
-def get_project_file_paths(git_repo_id):
+def get_project_file_paths(project_id):
     # Récupérer le projet ayant le même git_repo_id
-    project = get_object_or_404(Project, git_repo_id=git_repo_id)
+    project = get_object_or_404(Project, id=project_id)
     # Filtrer les fichiers liés à ce projet
     files = File.objects.filter(project=project)
     # Récupérer les chemins des fichiers

@@ -246,9 +246,9 @@ def process_selected_files(request, git_repo_id, repo_name):
                     File.objects.filter(project=project, path=path).delete()
 
             if project.technology is None:
-                document_tech(git_repo_id)
+                document_tech(project.id)
 
-            project = get_object_or_404(Project, git_repo_id=git_repo_id)
+            project = get_object_or_404(Project, id=project.id)
             #document_components(project, project.technology)
             for progress in document_components(project, project.technology):
                 yield json.dumps(progress) + "\n"

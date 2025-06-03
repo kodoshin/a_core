@@ -579,6 +579,7 @@ document.addEventListener('DOMContentLoaded', function(){
           <div class="card mb-4">
             <div class="card-body">
               <h4 class="card-title">{{ project.name }}</h4>
+              <p class="card-title">{{ project.git_branch }}</p>
               <p class="card-text">{{ project.technology.name }}
                 {% if project.technology.status.code == 3 %}
                 <span style="font-family: 'Courier New', monospace; font-size: 12px; font-weight: bold; color: #aaaaaa; font-family: bold; vertical-align: top;">

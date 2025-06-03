@@ -41,7 +41,7 @@ class Project(models.Model):
     github_sync = models.BooleanField(default=False)
     tokens_count = models.PositiveIntegerField(default=0)
     is_large = models.BooleanField(default=False)
-    git_branch = models.CharField(max_length=100, null=True, blank=True)
+    git_branch = models.CharField(max_length=100, null=True, blank=True, default='main')
 
     class Meta:
         unique_together = ("user", "git_repo_id", "git_branch")
