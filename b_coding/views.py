@@ -395,3 +395,13 @@ def toggle_chat_importance(request):
     except CodingChat.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Chat not found.'}, status=404)
 
+
+async def chat_category_comparison_view(request):
+    chatcategories = await sync_to_async(
+        lambda: list(ChatCategory.objects.filter(is_active=True).order_by('price'))
+    )()
+    return render(
+        request,
+        'b_coding/chat_category_comparison.html',
+        {'chatcategories': chatcategories}
+    )

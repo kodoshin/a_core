@@ -14,6 +14,9 @@ class ChatCategory(models.Model):
     is_advanced = models.BooleanField(default=False)
     is_large = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
+    speed = models.IntegerField(default=0)  # note /10
+    precision = models.IntegerField(default=0)  # note /10
+    use_cases = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f"{self.type}"

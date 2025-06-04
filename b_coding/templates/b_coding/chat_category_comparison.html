@@ -1,0 +1,57 @@
+<title>AI Models</title>
+{% extends 'layouts/blank.html' %}
+{% block content %}
+{% load chat_category_tags %}
+
+<style>
+    table{
+        width:100%;
+        border-collapse:collapse;
+        color:#fff;
+    }
+    th,td{
+        padding:10px;
+        border-bottom:1px solid #555;
+        text-align:center;
+    }
+    th{background:#262626;}
+    tr:nth-child(even){background:#1f1f1f;}
+</style>
+
+    <div class="main-container">
+        <div class="chat-area-container">
+            <br>
+            <h2 style="color:#fff;">AI Models Comparaison</h2>
+            <br>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Speed</th>
+                        <th>Precision</th>
+                        <th>large projects</th>
+                        <th>Best use cases</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in chatcategories %}
+                    <tr>
+                        <td>{{ cat.name }}</td>
+                        <td>{{ cat.price }} cr</td>
+                        <td>{{ cat.speed|stars }}</td>
+                        <td>{{ cat.precision|stars }}</td>
+                        <td>{{ cat.is_large|checkmark }}</td>
+                        <td>{{ cat.use_cases }} cr</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4">Aucune catégorie disponible</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+
+{% endblock %}
