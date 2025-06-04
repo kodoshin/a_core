@@ -26,6 +26,7 @@
     <table>
         <tr>
             <th>Name</th>
+            <th>Branch</th>
             <th>Size</th>
             <th>Repo</th>
             <th>Techno</th>
@@ -33,6 +34,7 @@
         </tr>
         <tr>
             <td id="project-name">{{ project.name }}</td>
+            <td>{{ project.git_branch }}</td>
             <td>{% if project.is_large %}Large{% else %} Normal {% endif %}</td>
             <td id="project-repo">{{ project.git_repo_id }}</td>
             <td>{{ project.technology.name }}</td>

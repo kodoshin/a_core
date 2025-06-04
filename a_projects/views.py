@@ -61,12 +61,21 @@ def github_webhook(request):
     payload = json.loads(request.body.decode('utf-8'))
     repo_data = payload.get('repository', {})
     repo_id = repo_data.get('id')
+
+    ref = payload.get('ref', '')
+    branch = ref.split('/')[-1] if ref else 'main'
+    print('BRANCH :::', branch)
+
     owner = repo_data.get('owner', {}).get('login')
     name = repo_data.get('name')
     try:
-        project = Project.objects.get(git_repo_id=repo_id)
+        project = Project.objects.get(git_repo_id=repo_id, git_branch = branch )
     except Project.DoesNotExist:
         return HttpResponse(status=404)
+    except Project.MultipleObjectsReturned:
+        # Sécurité : on prend le premier correspondant
+        project = Project.objects.filter(git_repo_id=repo_id, git_branch=branch).first()
+
     user = project.user
     token = get_github_token(user)
     if not token:
@@ -78,7 +87,7 @@ def github_webhook(request):
     }
     current_files = {}
     def fetch_dir(path=''):
-        url = f'https://api.github.com/repos/{owner}/{name}/contents/{path}'
+        url = f'https://api.github.com/repos/{owner}/{name}/contents/{path}?ref={branch}'
         resp = requests.get(url, headers=headers)
         return resp.json() if resp.status_code == 200 else []
     def recurse(path=''):
@@ -209,8 +218,8 @@ def delete_github_sync(request, project_id):
     return redirect('view_documentation', project_id=project_id)
 
 
-def has_equivalent(user, git_repo_id, path,file_content):
-    project = Project.objects.filter(git_repo_id=git_repo_id, user=user).first()
+def has_equivalent(project_id, path,file_content):
+    project = Project.objects.get(id=project_id)
     file = File.objects.filter(project=project, path=path).first()
     if file and file.content == file_content:
         return True
@@ -219,29 +228,37 @@ def has_equivalent(user, git_repo_id, path,file_content):
 
 
 def view_modified_repo_files(request, git_repo_id, repo_name, project_id):
-    #print('view repo files')
+    project = Project.objects.get(id=project_id)
+    branch = project.git_branch
+    if branch == 'main' :
+        branch = ''
+    #print('BRANCH :', branch)
     allowed_extensions = tuple(AllowedFile.objects.values_list('extension', flat=True))
     token = get_github_token(request.user)
     headers = {'Authorization': f'token {token}',
                "Accept": "application/vnd.github.v3+json"}
+
+    def build_url(path=''):
+        base = f'https://api.github.com/repos/{request.user.username}/{repo_name}/contents/{path}'
+        return f'{base}?ref={branch}' if branch else base
+
     def fetch_directory_contents(path=''):
-        url = f'https://api.github.com/repos/{request.user.username}/{repo_name}/contents/{path}'
-        response = requests.get(url, headers=headers)
+        response = requests.get(build_url(path), headers=headers)
         if response.status_code == 200:
             return response.json()
         return []
-    def fetch_file_content(path):
-        url = f'https://api.github.com/repos/{request.user.username}/{repo_name}/contents/{path}'
-        response = requests.get(url, headers=headers)
 
+    def fetch_file_content(path):
+        response = requests.get(build_url(path), headers=headers)
         if response.status_code == 200:
             content_data = response.json()
-            # Le contenu du fichier est encodé en base64, il faut donc le décoder
             file_content = base64.b64decode(content_data['content']).decode('utf-8')
             return file_content
         return None
     def build_paths(path=''):
         contents = fetch_directory_contents(path)
+        print('CONTENTS:')
+        print(contents)
         dirs = []
         files = []
         #rendre les extensions autorisées dynamique à partir de la console
@@ -252,7 +269,7 @@ def view_modified_repo_files(request, git_repo_id, repo_name, project_id):
                         ##########################################################################################################################################################################################################
                         file_content = fetch_file_content(content['path'])
 
-                        if has_equivalent(request.user, git_repo_id, content['path'],file_content) or file_content.replace(" ","") == "":
+                        if has_equivalent(project_id, content['path'],file_content) or file_content.replace(" ","") == "":
                             pass
                         else:
                             files.append([content['path'], file_content])
@@ -338,7 +355,7 @@ def view_modified_repo_files(request, git_repo_id, repo_name, project_id):
         #print('FILES PATHS :')
         #print(files)
         deleted_files = []
-        project = Project.objects.filter(git_repo_id=git_repo_id, user=request.user).first()
+        project = Project.objects.get(id=project_id)
         project_files = File.objects.filter(project=project)
         for file in project_files:
             if file.path in files:
@@ -357,7 +374,7 @@ def view_modified_repo_files(request, git_repo_id, repo_name, project_id):
     git_repo_id = response_repo.json().get('id')
     git_repo_name = repo_name
     git_repo_url = f'https://github.com/{request.user.username}/{repo_name}'
-    existing_project = Project.objects.filter(user=user, git_repo_id=git_repo_id).first()
+    existing_project = Project.objects.get(id=project_id)
 
     # mettre le projet à jour
     existing_project.name = name
@@ -366,7 +383,7 @@ def view_modified_repo_files(request, git_repo_id, repo_name, project_id):
     existing_project.save()  # Sauvegarder les changements
     project = existing_project
 
-    return render(request, 'a_projects/update_repo_files.html', {'file_tree': file_tree, 'deleted_files':deleted_files, 'project':project})
+    return render(request, 'a_projects/update_repo_files.html', {'file_tree': file_tree, 'deleted_files':deleted_files, 'project':project, 'selected_branch': branch})
 
 
 def delete_project(request, project_id) :
