@@ -19,12 +19,13 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 from a_users.views import profile_view
-from a_home.views import home
+from a_home.views import home, learn_more_about_ai_models
 from a_projects.views import github_webhook
 
 
 urlpatterns = [
     path('', home, name='home'),
+    path('learn-more-about-ai-models/', learn_more_about_ai_models, name='learn_more_about_ai_models'),
     path('admin/', admin.site.urls),
     path('git/', include('git_auth.urls')),
     path('accounts/', include('allauth.urls')),

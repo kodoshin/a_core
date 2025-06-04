@@ -66,7 +66,18 @@
     }
 </style>
 
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const dropdown = document.getElementById('chatcategory-dropdown');
 
+    dropdown.addEventListener('change', function() {
+      if (this.value === 'learn_more') {
+        // Remplacez "/learn-more-categories/" par l’URL de votre page explicative
+        window.location.href = '/learn-more-about-ai-models/';
+      }
+    });
+  });
+</script>
 
 
 <!-- Wrap child containers in a parent container -->
@@ -93,7 +104,7 @@
                   value="{{ project.id }}"
                   {% if default_project and project.id == default_project.id %}selected{% endif %}
                 >
-                  {{ project.name }} {% if project.is_large %} (L) {% endif %}
+                  {{ project.name }} : {{ project.git_branch }} {% if project.is_large %} (Large) {% endif %}
                 </option>
               {% endfor %}
         </select>
@@ -189,6 +200,9 @@
               {{ category.name }} ({{ category.price }})
             </option>
         {% endfor %}
+        <option value="learn_more" style="color: #007bff;">
+    Learn more…
+  </option>
     </select>
 
 
