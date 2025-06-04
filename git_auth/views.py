@@ -74,9 +74,6 @@ def list_repos(request):
 def view_repo_files(request, git_repo_id, repo_name):
     branch = request.GET.get('branch') or "main"
     allowed_extensions = tuple(AllowedFile.objects.values_list('extension', flat=True))
-    #print('view repo files')
-    print('BRANCHES :')
-    print(get_repo_branches(request, repo_name).content.decode("utf-8"))
     token = get_github_token(request.user)
     headers = {'Authorization': f'token {token}',
                "Accept": "application/vnd.github.v3+json"}
