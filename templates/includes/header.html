@@ -18,17 +18,17 @@
             {% if request.resolver_match.view_name == "home"  %}
                 {% if not user.profile.has_claimed_credits %}
                 <li>
-                    <form action="{% url 'claim-credits' %}" method="post">
+                    <form action="{% url 'claim-credits' %}" method="post" style="display: inline;">
                         {% csrf_token %}
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold rounded whitespace-nowrap text-[10px] sm:text-xs md:text-sm lg:text-base px-2 sm:px-3 md:px-4 py-1 sm:py-2" style="background-color: unset; font-size: 0.8em;">
-                            <span style="color: #a41515;">Claim daily credits ({{ user.profile.current_plan.daily_credits|default:5 }})</span>
+                        <button type="submit" class="bg-gray-500 text-green font-bold rounded whitespace-nowrap text-[10px] sm:text-xs md:text-sm lg:text-base px-2 sm:px-3 md:px-4 py-1 sm:py-2" style="background-color: unset; font-size: 0.8em;">
+                            <span style="color: #4CAF50;">Get {{ user.profile.current_plan.daily_credits|default:5 }} Raikos</span>
                         </button>
                     </form>
                 </li>
                 {% else %}
                 <li>
                     <button disabled class="bg-gray-500 text-white font-bold rounded whitespace-nowrap text-[10px] sm:text-xs md:text-sm lg:text-base px-2 sm:px-3 md:px-4 py-1 sm:py-2" style="background-color: unset; font-size: 0.8em;">
-                        <span style="color: lightgray;">Claimed</span>
+                        <span style="color: lightgray;">Get free Raikos tomorrow</span>
                     </button>
                 </li>
                 {% endif %}

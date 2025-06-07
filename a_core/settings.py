@@ -246,8 +246,12 @@ CLOUDINARY_STORAGE = {
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Facultatif : backend pour les statiques
-STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
-
+#STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
+if ENVIRONMENT == 'development':
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+else:
+    # Compression + hash fingerprint pour le cache-busting
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Configuration pour les fichiers médias
 #MEDIA_URL = f"{AZURE_CUSTOM_DOMAIN}/{AZURE_MEDIA_CONTAINER}/"
 #DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
@@ -256,7 +260,7 @@ STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
 
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [ BASE_DIR / 'static' ]
 
 #MEDIA_URL = 'media/'

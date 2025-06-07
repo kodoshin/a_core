@@ -1,11 +1,614 @@
 <title>Kenshi</title>
 {% extends 'layouts/blank.html' %}
+{% load static %}
 
 
 {% block content %}
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> <!-- for trash icon -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+
+{% if in_progress %}
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+      $('#loading-spinner').show();
+      $('#loading-text').show().empty().text('Loading...');
+      if(typeof pollUpdates === 'function'){
+          pollUpdates();
+      }
+  });
+</script>
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Flag to know if a default project is selected
+    var hasDefaultProject = {% if default_project %}true{% else %}false{% endif %};
+    // Expose to global scope for other handlers
+    window.hasDefaultProject = hasDefaultProject;
+});
+
+
+$(document).ready(function(){
+    $('#regenerate-btn').on('click', function(e){
+        e.preventDefault();
+        // Clear previous steps and hide controls
+        $('.steps-container').empty();
+        $('.prev-step-btn, .next-step-btn, .message-user, .ai-avatar-img').hide();
+        // Show loading spinner and message
+
+        $('#loading-spinner').show();
+        $('#loading-text').text('Regenerating...').append('<br>').show();
+        // Start polling during regeneration
+        if (typeof window.pollUpdates === 'function') {
+            pollUpdates();
+        }
+        $.ajax({
+            url: "{% url 'code_chat_view' %}",
+            method: "POST",
+            data: {
+                regenerate: 1,
+                chat_id: "{{ current_chat.public_id }}",
+                csrfmiddlewaretoken: "{{ csrf_token }}"
+            },
+            success: function(data){
+                if(data.status === 'success'){
+                    window.location.href = '?chat_id={{ current_chat.public_id }}&attempt=' + ({{ total_attempts }} + 1);
+                } else {
+                    alert(data.message);
+                }
+            },
+            error: function(){
+                alert('Error while regenerating.');
+            },
+            complete: function(){
+                $('#loading-spinner').hide();
+                $('#loading-text').hide();
+            }
+        });
+    });
+});
+
+
+$(function(){
+  console.log('DOM ready, binding regenerate');
+  var chatId = "{{ current_chat.public_id }}";
+  $('#prev-attempt').on('click', function(){
+    window.location.href = '?chat_id='+chatId+'&attempt=' + ({{ selected_attempt }} - 1);
+  });
+  $('#next-attempt').on('click', function(){
+    window.location.href = '?chat_id='+chatId+'&attempt=' + ({{ selected_attempt }} + 1);
+  });
+});
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+const dropdown = document.getElementById('chatcategory-dropdown');
+
+dropdown.addEventListener('change', function() {
+  if (this.value === 'learn_more') {
+    // Remplacez "/learn-more-categories/" par l’URL de votre page explicative
+    window.location.href = '/ai/kenshi/categories/comparison/';
+  }
+});
+});
+
+
+$(document).ready(function(){
+    // Toggle important status on star click
+    $(document).on('click', '.toggle-important', function(){
+        var $star = $(this);
+        var chatId = $star.data('chat-id');
+        $.ajax({
+            url: '{% url "toggle_chat_importance" %}',
+            type: 'POST',
+            data: {
+                'chat_id': chatId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response){
+                if(response.status === 'success'){
+                    $star.css('color', response.important ? 'gold' : 'gray');
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(){
+                alert('An error occurred while toggling importance.');
+            }
+        });
+    });
+});
+
+
+
+//Next & Previous buttons with right left arrows
+document.addEventListener('DOMContentLoaded', () => {
+    let activeContainer = null;
+
+    // When clicking on an AI message, mark it as active
+    document.querySelectorAll('.message.ai').forEach(container => {
+        //container.style.cursor = 'pointer';
+        container.addEventListener('click', function() {
+            document.querySelectorAll('.message.ai').forEach(c => c.classList.remove('active-ai-message'));
+            this.classList.add('active-ai-message');
+            activeContainer = this;
+        });
+    });
+
+    // Scoped arrow‐key navigation
+    document.addEventListener('keydown', function(event) {
+        // Skip when typing in textarea or contentEditable
+        if (document.activeElement.tagName.toLowerCase() === 'textarea' ||
+            document.activeElement.isContentEditable) {
+            return;
+        }
+        if (!activeContainer) return;
+
+        if (event.key === 'ArrowRight') {
+            const nextBtn = activeContainer.querySelector('.next-step-btn');
+            if (nextBtn) nextBtn.click();
+        } else if (event.key === 'ArrowLeft') {
+            const prevBtn = activeContainer.querySelector('.prev-step-btn');
+            if (prevBtn) prevBtn.click();
+        }
+    });
+});
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    var toggleBtn = document.getElementById("toggle-chats");
+    var sidebar = document.querySelector(".chats-list-container");
+
+    toggleBtn.addEventListener("click", function() {
+        sidebar.classList.toggle("collapsed");
+        // Switch icon between ◀ and ▶
+        if (sidebar.classList.contains("collapsed")) {
+            toggleBtn.innerHTML = "&#x226B;"; //"&#x22B3;"; // ▶
+            toggleBtn.style.left      = "0";
+            toggleBtn.style.marginLeft = "0";
+        } else {
+            toggleBtn.innerHTML = "&#x226A;"; // "&#x22B2;"; // ◀
+            toggleBtn.style.left      = "22vh";
+        }
+    });
+});
+
+
+
+
+$(document).ready(function() {
+    $('#prompt').on('input', function() {
+        $(this).css('height', 'auto');
+        $(this).css('height', this.scrollHeight + 'px');
+    });
+});
+
+
+
+
+
+$(document).ready(function() {
+    $('#prompt').on('keydown', function(e) {
+        // Si la touche "Enter" est pressée sans 'Shift'
+        if (e.keyCode === 13 && !e.shiftKey) {
+            e.preventDefault();
+            $('#chat-form').submit();
+        }
+    });
+});
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    let textarea = document.getElementById("prompt");
+
+    function setPlaceholder() {
+      if (textarea.value.trim() === "") {
+        textarea.value = "Ask anything";
+        textarea.style.color = "#777"; // Grisé pour indiquer que c'est un placeholder
+      }
+    }
+
+    function clearPlaceholder() {
+      if (textarea.value === "Ask anything") {
+        textarea.value = "";
+        textarea.style.color = "#1f1e23"; // Couleur normale du texte
+      }
+    }
+
+    textarea.addEventListener("focus", clearPlaceholder);
+    textarea.addEventListener("blur", setPlaceholder);
+
+    setPlaceholder(); // Appliquer au chargement de la page
+});
+
+
+
+
+//Delete chat
+$(document).ready(function() {
+  // Handle delete icon click: show confirm and cancel icons
+  $('.delete-chat').click(function() {
+      var chatId = $(this).data('chat-id');
+      $(this).hide();
+      $('span.confirm-delete[data-chat-id="' + chatId + '"]').show();
+      $('span.cancel-delete[data-chat-id="' + chatId + '"]').show();
+  });
+
+  // Handle cancel icon click: hide confirm and cancel icons, show delete icon
+  $('.cancel-delete').click(function() {
+      var chatId = $(this).data('chat-id');
+      $(this).hide();
+      $('span.confirm-delete[data-chat-id="' + chatId + '"]').hide();
+      $('span.delete-chat[data-chat-id="' + chatId + '"]').show();
+  });
+
+  // Handle confirm icon click: send AJAX request to delete the chat from the DB
+  $('.confirm-delete').click(function() {
+      var chatId = $(this).data('chat-id');
+      var $li = $(this).closest('li');
+      $.ajax({
+          url: '{% url "delete_chat" %}',
+          type: 'POST',
+          data: {
+              'chat_id': chatId,
+              'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function(response) {
+              if (response.status === 'success') {
+                  $li.remove();
+              } else {
+                  alert('Failed to delete chat: ' + response.message);
+                  // Revert UI on failure
+                  $('span.confirm-delete[data-chat-id="' + chatId + '"]').hide();
+                  $('span.cancel-delete[data-chat-id="' + chatId + '"]').hide();
+                  $('span.delete-chat[data-chat-id="' + chatId + '"]').show();
+              }
+          },
+          error: function() {
+              alert('An error occurred while deleting the chat.');
+              // Revert UI on error
+              $('span.confirm-delete[data-chat-id="' + chatId + '"]').hide();
+              $('span.cancel-delete[data-chat-id="' + chatId + '"]').hide();
+              $('span.delete-chat[data-chat-id="' + chatId + '"]').show();
+          }
+      });
+  });
+});
+
+
+
+
+// Manage reviews
+document.addEventListener("DOMContentLoaded", function () {
+  const stars = document.querySelectorAll(".star");
+
+  // Définir la couleur par défaut de toutes les étoiles en gris
+  stars.forEach(star => {
+      star.style.color = "gray";
+  });
+
+  // Fonction pour mettre en surbrillance les étoiles jusqu'au rang donné
+  function highlightStars(rating) {
+      stars.forEach(star => {
+          if (parseInt(star.getAttribute("data-value")) <= rating) {
+              star.style.color = "gold";
+          } else {
+              star.style.color = "gray";
+          }
+      });
+  }
+
+  // Récupérer la note enregistrée depuis le contexte et mettre en surbrillance les étoiles si la note > 0
+  var currentChatRating = parseInt("{{ current_chat.rate|default:'0' }}");
+  if (currentChatRating > 0) {
+      highlightStars(currentChatRating);
+  }
+
+  // Gestion du clic sur une étoile pour envoyer la note via AJAX
+  stars.forEach(star => {
+      star.addEventListener("click", function () {
+          const rating = this.getAttribute("data-value");
+          const chatId = "{{ current_chat.public_id }}";
+          if (!chatId) {
+              console.error("Chat ID is not defined.");
+              return;
+          }
+          fetch("{% url 'code_chat_view' %}", {
+              method: "POST",
+              headers: {
+                  "X-CSRFToken": "{{ csrf_token }}",
+                  "Content-Type": "application/x-www-form-urlencoded"
+              },
+              body: new URLSearchParams({
+                  "rate": rating,
+                  "chat_id": chatId
+              })
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.status === "success") {
+                  console.log("Note saved :", data.rate);
+                  highlightStars(rating);
+              } else {
+                  console.error("Error while saving the note.");
+              }
+          })
+          .catch(error => console.error("Erreur AJAX :", error));
+      });
+  });
+});
+
+
+
+$(document).ready(function() {
+$('#chatcategory-dropdown').on('change', function() {
+    var SelectedChatCategoryId = $(this).val();
+    $.ajax({
+        url: '{% url "update_default_chatcategory" %}',
+        type: 'POST',
+        data: {
+            'chatcategory_id': SelectedChatCategoryId,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+            }
+        })
+    })
+});
+
+$(document).ready(function() {
+    $('#project-dropdown').on('change', function() {
+        var selectedProjectId = $(this).val();
+        $.ajax({
+            url: '{% url "update_default_project" %}',
+            type: 'POST',
+            data: {
+                'project_id': selectedProjectId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Rebuild chats list
+                    window.hasDefaultProject = true;
+                    var chatList = $('#chats-list ul');
+                    chatList.empty();
+                    if (response.chats && response.chats.length > 0) {
+                        console.log(response.chats)
+                        response.chats.forEach(function(chat) {
+                            console.log(chat.important)
+
+                            var li = $('<li>').css('margin-top','10px');
+                            var link = $('<a>')
+                                .attr('href', '?chat_id=' + chat.id)
+                                .text(chat.title)
+                                .css({'color':'white','font-size':'small','font-weight':'bold'});
+
+                            var toggleImportantSpan = $('<span>')
+                                .addClass('toggle-important')
+                                .attr('data-chat-id', chat.id)
+                                .html('&#9733;')
+                                .css({'cursor':'pointer', 'margin-left':'5px', 'float': 'right', 'color': chat.important === true ? 'gold' : 'gray' }) ;
+                            var deleteSpan = $('<span>')
+                                .addClass('delete-chat glyphicon')
+                                .attr('data-chat-id', chat.id)
+                                .css({'cursor':'pointer','color':'white','margin-left':'0','float':'right'})
+                                .html('&#xe020;');
+                            var cancelSpan = $('<span>')
+                                .addClass('cancel-delete')
+                                .attr('data-chat-id', chat.id)
+                                .css({'display':'none','cursor':'pointer','color':'gray','margin-left':'0','float':'right'})
+                                .html('&#x274C;');
+                            var confirmSpan = $('<span>')
+                                .addClass('confirm-delete')
+                                .attr('data-chat-id', chat.id)
+                                .css({'display':'none','cursor':'pointer','color':'green','margin-left':'0','float':'right'})
+                                .html('&#x2714;');
+                            li.append(link, toggleImportantSpan, deleteSpan, cancelSpan, confirmSpan);
+                            chatList.append(li);
+                        });
+                    } else {
+                        chatList.append(
+                            $('<li>').text('No Chats.').css('font-weight','bold')
+                        );
+                    }
+
+                    // Rebuild chatcategory dropdown if it exists
+                    var catSelect = $('#chatcategory-dropdown');
+                    if (catSelect.length) {
+                        catSelect.empty();
+                        response.chatcategories.forEach(function(category) {
+                            var disabled = false;
+                            if (response.default_project_is_large && !category.is_large) {
+                                disabled = true;
+                            } else if (!response.access_large_models && category.is_large) {
+                                disabled = true;
+                            } else if (!response.access_advanced_models && category.is_advanced) {
+                                disabled = true;
+                            }
+                            var option = $('<option>')
+                                .val(category.id)
+                                .text(category.name + ' (' + category.price + ')');
+                            if (disabled) {
+                                option.prop('disabled', true).css('color', '#ccc');
+                            } else {
+                                option.css('color', 'black');
+                            }
+                            catSelect.append(option);
+                        });
+                    }
+                } else {
+                    alert('Error while updating default project.');
+                }
+            },
+            error: function() {
+                alert('Server error while updating default project.');
+            }
+        });
+    });
+});
+
+
+
+// Polls management
+$(document).ready(function() {
+    var lastAiMessageId = 0;
+    window.pollingStopped = false;
+
+    function pollUpdates() {
+        if(window.pollingStopped){ return; }
+        var chatId = $('#chat_id').val();
+        $.ajax({
+            url: '{% url "code_chat_updates" %}',
+            data: { chat_id: chatId, last_id: lastAiMessageId },
+            success: function(data) {
+
+                /* ---------- ⬇️  NEW : stop on error  ---------- */
+                if (data.error) {
+                    $('#loading-text').append(
+                        '<span style="color:red;font-weight:bold;">'+ data.error +'</span><br>'
+                    );
+                    $('#loading-spinner').hide();
+                    window.pollingStopped = true;      // prevent further loops
+                    return;                            // exit success handler
+                }
+                /* ----------  END NEW PART  ---------- */
+
+                data.messages.forEach(function(msg) {
+                    var parser = new DOMParser();
+                    var xmlDoc = parser.parseFromString(msg.content, 'application/xml');
+                    var rootTag = xmlDoc.documentElement.tagName;
+                    if (rootTag === 'files') {
+                        var items = Array.from(xmlDoc.getElementsByTagName('file'));
+                        items.forEach(function(file, index) {
+                            setTimeout(function() {
+                                $('#loading-text').append(file.textContent + '<br>');
+                            }, index * 500);
+                        });
+                    } else if (rootTag === 'components') {
+                        var items = Array.from(xmlDoc.getElementsByTagName('component'));
+                        items.forEach(function(comp, index) {
+                            setTimeout(function() {
+                                var fileName = comp.getElementsByTagName('file')[0].textContent;
+                                var compName = comp.getElementsByTagName('name')[0].textContent;
+                                $('#loading-text').append(fileName + ' : ' + compName + '<br>');
+                            }, index * 500);
+                        });
+                    } else {
+                        $('#loading-text').append(msg.content + '<br>');
+                    }
+                    lastAiMessageId = msg.id;
+                });
+            },
+            complete: function() {
+                // ⬇️ keep polling only if not stopped
+                if(!window.pollingStopped){
+                    setTimeout(pollUpdates, 2000);
+                }
+            }
+        });
+    }
+
+    // Expose for external calls (e.g. regenerate)
+    window.pollUpdates = pollUpdates;
+
+    $(document).ready(function() {
+        $('#chat-form').on('submit', function(e) {
+            if (!window.hasDefaultProject) {
+                e.preventDefault();
+                alert('Please select a project');
+                return;
+            }
+            e.preventDefault();
+            var prompt = $('#prompt').val().trim();
+            if (prompt === "Ask anything" || prompt === "") {
+                alert('Please enter a prompt.');
+                return;
+            }
+            // Show loader and clear previous text
+            $('#loading-spinner').show();
+            $('#loading-text').show().empty();
+            $('#loading-text').show().empty();
+            // Start polling for AI processing updates
+            pollUpdates();
+            // Send the chat request
+            $.ajax({
+                url: '{% url "code_chat_view" %}',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(data) {
+                    $('#loading-spinner').hide();
+                    // Preserve the selected attempt in the redirect
+                    var attempt = $('#attempt_no').val();
+                    window.location.href = '?chat_id=' + data.chat_id + '&attempt=' + attempt;
+                },
+                error: function() {
+                    $('#loading-spinner').hide();
+                    alert('An error has occured.');
+                }
+            });
+        });
+    });
+});
+
+
+
+
+
+ //Step Navigation & copy button
+    $(document).ready(function() {
+        // Handle step navigation
+        $('.next-step-btn').click(function() {
+            var $stepsContainer = $(this).siblings('.steps-container');
+            var $currentStep = $stepsContainer.find('.step:visible');
+            var $nextStep = $currentStep.next('.step');
+            if ($nextStep.length) {
+                $currentStep.hide();
+                $nextStep.show();
+            }
+        });
+        $('.prev-step-btn').click(function() {
+            var $stepsContainer = $(this).siblings('.steps-container');
+            var $currentStep = $stepsContainer.find('.step:visible');
+            var $prevStep = $currentStep.prev('.step');
+            if ($prevStep.length) {
+                $currentStep.hide();
+                $prevStep.show();
+            }
+        });
+
+        // Handle "Copy Code" button
+        document.querySelectorAll(".copy-code-btn").forEach(button => {
+            button.addEventListener("click", () => {
+                const codeElement = button.nextElementSibling.querySelector("code");
+                const text = codeElement.innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    button.innerText = "Copied!";
+                    setTimeout(() => {
+                        button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg> Copy`;
+                    }, 2000);
+                });
+            });
+        });
+
+    });
+
+
+</script>
+
 <style>
-        /* Styles de base */
+    /* Styles de base */
 /*body*/
 Copy {
     overflow: hidden; /* Hide the default browser scrollbar */
@@ -193,7 +796,9 @@ button:active {
 }
 
 
-
+/*************************************************************************************************************************************************/
+/*************************************************************************************************************************************************/
+/*************************************************************************************************************************************************/
 
 /* Ensure main container can position the toggle button */
 .prev-step-btn,
@@ -256,19 +861,6 @@ button:active {
     display: none;
 }
 </style>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const dropdown = document.getElementById('chatcategory-dropdown');
-
-    dropdown.addEventListener('change', function() {
-      if (this.value === 'learn_more') {
-        // Remplacez "/learn-more-categories/" par l’URL de votre page explicative
-        window.location.href = '/ai/kenshi/categories/comparison/';
-      }
-    });
-  });
-</script>
 
 
 <!-- Wrap child containers in a parent container -->
@@ -488,592 +1080,8 @@ button:active {
 
 
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
-<script>
-$(document).ready(function(){
-    // Toggle important status on star click
-    $(document).on('click', '.toggle-important', function(){
-        var $star = $(this);
-        var chatId = $star.data('chat-id');
-        $.ajax({
-            url: '{% url "toggle_chat_importance" %}',
-            type: 'POST',
-            data: {
-                'chat_id': chatId,
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
-            },
-            success: function(response){
-                if(response.status === 'success'){
-                    $star.css('color', response.important ? 'gold' : 'gray');
-                } else {
-                    alert('Error: ' + response.message);
-                }
-            },
-            error: function(){
-                alert('An error occurred while toggling importance.');
-            }
-        });
-    });
-});
-</script>
-
-
-<script> //Next & Previous buttons with right left arrows
-document.addEventListener('DOMContentLoaded', () => {
-    let activeContainer = null;
-
-    // When clicking on an AI message, mark it as active
-    document.querySelectorAll('.message.ai').forEach(container => {
-        //container.style.cursor = 'pointer';
-        container.addEventListener('click', function() {
-            document.querySelectorAll('.message.ai').forEach(c => c.classList.remove('active-ai-message'));
-            this.classList.add('active-ai-message');
-            activeContainer = this;
-        });
-    });
-
-    // Scoped arrow‐key navigation
-    document.addEventListener('keydown', function(event) {
-        // Skip when typing in textarea or contentEditable
-        if (document.activeElement.tagName.toLowerCase() === 'textarea' ||
-            document.activeElement.isContentEditable) {
-            return;
-        }
-        if (!activeContainer) return;
-
-        if (event.key === 'ArrowRight') {
-            const nextBtn = activeContainer.querySelector('.next-step-btn');
-            if (nextBtn) nextBtn.click();
-        } else if (event.key === 'ArrowLeft') {
-            const prevBtn = activeContainer.querySelector('.prev-step-btn');
-            if (prevBtn) prevBtn.click();
-        }
-    });
-});
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    var toggleBtn = document.getElementById("toggle-chats");
-    var sidebar = document.querySelector(".chats-list-container");
-
-    toggleBtn.addEventListener("click", function() {
-        sidebar.classList.toggle("collapsed");
-        // Switch icon between ◀ and ▶
-        if (sidebar.classList.contains("collapsed")) {
-            toggleBtn.innerHTML = "&#x226B;"; //"&#x22B3;"; // ▶
-            toggleBtn.style.left      = "0";
-            toggleBtn.style.marginLeft = "0";
-        } else {
-            toggleBtn.innerHTML = "&#x226A;"; // "&#x22B2;"; // ◀
-            toggleBtn.style.left      = "22vh";
-        }
-    });
-});
-</script>
-
-
-<script>
-$(document).ready(function() {
-    $('#prompt').on('input', function() {
-        $(this).css('height', 'auto');
-        $(this).css('height', this.scrollHeight + 'px');
-    });
-});
-</script>
-
-<script>
-$(document).ready(function() {
-    $('#prompt').on('keydown', function(e) {
-        // Si la touche "Enter" est pressée sans 'Shift'
-        if (e.keyCode === 13 && !e.shiftKey) {
-            e.preventDefault();
-            $('#chat-form').submit();
-        }
-    });
-});
-</script>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    let textarea = document.getElementById("prompt");
-
-    function setPlaceholder() {
-      if (textarea.value.trim() === "") {
-        textarea.value = "Ask anything";
-        textarea.style.color = "#777"; // Grisé pour indiquer que c'est un placeholder
-      }
-    }
-
-    function clearPlaceholder() {
-      if (textarea.value === "Ask anything") {
-        textarea.value = "";
-        textarea.style.color = "#1f1e23"; // Couleur normale du texte
-      }
-    }
-
-    textarea.addEventListener("focus", clearPlaceholder);
-    textarea.addEventListener("blur", setPlaceholder);
-
-    setPlaceholder(); // Appliquer au chargement de la page
-  });
-</script>
-
-<script> //Delete chat
-  $(document).ready(function() {
-      // Handle delete icon click: show confirm and cancel icons
-      $('.delete-chat').click(function() {
-          var chatId = $(this).data('chat-id');
-          $(this).hide();
-          $('span.confirm-delete[data-chat-id="' + chatId + '"]').show();
-          $('span.cancel-delete[data-chat-id="' + chatId + '"]').show();
-      });
-
-      // Handle cancel icon click: hide confirm and cancel icons, show delete icon
-      $('.cancel-delete').click(function() {
-          var chatId = $(this).data('chat-id');
-          $(this).hide();
-          $('span.confirm-delete[data-chat-id="' + chatId + '"]').hide();
-          $('span.delete-chat[data-chat-id="' + chatId + '"]').show();
-      });
-
-      // Handle confirm icon click: send AJAX request to delete the chat from the DB
-      $('.confirm-delete').click(function() {
-          var chatId = $(this).data('chat-id');
-          var $li = $(this).closest('li');
-          $.ajax({
-              url: '{% url "delete_chat" %}',
-              type: 'POST',
-              data: {
-                  'chat_id': chatId,
-                  'csrfmiddlewaretoken': '{{ csrf_token }}'
-              },
-              success: function(response) {
-                  if (response.status === 'success') {
-                      $li.remove();
-                  } else {
-                      alert('Failed to delete chat: ' + response.message);
-                      // Revert UI on failure
-                      $('span.confirm-delete[data-chat-id="' + chatId + '"]').hide();
-                      $('span.cancel-delete[data-chat-id="' + chatId + '"]').hide();
-                      $('span.delete-chat[data-chat-id="' + chatId + '"]').show();
-                  }
-              },
-              error: function() {
-                  alert('An error occurred while deleting the chat.');
-                  // Revert UI on error
-                  $('span.confirm-delete[data-chat-id="' + chatId + '"]').hide();
-                  $('span.cancel-delete[data-chat-id="' + chatId + '"]').hide();
-                  $('span.delete-chat[data-chat-id="' + chatId + '"]').show();
-              }
-          });
-      });
-  });
-</script>
-
-<script> // Manage reviews
-  document.addEventListener("DOMContentLoaded", function () {
-      const stars = document.querySelectorAll(".star");
-
-      // Définir la couleur par défaut de toutes les étoiles en gris
-      stars.forEach(star => {
-          star.style.color = "gray";
-      });
-
-      // Fonction pour mettre en surbrillance les étoiles jusqu'au rang donné
-      function highlightStars(rating) {
-          stars.forEach(star => {
-              if (parseInt(star.getAttribute("data-value")) <= rating) {
-                  star.style.color = "gold";
-              } else {
-                  star.style.color = "gray";
-              }
-          });
-      }
-
-      // Récupérer la note enregistrée depuis le contexte et mettre en surbrillance les étoiles si la note > 0
-      var currentChatRating = parseInt("{{ current_chat.rate|default:'0' }}");
-      if (currentChatRating > 0) {
-          highlightStars(currentChatRating);
-      }
-
-      // Gestion du clic sur une étoile pour envoyer la note via AJAX
-      stars.forEach(star => {
-          star.addEventListener("click", function () {
-              const rating = this.getAttribute("data-value");
-              const chatId = "{{ current_chat.public_id }}";
-              if (!chatId) {
-                  console.error("Chat ID is not defined.");
-                  return;
-              }
-              fetch("{% url 'code_chat_view' %}", {
-                  method: "POST",
-                  headers: {
-                      "X-CSRFToken": "{{ csrf_token }}",
-                      "Content-Type": "application/x-www-form-urlencoded"
-                  },
-                  body: new URLSearchParams({
-                      "rate": rating,
-                      "chat_id": chatId
-                  })
-              })
-              .then(response => response.json())
-              .then(data => {
-                  if (data.status === "success") {
-                      console.log("Note saved :", data.rate);
-                      highlightStars(rating);
-                  } else {
-                      console.error("Error while saving the note.");
-                  }
-              })
-              .catch(error => console.error("Erreur AJAX :", error));
-          });
-      });
-  });
-</script>
-
-<script>
-    $(document).ready(function() {
-    $('#chatcategory-dropdown').on('change', function() {
-        var SelectedChatCategoryId = $(this).val();
-        $.ajax({
-            url: '{% url "update_default_chatcategory" %}',
-            type: 'POST',
-            data: {
-                'chatcategory_id': SelectedChatCategoryId,
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
-                }
-            })
-        })
-    });
-</script>
-
-<script>
-$(document).ready(function() {
-    $('#project-dropdown').on('change', function() {
-        var selectedProjectId = $(this).val();
-        $.ajax({
-            url: '{% url "update_default_project" %}',
-            type: 'POST',
-            data: {
-                'project_id': selectedProjectId,
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
-            },
-            success: function(response) {
-                if (response.status === 'success') {
-                    // Rebuild chats list
-                    window.hasDefaultProject = true;
-                    var chatList = $('#chats-list ul');
-                    chatList.empty();
-                    if (response.chats && response.chats.length > 0) {
-                        console.log(response.chats)
-                        response.chats.forEach(function(chat) {
-                            console.log(chat.important)
-
-                            var li = $('<li>').css('margin-top','10px');
-                            var link = $('<a>')
-                                .attr('href', '?chat_id=' + chat.id)
-                                .text(chat.title)
-                                .css({'color':'white','font-size':'small','font-weight':'bold'});
-
-                            var toggleImportantSpan = $('<span>')
-                                .addClass('toggle-important')
-                                .attr('data-chat-id', chat.id)
-                                .html('&#9733;')
-                                .css({'cursor':'pointer', 'margin-left':'5px', 'float': 'right', 'color': chat.important === true ? 'gold' : 'gray' }) ;
-                            var deleteSpan = $('<span>')
-                                .addClass('delete-chat glyphicon')
-                                .attr('data-chat-id', chat.id)
-                                .css({'cursor':'pointer','color':'white','margin-left':'0','float':'right'})
-                                .html('&#xe020;');
-                            var cancelSpan = $('<span>')
-                                .addClass('cancel-delete')
-                                .attr('data-chat-id', chat.id)
-                                .css({'display':'none','cursor':'pointer','color':'gray','margin-left':'0','float':'right'})
-                                .html('&#x274C;');
-                            var confirmSpan = $('<span>')
-                                .addClass('confirm-delete')
-                                .attr('data-chat-id', chat.id)
-                                .css({'display':'none','cursor':'pointer','color':'green','margin-left':'0','float':'right'})
-                                .html('&#x2714;');
-                            li.append(link, toggleImportantSpan, deleteSpan, cancelSpan, confirmSpan);
-                            chatList.append(li);
-                        });
-                    } else {
-                        chatList.append(
-                            $('<li>').text('No Chats.').css('font-weight','bold')
-                        );
-                    }
-
-                    // Rebuild chatcategory dropdown if it exists
-                    var catSelect = $('#chatcategory-dropdown');
-                    if (catSelect.length) {
-                        catSelect.empty();
-                        response.chatcategories.forEach(function(category) {
-                            var disabled = false;
-                            if (response.default_project_is_large && !category.is_large) {
-                                disabled = true;
-                            } else if (!response.access_large_models && category.is_large) {
-                                disabled = true;
-                            } else if (!response.access_advanced_models && category.is_advanced) {
-                                disabled = true;
-                            }
-                            var option = $('<option>')
-                                .val(category.id)
-                                .text(category.name + ' (' + category.price + ')');
-                            if (disabled) {
-                                option.prop('disabled', true).css('color', '#ccc');
-                            } else {
-                                option.css('color', 'black');
-                            }
-                            catSelect.append(option);
-                        });
-                    }
-                } else {
-                    alert('Error while updating default project.');
-                }
-            },
-            error: function() {
-                alert('Server error while updating default project.');
-            }
-        });
-    });
-});
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-    // Flag to know if a default project is selected
-    var hasDefaultProject = {% if default_project %}true{% else %}false{% endif %};
-    // Expose to global scope for other handlers
-    window.hasDefaultProject = hasDefaultProject;
-});
-</script>
-
-
-<script>
-// Polls management
-$(document).ready(function() {
-    var lastAiMessageId = 0;
-    window.pollingStopped = false;
-
-    function pollUpdates() {
-        if(window.pollingStopped){ return; }
-        var chatId = $('#chat_id').val();
-        $.ajax({
-            url: '{% url "code_chat_updates" %}',
-            data: { chat_id: chatId, last_id: lastAiMessageId },
-            success: function(data) {
-
-                /* ---------- ⬇️  NEW : stop on error  ---------- */
-                if (data.error) {
-                    $('#loading-text').append(
-                        '<span style="color:red;font-weight:bold;">'+ data.error +'</span><br>'
-                    );
-                    $('#loading-spinner').hide();
-                    window.pollingStopped = true;      // prevent further loops
-                    return;                            // exit success handler
-                }
-                /* ----------  END NEW PART  ---------- */
-
-                data.messages.forEach(function(msg) {
-                    var parser = new DOMParser();
-                    var xmlDoc = parser.parseFromString(msg.content, 'application/xml');
-                    var rootTag = xmlDoc.documentElement.tagName;
-                    if (rootTag === 'files') {
-                        var items = Array.from(xmlDoc.getElementsByTagName('file'));
-                        items.forEach(function(file, index) {
-                            setTimeout(function() {
-                                $('#loading-text').append(file.textContent + '<br>');
-                            }, index * 500);
-                        });
-                    } else if (rootTag === 'components') {
-                        var items = Array.from(xmlDoc.getElementsByTagName('component'));
-                        items.forEach(function(comp, index) {
-                            setTimeout(function() {
-                                var fileName = comp.getElementsByTagName('file')[0].textContent;
-                                var compName = comp.getElementsByTagName('name')[0].textContent;
-                                $('#loading-text').append(fileName + ' : ' + compName + '<br>');
-                            }, index * 500);
-                        });
-                    } else {
-                        $('#loading-text').append(msg.content + '<br>');
-                    }
-                    lastAiMessageId = msg.id;
-                });
-            },
-            complete: function() {
-                // ⬇️ keep polling only if not stopped
-                if(!window.pollingStopped){
-                    setTimeout(pollUpdates, 2000);
-                }
-            }
-        });
-    }
-
-    // Expose for external calls (e.g. regenerate)
-    window.pollUpdates = pollUpdates;
-
-    $(document).ready(function() {
-        $('#chat-form').on('submit', function(e) {
-            if (!window.hasDefaultProject) {
-                e.preventDefault();
-                alert('Please select a project');
-                return;
-            }
-            e.preventDefault();
-            var prompt = $('#prompt').val().trim();
-            if (prompt === "Ask anything" || prompt === "") {
-                alert('Please enter a prompt.');
-                return;
-            }
-            // Show loader and clear previous text
-            $('#loading-spinner').show();
-            $('#loading-text').show().empty();
-            $('#loading-text').show().empty();
-            // Start polling for AI processing updates
-            pollUpdates();
-            // Send the chat request
-            $.ajax({
-                url: '{% url "code_chat_view" %}',
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function(data) {
-                    $('#loading-spinner').hide();
-                    // Preserve the selected attempt in the redirect
-                    var attempt = $('#attempt_no').val();
-                    window.location.href = '?chat_id=' + data.chat_id + '&attempt=' + attempt;
-                },
-                error: function() {
-                    $('#loading-spinner').hide();
-                    alert('An error has occured.');
-                }
-            });
-        });
-    });
-});
-</script>
-
-{% if in_progress %}
-<script>
-  document.addEventListener("DOMContentLoaded", function(){
-      $('#loading-spinner').show();
-      $('#loading-text').show().empty().text('Loading...');
-      if(typeof pollUpdates === 'function'){
-          pollUpdates();
-      }
-  });
-</script>
-{% endif %}
-
-
-
-
-
-<script> //Step Navigation & copy button
-    $(document).ready(function() {
-        // Handle step navigation
-        $('.next-step-btn').click(function() {
-            var $stepsContainer = $(this).siblings('.steps-container');
-            var $currentStep = $stepsContainer.find('.step:visible');
-            var $nextStep = $currentStep.next('.step');
-            if ($nextStep.length) {
-                $currentStep.hide();
-                $nextStep.show();
-            }
-        });
-        $('.prev-step-btn').click(function() {
-            var $stepsContainer = $(this).siblings('.steps-container');
-            var $currentStep = $stepsContainer.find('.step:visible');
-            var $prevStep = $currentStep.prev('.step');
-            if ($prevStep.length) {
-                $currentStep.hide();
-                $prevStep.show();
-            }
-        });
-
-        // Handle "Copy Code" button
-        document.querySelectorAll(".copy-code-btn").forEach(button => {
-            button.addEventListener("click", () => {
-                const codeElement = button.nextElementSibling.querySelector("code");
-                const text = codeElement.innerText;
-                navigator.clipboard.writeText(text).then(() => {
-                    button.innerText = "Copied!";
-                    setTimeout(() => {
-                        button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg> Copy`;
-                    }, 2000);
-                });
-            });
-        });
-
-    });
-</script>
-
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-
-<script>
-$(document).ready(function(){
-    $('#regenerate-btn').on('click', function(e){
-        e.preventDefault();
-        // Clear previous steps and hide controls
-        $('.steps-container').empty();
-        $('.prev-step-btn, .next-step-btn, .message-user, .ai-avatar-img').hide();
-        // Show loading spinner and message
-
-        $('#loading-spinner').show();
-        $('#loading-text').text('Regenerating...').append('<br>').show();
-        // Start polling during regeneration
-        if (typeof window.pollUpdates === 'function') {
-            pollUpdates();
-        }
-        $.ajax({
-            url: "{% url 'code_chat_view' %}",
-            method: "POST",
-            data: {
-                regenerate: 1,
-                chat_id: "{{ current_chat.public_id }}",
-                csrfmiddlewaretoken: "{{ csrf_token }}"
-            },
-            success: function(data){
-                if(data.status === 'success'){
-                    window.location.href = '?chat_id={{ current_chat.public_id }}&attempt=' + ({{ total_attempts }} + 1);
-                } else {
-                    alert(data.message);
-                }
-            },
-            error: function(){
-                alert('Error while regenerating.');
-            },
-            complete: function(){
-                $('#loading-spinner').hide();
-                $('#loading-text').hide();
-            }
-        });
-    });
-});
-</script>
-
-
-
-<script>
-$(function(){
-  console.log('DOM ready, binding regenerate');
-  var chatId = "{{ current_chat.public_id }}";
-  $('#prev-attempt').on('click', function(){
-    window.location.href = '?chat_id='+chatId+'&attempt=' + ({{ selected_attempt }} - 1);
-  });
-  $('#next-attempt').on('click', function(){
-    window.location.href = '?chat_id='+chatId+'&attempt=' + ({{ selected_attempt }} + 1);
-  });
-});
-</script>
 
 
 {% endblock %}
