@@ -61,7 +61,7 @@ Provide me a detailed solution using the resources to solve the request.
 """
 
 pe_final_answer_format = """
-Develop the solution then please format the instructions in order to respect this format example (this example is Django but you need to adapt it to {technology})
+Develop the solution then please format the instructions in order to respect this format example :
  
 {code_example}
 ----------------------------------------------------------------------    
@@ -69,6 +69,7 @@ Constraints:
 Do not include any additional text or explanations outside of the specified XML format.
 Do not modify the structure of the XML formats provided, and make sure to include the coding language inside <code></code> balise, if no language, please use <text></text>.
 It is crucial that you respect the same components and files names in your solution, please don't change the name of any function, model or variable.
+If the components list is empty, please provide the steps to create a solution from scratch
 Avoid making changes on legacy code when it's not necessary.
 Make sure to respect code indentations and line breaks.
 Make sure to include the full path of the file.

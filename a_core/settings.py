@@ -90,6 +90,8 @@ INSTALLED_APPS = [
     'a_users',
     'git_auth',
     'b_coding',
+    #'b_insights',
+    'b_planning',
     'management',
     'tasks',
     'cloudinary',
@@ -230,22 +232,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-# Lire les variables depuis .env
-#AZURE_ACCOUNT_NAME = env("AZURE_ACCOUNT_NAME")
-#AZURE_ACCOUNT_NAME = 'kodoshinstaticfiles'
-#AZURE_ACCOUNT_KEY = env("AZURE_ACCOUNT_KEY")
-#AZURE_ACCOUNT_KEY = 'mN/+Rts/vp6KbRjOLdmSRA3I1mCGsGH5wg9JwckK8rqKkmnCom7ija34lCIlLCPIulMAzwmfH+AB+AStS1BkMQ=='
-
-#AZURE_STATIC_CONTAINER = env("AZURE_STATIC_CONTAINER", default="staticfiles")
-#AZURE_MEDIA_CONTAINER = env("AZURE_MEDIA_CONTAINER")
-#AZURE_MEDIA_CONTAINER = 'mediafiles'
-
-#AZURE_CUSTOM_DOMAIN = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net"
 
 #################################################### CLOUDINARY ################################################################################3
 # Configuration pour les fichiers statiques

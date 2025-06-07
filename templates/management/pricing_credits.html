@@ -1,4 +1,4 @@
-<title>Plans & Credits</title>
+<title>Plans & Rikos</title>
 
 {% extends 'base.html' %}
 {% load static %}
@@ -66,7 +66,9 @@
       <button style="background-color: unset;" type="submit" class="buy-button">
         <div class="pricing-card">
           <div class="pricing-card-header">
-            <div class="pricing-title">{{ offer.name }} Credits</div>
+            <img style="max-width: 30px;  display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1749095379/bolt_j4tbpk.svg" alt="magic"  >
+            <div class="pricing-title">{{ offer.name }} Rikos</div>
+
             {% if offer.original_price and offer.price != offer.original_price %}
                 <span class="pricing-old-price">${{ offer.original_price|floatformat:0 }}</span>
                 <span class="pricing-price-promo">${{ offer.price|floatformat:0 }}</span>
@@ -111,11 +113,11 @@
         <div class="pricing-table-content">
           <div class="pricing-table-row">
             <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721061/plans-features_rghsjl.png" alt="" class="pricing-icon">
-            <div class="pricing-row-text">{{ plan.monthly_credits }} credits per month</div>
+            <div class="pricing-row-text">{{ plan.monthly_credits }} Rikos per month</div>
           </div>
           <div class="pricing-table-row">
             <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721061/plans-features_rghsjl.png" alt="" class="pricing-icon">
-            <div class="pricing-row-text">{{ plan.daily_credits }} free credits per day</div>
+            <div class="pricing-row-text">{{ plan.daily_credits }} free Rikos per day</div>
           </div>
           <div class="pricing-table-row">
             <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721061/plans-features_rghsjl.png" alt="" class="pricing-icon">
@@ -191,11 +193,11 @@
         <div class="pricing-table-content">
           <div class="pricing-table-row">
             <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721061/plans-features_rghsjl.png" alt="" class="pricing-icon">
-            <div class="pricing-row-text">{{ plan.monthly_credits }} credits per month</div>
+            <div class="pricing-row-text">{{ plan.monthly_credits }} Rikos per month</div>
           </div>
           <div class="pricing-table-row">
             <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721061/plans-features_rghsjl.png" alt="" class="pricing-icon">
-            <div class="pricing-row-text">{{ plan.daily_credits }} free credits per day</div>
+            <div class="pricing-row-text">{{ plan.daily_credits }} free Rikos per day</div>
           </div>
           <div class="pricing-table-row">
             <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721061/plans-features_rghsjl.png" alt="" class="pricing-icon">
@@ -257,7 +259,7 @@
 </div>
 
 <div class="max-w-4xl ml-[15%]">
-  <label>*daily credits are not cumulative</label>
+  <label>*daily Raikos are not cumulative</label>
 </div>
 
 <style>

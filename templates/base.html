@@ -1,15 +1,17 @@
 {% load static %}
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Home</title>
 
     <link rel="icon" type="image/x-icon" href="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748729443/icon_vy3f4i.ico">
+    <!-- A Reactiver !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     <link rel="stylesheet" type="text/css" href="{% static 'git_auth/css/style.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'b_coding/css/style.css' %}">
+    -->
     <!-- Include Prism CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet" />
 
@@ -116,6 +118,82 @@
     </style>
 
 
+
+<style> /* ---- GIT_AUTH !!!!!!!!!!!!!!!!!! ---- */
+/* ---- Le conteneur global, éventuellement ---- */
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ---- Le style de liste globale ---- */
+.file-tree {
+    list-style: none;    /* pas de puces */
+    margin: 0;           /* réinitialise les marges */
+    padding-left: 0;     /* retire le padding par défaut */
+    text-align: left;    /* tout aligné à gauche */
+}
+
+/* ---- Les sous-listes (enfants) doivent être indentées ---- */
+.file-tree ul {
+    margin-left: 20px;   /* Indentation visuelle des sous-dossiers/fichiers */
+    padding-left: 0;
+}
+
+/* ---- Chaque <li> de la liste ---- */
+.file-item {
+    margin: 5px 0; /* léger espace entre items */
+}
+
+/* ---- La « row » qui contient sur une ligne icône + nom + checkbox ---- */
+.item-row {
+    display: flex;            /* Mise en ligne horizontale */
+    align-items: center;      /* Centrage vertical */
+    justify-content: flex-start;
+}
+
+.icon, .folder, .file, .file-checkbox {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* ---- Icônes (facultatif) ---- */
+.icon {
+    margin-right: 5px;        /* espace après l’icône */
+}
+
+/* ---- Nom du dossier ---- */
+.folder {
+    font-weight: bold;
+    color: #1a73e8;
+    cursor: pointer;  /* si tu veux activer le click pour toggle l'affichage */
+    margin-right: 1px;
+}
+
+/* ---- Nom du fichier ---- */
+.file {
+    margin-right: 1px;
+    color: #555;
+}
+
+/* ---- La checkbox ---- */
+.file-checkbox {
+    /* Si tu veux la coller complètement à droite de .item-row,
+       tu peux mettre margin-left: auto; */
+    margin-left: 4px;
+    width: 10%;
+}
+
+/* ---- Pour masquer les sous-listes au chargement (si besoin) ---- */
+.hidden {
+    display: none;
+}
+</style>
+
+
 </head>
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -140,7 +218,33 @@
         {% endblock %}
 
         {% block javascript %}
-        <script src="{% static 'git_auth/scripts.js' %}"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const folders = document.querySelectorAll(".file-tree .folder");
+
+                folders.forEach(folder => {
+                    folder.addEventListener("click", function() {
+                        const nextSibling = folder.nextElementSibling;
+                        if (nextSibling && nextSibling.tagName === "UL") {
+                            nextSibling.classList.toggle("hidden");
+                        }
+                    });
+                });
+
+                const checkboxes = document.querySelectorAll('.file-tree .checkbox');
+
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const parentLi = this.closest('li');
+                        const childCheckboxes = parentLi.querySelectorAll('ul .checkbox');
+                        childCheckboxes.forEach(childCheckbox => {
+                            childCheckbox.checked = this.checked;
+                        });
+                    });
+                });
+            });
+
+        </script>
         {% endblock %}
         </div>
     </div>

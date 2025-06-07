@@ -359,7 +359,7 @@ async def async_get_ai_title(content):
             response = await client.post(url, headers=headers, json=body)
         if response.status_code == 200:
             output = response.json()
-            return output['choices'][0]['message']['content'].strip()
+            return output['choices'][0]['message']['content'].strip().replace('"','')
         return response.text
     finally:
         await sync_to_async(release_api_key)(key)
