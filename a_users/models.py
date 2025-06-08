@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.templatetags.static import static
 from a_projects.models import Project
 from b_coding.models import ChatCategory
+from b_planning.models import PlanningChatCategory
 from fernet_fields import EncryptedCharField
 from django.utils import timezone
 from management.models import Subscription, SubscriptionPlan, SubscriptionBonus
@@ -59,6 +60,7 @@ class Profile(models.Model):
     info = models.TextField(null=True, blank=True)
     default_project = models.ForeignKey(Project, on_delete=models.SET_NULL, related_name='profiles_with_default_project', blank=True, null=True)
     default_chat_category = models.ForeignKey(ChatCategory, on_delete=models.DO_NOTHING, related_name='profiles_with_default_chat_category', blank=True, null=True)
+    default_planning_chat_category = models.ForeignKey(PlanningChatCategory, on_delete=models.DO_NOTHING, related_name='profiles_with_default_planning_chat_category', blank=True, null=True)
     github_access_key = EncryptedCharField(max_length=200, null=True, blank=True) # FallbackEncryptedTextField(max_length=255, null=True, blank=True) # models.CharField(max_length=255, null=True, blank=True) #
     xp_points = models.IntegerField(default=0)
     available_credits = models.IntegerField(default=0)

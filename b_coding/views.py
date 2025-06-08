@@ -352,7 +352,7 @@ def delete_chat(request):
             chat = CodingChat.objects.get(public_id=chat_id, user=request.user)
             chat.delete()
             return JsonResponse({'status': 'success'})
-        except Chat.DoesNotExist:
+        except CodingChat.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Chat not found.'})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
@@ -405,3 +405,5 @@ async def chat_category_comparison_view(request):
         'b_coding/chat_category_comparison.html',
         {'chatcategories': chatcategories}
     )
+
+

@@ -1,4 +1,4 @@
-<title>Kenshi</title>
+<title>Sana</title>
 {% extends 'layouts/blank.html' %}
 {% block class %}bg-[#1f1e23] text-white code-chat-page{% endblock %}
 {% load static %}
@@ -215,7 +215,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function setPlaceholder() {
       if (textarea.value.trim() === "") {
-        textarea.value = "Ask anything";
+        textarea.value = "Write your planning details";
         textarea.style.color = "#777"; // Grisé pour indiquer que c'est un placeholder
         textarea.style.fontSize = "large";
         textarea.style.margin = "5px";
@@ -223,9 +223,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function clearPlaceholder() {
-      if (textarea.value === "Ask anything") {
+      if (textarea.value === "Write your planning details") {
         textarea.value = "";
-        textarea.style.color = "#ffffff"; // Couleur normale du texte
+        textarea.style.color = "#1f1e23"; // Couleur normale du texte
         textarea.style.fontSize = "large";
         textarea.style.margin = "5px";
       }
@@ -358,12 +358,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 $(document).ready(function() {
 $('#chatcategory-dropdown').on('change', function() {
+    console.log('Updateing chat category')
     var SelectedChatCategoryId = $(this).val();
     $.ajax({
-        url: '{% url "update_default_chatcategory" %}',
+        url: '{% url "update_planning_default_chatcategory" %}',
         type: 'POST',
         data: {
-            'chatcategory_id': SelectedChatCategoryId,
+            'planning_chatcategory_id': SelectedChatCategoryId,
             'csrfmiddlewaretoken': '{{ csrf_token }}'
             }
         })
@@ -374,7 +375,7 @@ $(document).ready(function() {
     $('#project-dropdown').on('change', function() {
         var selectedProjectId = $(this).val();
         $.ajax({
-            url: '{% url "update_default_project" %}',
+            url: '{% url "planning_update_default_project" %}',
             type: 'POST',
             data: {
                 'project_id': selectedProjectId,
@@ -534,7 +535,7 @@ $(document).ready(function() {
             }
             e.preventDefault();
             var prompt = $('#prompt').val().trim();
-            if (prompt === "Ask anything" || prompt === "") {
+            if (prompt === "Write your planning details" || prompt === "") {
                 alert('Please enter a prompt.');
                 return;
             }
@@ -908,7 +909,7 @@ button:active {
 
 
             <!--<h3 style="font-weight: bold;">Your Chats</h3>-->
-            <button type="submit" class="new-chat-btn" onclick="window.location.href='/ai/kenshi'">
+            <button type="submit" class="new-chat-btn" onclick="window.location.href='/ai/sana'">
                 + new chat
             </button>
 
@@ -933,14 +934,12 @@ button:active {
                 </ul>
             </div>
         </div>
-
     </div>
-    <img class="ai-avatar-img" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748726600/Kenshi_a7zk40.png" alt="IA" style="width:6em;height:9em; margin-left: 2em; margin-top: 2em">
+    <img class="ai-avatar-img" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748716164/d6nl77n3c8jkfwrnkr7c.png" alt="IA" style="width:6em;height:9em; margin-left: 2em; margin-top: 2em">
     </div>
 
 
-
-<div class="chat-area-container" style="margin-left: 1em; width: 100%">
+    <div class="chat-area-container" style="margin-left: 1em; width: 100%">
 
 <br>
 <div class="chat-area">
@@ -1015,7 +1014,7 @@ button:active {
                 </div>
             {% elif message.type == 'gpt-a' and message.attempt_number == selected_attempt %}
                 <div class="message ai">
-                    <img class="ai-avatar-img" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748726600/Kenshi_a7zk40.png" alt="IA" style="width:2em;height:3em;display: inline;margin-right: 2em">
+                    <img class="ai-avatar-img" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748716164/d6nl77n3c8jkfwrnkr7c.png" alt="IA" style="width:2em;height:3em;display: inline;margin-right: 2em">
                     <!-- Display steps here -->
                     {% if message.steps|length > 1 %}
                     <button class="prev-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-weight: bold;">Previous</button>
@@ -1075,8 +1074,8 @@ button:active {
             <div>({{ current_chat.chat_category.price_secondary_prompt }} credits for next prompts)</div> <br>
         {% endif %}
         <input type="hidden" name="attempt_no" value="{{ selected_attempt }}" id="attempt_no">
-        <textarea name="prompt" id="prompt" rows="3" style="width: 80%; background-color: #333333; overflow:hidden;"></textarea><br><br>
-        <button type="submit" style="height: 2em; width: 4em; font-size: 1em; padding: 0.2em 0.5em;  margin: 5px; line-height: 1.2em; font-family: 'DynaPuff';">>>> </button>
+        <textarea name="prompt" id="prompt" rows="3" style="width: 80%; background-color: #c6cacb; color: #1f1e23; overflow:hidden;"></textarea><br><br>
+        <button type="submit" style="background-color: deeppink ;height: 2em; width: 4em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; margin: 5px ; font-family: 'DynaPuff';">>>> </button>
     </form>
 
 
