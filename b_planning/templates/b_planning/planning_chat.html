@@ -95,7 +95,7 @@ const dropdown = document.getElementById('chatcategory-dropdown');
 dropdown.addEventListener('change', function() {
   if (this.value === 'learn_more') {
     // Remplacez "/learn-more-categories/" par l’URL de votre page explicative
-    window.location.href = '/ai/kenshi/categories/comparison/';
+    window.location.href = '/ai/sana/categories/comparison/';
   }
 });
 });
@@ -358,8 +358,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 $(document).ready(function() {
 $('#chatcategory-dropdown').on('change', function() {
-    console.log('Updateing chat category')
+    console.log('Updating chat category')
     var SelectedChatCategoryId = $(this).val();
+
+    if (SelectedChatCategoryId === 'learn_more') {
+            return;          // on quitte la fonction
+        }
     $.ajax({
         url: '{% url "update_planning_default_chatcategory" %}',
         type: 'POST',
@@ -458,109 +462,6 @@ $(document).ready(function() {
             error: function() {
                 alert('Server error while updating default project.');
             }
-        });
-    });
-});
-
-
-
-// Polls management
-$(document).ready(function() {
-    var lastAiMessageId = 0;
-    window.pollingStopped = false;
-
-    function pollUpdates() {
-        if(window.pollingStopped){ return; }
-        var chatId = $('#chat_id').val();
-        $.ajax({
-            url: '{% url "code_chat_updates" %}',
-            data: { chat_id: chatId, last_id: lastAiMessageId },
-            success: function(data) {
-
-                /* ---------- ⬇️  NEW : stop on error  ---------- */
-                if (data.error) {
-                    $('#loading-text').append(
-                        '<span style="color:red;font-weight:bold;">'+ data.error +'</span><br>'
-                    );
-                    $('#loading-spinner').hide();
-                    window.pollingStopped = true;      // prevent further loops
-                    return;                            // exit success handler
-                }
-                /* ----------  END NEW PART  ---------- */
-
-                data.messages.forEach(function(msg) {
-                    var parser = new DOMParser();
-                    var xmlDoc = parser.parseFromString(msg.content, 'application/xml');
-                    var rootTag = xmlDoc.documentElement.tagName;
-                    if (rootTag === 'files') {
-                        var items = Array.from(xmlDoc.getElementsByTagName('file'));
-                        items.forEach(function(file, index) {
-                            setTimeout(function() {
-                                $('#loading-text').append(file.textContent + '<br>');
-                            }, index * 500);
-                        });
-                    } else if (rootTag === 'components') {
-                        var items = Array.from(xmlDoc.getElementsByTagName('component'));
-                        items.forEach(function(comp, index) {
-                            setTimeout(function() {
-                                var fileName = comp.getElementsByTagName('file')[0].textContent;
-                                var compName = comp.getElementsByTagName('name')[0].textContent;
-                                $('#loading-text').append(fileName + ' : ' + compName + '<br>');
-                            }, index * 500);
-                        });
-                    } else {
-                        $('#loading-text').append(msg.content + '<br>');
-                    }
-                    lastAiMessageId = msg.id;
-                });
-            },
-            complete: function() {
-                // ⬇️ keep polling only if not stopped
-                if(!window.pollingStopped){
-                    setTimeout(pollUpdates, 2000);
-                }
-            }
-        });
-    }
-
-    // Expose for external calls (e.g. regenerate)
-    window.pollUpdates = pollUpdates;
-
-    $(document).ready(function() {
-        $('#chat-form').on('submit', function(e) {
-            if (!window.hasDefaultProject) {
-                e.preventDefault();
-                alert('Please select a project');
-                return;
-            }
-            e.preventDefault();
-            var prompt = $('#prompt').val().trim();
-            if (prompt === "Write your planning details" || prompt === "") {
-                alert('Please enter a prompt.');
-                return;
-            }
-            // Show loader and clear previous text
-            $('#loading-spinner').show();
-            $('#loading-text').show().empty();
-            $('#loading-text').show().empty();
-            // Start polling for AI processing updates
-            pollUpdates();
-            // Send the chat request
-            $.ajax({
-                url: '{% url "code_chat_view" %}',
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function(data) {
-                    $('#loading-spinner').hide();
-                    // Preserve the selected attempt in the redirect
-                    var attempt = $('#attempt_no').val();
-                    window.location.href = '?chat_id=' + data.chat_id + '&attempt=' + attempt;
-                },
-                error: function() {
-                    $('#loading-spinner').hide();
-                    alert('An error has occured.');
-                }
-            });
         });
     });
 });

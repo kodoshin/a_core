@@ -1,7 +1,7 @@
 <title>AI Models</title>
 {% extends 'layouts/blank.html' %}
 {% block content %}
-{% load chat_category_tags %}
+{% load planning_chat_category_tags %}
 
 <style>
     table{
@@ -30,7 +30,6 @@
                         <th>Consumption</th>
                         <th>Speed</th>
                         <th>Precision</th>
-                        <th>large projects</th>
                         <th>Best use cases</th>
                     </tr>
                 </thead>
@@ -41,7 +40,6 @@
                         <td>{{ cat.price }}<img style="max-width: 18px;  display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1749095379/bolt_j4tbpk.svg" alt="magic"></td>
                         <td>{{ cat.speed|stars }}</td>
                         <td>{{ cat.precision|stars }}</td>
-                        <td>{{ cat.is_large|checkmark }}</td>
                         <td>{{ cat.use_cases }}</td>
                     </tr>
                     {% empty %}

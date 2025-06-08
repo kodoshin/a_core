@@ -359,6 +359,9 @@ document.addEventListener("DOMContentLoaded", function () {
 $(document).ready(function() {
 $('#chatcategory-dropdown').on('change', function() {
     var SelectedChatCategoryId = $(this).val();
+    if (SelectedChatCategoryId === 'learn_more') {
+            return;          // on quitte la fonction
+        }
     $.ajax({
         url: '{% url "update_default_chatcategory" %}',
         type: 'POST',

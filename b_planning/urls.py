@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import planning_chat_view, update_default_project, update_planning_default_chatcategory
+from .views import planning_chat_view, update_default_project, update_planning_default_chatcategory, planning_chat_category_comparison_view
 
 urlpatterns = [
     path('sana/', planning_chat_view, name='planning_view'),
@@ -8,5 +8,5 @@ urlpatterns = [
     path('sana/update_default_chatcategory/', update_planning_default_chatcategory, name="update_planning_default_chatcategory"),
     ##delete chat
     ##toggle importance
-    ##comparison
+    path('sana/categories/comparison/', planning_chat_category_comparison_view, name="planning_chat_category_comparison"),
 ]
