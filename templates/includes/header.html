@@ -21,7 +21,7 @@
                     <form action="{% url 'claim-credits' %}" method="post" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" class="bg-gray-500 text-green font-bold rounded whitespace-nowrap text-[10px] sm:text-xs md:text-sm lg:text-base px-2 sm:px-3 md:px-4 py-1 sm:py-2" style="background-color: unset; font-size: 0.8em;">
-                            <span style="color: #4CAF50;">Get {{ user.profile.current_plan.daily_credits|default:5 }} <img style="max-width: 18px;  display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1749095379/bolt_j4tbpk.svg" alt="magic"></span>
+                            <span style="color: #4CAF50;">GET {{ user.profile.current_plan.daily_credits|default:5 }} <img style="max-width: 18px;  display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1749095379/bolt_j4tbpk.svg" alt="magic"></span>
                         </button>
                     </form>
                 </li>
@@ -43,7 +43,7 @@
 
             <li x-data="{ dropdownOpen: false }" class="relative" style="font-weight: bold;">
                 <a @click="dropdownOpen = !dropdownOpen" @click.away="dropdownOpen = false" class="cursor-pointer select-none">
-                    <img class="h-8 w-8 rounded-full object-cover" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748720813/Github-512_ckwtpp.webp"/>
+                    <img class="h-8 w-8 rounded-full object-cover" style="height: 1.5em; width: 1.5em" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748726826/6594712_ljqxyj.webp"/>
                     {{ user.profile.name }}
                     <img x-bind:class="dropdownOpen && 'rotate-180 duration-300'" class="w-4" src="https://img.icons8.com/small/32/ffffff/expand-arrow.png"/>
                 </a>

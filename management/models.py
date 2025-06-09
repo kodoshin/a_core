@@ -60,6 +60,7 @@ class SubscriptionPlan(models.Model):
     monthly_credits = models.PositiveIntegerField(default=0)
     daily_credits = models.PositiveIntegerField(default=0)
     project_limits = models.PositiveIntegerField(default=0)
+    allows_multibranch = models.BooleanField(default=False)
     sync_with_github = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     advantages = models.TextField(null=True, blank=True)

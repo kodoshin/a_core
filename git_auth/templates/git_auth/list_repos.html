@@ -3,6 +3,76 @@
 {% extends 'layouts/blank.html' %}
 
 {% block content %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const carousel = document.querySelector('.tech-carousel .tech-list');
+  document.querySelector('.tech-carousel .carousel-arrow.left').addEventListener('click', function(){
+    carousel.scrollBy({ left: -200, behavior: 'smooth' });
+  });
+  document.querySelector('.tech-carousel .carousel-arrow.right').addEventListener('click', function(){
+    carousel.scrollBy({ left: 200, behavior: 'smooth' });
+  });
+});
+</script>
+<style>
+
+        /* Carousel technologies */
+    .tech-carousel {
+      background-color: rgba(31, 30, 35, 0.5);
+      padding: 2rem;
+      border-radius: 10px;
+      position: relative;
+      margin: 2rem 0;
+      overflow: hidden;
+    }
+    .tech-carousel .carousel-wrapper {
+      position: relative;
+    }
+    .tech-carousel .carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 50%;
+      z-index: 10;
+    }
+    .tech-carousel .carousel-arrow.left { left: 1rem; }
+    .tech-carousel .carousel-arrow.right { right: 1rem; }
+    .tech-carousel .tech-list {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      gap: 1rem;
+      padding: 1rem 3rem;
+    }
+    .tech-carousel .tech-list::-webkit-scrollbar { display: none; }
+    .tech-carousel .tech-list { -ms-overflow-style: none; scrollbar-width: none; }
+    .tech-carousel .tech-item {
+      flex: 0 0 auto;
+      text-align: center;
+    }
+    .tech-carousel .tech-item img {
+      max-width: 200px;
+      height: auto;
+      margin: 0 auto 0.5rem;
+    }
+    .tech-carousel .tech-item p {
+      color: #fff;
+    }
+
+</style>
+<style>
+    label {
+        font-size: large;
+        font-weight: bold;
+    }
+</style>
+
+
 <div class="content-wrapper">
     <br> <br> <br> <br>
     <form method="get" id="repo-form">
@@ -36,7 +106,7 @@
 
 
         <div id="repo-details" style="margin-top: 20px; display: none;">
-            <h2>Repository Details:</h2>
+            <h4>Repository Details:</h4>
             <p><strong>Name:</strong> <span id="repo-name"></span></p>
             <p><strong>Description:</strong> <span id="repo-title"></span></p>
             <p><strong>Created at:</strong> <span id="repo-created"></span></p>
@@ -48,21 +118,40 @@
     </form>
 </div>
 
+<br> <br>
+
+<div class="mb-20">
+    <section class="tech-carousel" style="width: 100%; margin: 0 auto;">
+      <h3 class="title">Native Technologies</h3>
+      <div class="carousel-wrapper">
+        <button class="carousel-arrow left">&larr;</button>
+        <div class="tech-list">
+          {% for tech in technologies %}
+            <div class="tech-item">
+              <img src="{{ tech.image.url }}" alt="{{ tech.name }}">
+            </div>
+          {% endfor %}
+        </div>
+        <button class="carousel-arrow right">&rarr;</button>
+      </div>
+    </section>
+</div>
 
 
-    <style>
-      .content-wrapper {
-        margin-left: 50px; /* Applique une marge de 50px à gauche */
-      }
-      .select-button {
-        height: 30px;
-        display: flex;
-        align-items: center; /* Centre verticalement */
-        justify-content: center; /* Centre horizontalement */
-        padding: 0 10px;
-        border: none;
-      }
-    </style>
+
+<style>
+  .content-wrapper {
+    margin-left: 50px; /* Applique une marge de 50px à gauche */
+  }
+  .select-button {
+    height: 30px;
+    display: flex;
+    align-items: center; /* Centre verticalement */
+    justify-content: center; /* Centre horizontalement */
+    padding: 0 10px;
+    border: none;
+  }
+</style>
 
 
 

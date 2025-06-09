@@ -13,7 +13,7 @@ import os
 import json
 from django.http import JsonResponse
 import tiktoken
-
+from a_projects.models import Technology
 
 
 def get_github_token(user):
@@ -42,6 +42,7 @@ def get_repo_branches(request, repo_name):
     return JsonResponse({'branches': branches})
 
 def list_repos(request):
+    technologies = Technology.objects.exclude(name='Other').exclude(status__name='inactive')
     try:
         token = get_github_token(request.user)
     except SocialToken.DoesNotExist:
@@ -67,7 +68,7 @@ def list_repos(request):
         page += 1
 
     repos_status = 1 if repos else 0
-    context = {'repos': repos, 'repos_status': repos_status}
+    context = {'repos': repos, 'repos_status': repos_status, 'technologies':technologies}
     return render(request, 'git_auth/list_repos.html', context)
 
 

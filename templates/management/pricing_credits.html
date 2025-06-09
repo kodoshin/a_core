@@ -145,6 +145,17 @@
             <div class="pricing-row-text muted">Automatic Github Sync.</div>
           </div>
           {% endif %}
+          {% if plan.sync_with_github == True %}
+          <div class="pricing-table-row">
+            <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721061/plans-features_rghsjl.png" alt="" class="pricing-icon">
+            <div class="pricing-row-text">Work with Multi-Branch</div>
+          </div>
+          {% else %}
+          <div class="pricing-table-row">
+            <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721061/plans-features_rghsjl.png" alt="" class="pricing-icon muted">
+            <div class="pricing-row-text muted">Multi-Branch (only main)</div>
+          </div>
+          {% endif %}
           {% if plan.advanced_models == True %}
           <div class="pricing-table-row">
             <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721061/plans-features_rghsjl.png" alt="" class="pricing-icon">
@@ -223,6 +234,17 @@
           <div class="pricing-table-row">
             <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721061/plans-features_rghsjl.png" alt="" class="pricing-icon muted">
             <div class="pricing-row-text muted">Automatic Github Sync.</div>
+          </div>
+          {% endif %}
+          {% if plan.allows_multibranch == True %}
+          <div class="pricing-table-row">
+            <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721061/plans-features_rghsjl.png" alt="" class="pricing-icon">
+            <div class="pricing-row-text">Work with Multi-Branch</div>
+          </div>
+          {% else %}
+          <div class="pricing-table-row">
+            <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721061/plans-features_rghsjl.png" alt="" class="pricing-icon muted">
+            <div class="pricing-row-text muted">Multi-Branch (only main)</div>
           </div>
           {% endif %}
           {% if plan.advanced_models == True %}
