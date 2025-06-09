@@ -1,5 +1,6 @@
 <title>Kenshi</title>
 {% extends 'layouts/blank.html' %}
+{% block header %}{% endblock %}
 {% block class %}bg-[#1f1e23] text-white code-chat-page{% endblock %}
 {% load static %}
 
@@ -94,8 +95,9 @@ const dropdown = document.getElementById('chatcategory-dropdown');
 
 dropdown.addEventListener('change', function() {
   if (this.value === 'learn_more') {
-    // Remplacez "/learn-more-categories/" par l’URL de votre page explicative
-    window.location.href = '/ai/kenshi/categories/comparison/';
+      window.open('/ai/kenshi/categories/comparison/', '_blank', 'noopener,noreferrer');
+      // (Optionnel) Remettre la sélection sur la catégorie par défaut
+      this.value = '{{ default_chat_category.id }}';
   }
 });
 });
@@ -616,7 +618,7 @@ $(document).ready(function() {
 </script>
 
 <style>
-    /* Styles de base */
+
 /*body*/
 Copy {
     overflow: hidden; /* Hide the default browser scrollbar */
@@ -877,22 +879,56 @@ button:active {
 
 
 <!-- Wrap child containers in a parent container -->
-<div class="main-container" style="margin-top: 40px;">
+<div class="main-container" style="margin-top: 0px;">
 
 
     <button id="toggle-chats" class="toggle-chats-btn" style="margin-left: 22vh; font-size: x-large; margin-top: 1vh;">&#x226A;</button>
 
 
-    <div>
-    <div class="chats-list-container" style="background-color: #1f1e23; max-height:50em; flex: 0 0 30vh; width: 30vh; min-width: 30vh;" >
+    <div class="chats-list-container" style="background-color: #333333; flex: 0 0 30vh; width: 30vh; min-width: 30vh;" >
 
 
 
 
     <br>
         <div class="sidebar">
+        <a class="flex items-center gap-2" href="/">
+            <img class="max-h-12 min-w-24 w-auto max-w-full" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748605954/My%20Brand/Kodoshin_logo_uoe1n5.png" alt="Logo"/>
+        </a>
+        <br>
+         <span style="display: inline; font-weight: bold; padding-right: 5px; padding-left: 10px">{{ user.profile.available_credits }} </span>
+        <img style="max-width: 18px;  display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1749095379/bolt_j4tbpk.svg" alt="magic"  >
 
 
+        <br><br>
+        <h4>Model</h4>
+        <select id="chatcategory-dropdown" style="background-color: #c6cacb; max-width: 20vh; color: black; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
+            {% for category in chatcategories %}
+                <option
+                  value="{{ category.id }}"
+                    {% if default_project.is_large and not category.is_large %}
+                      disabled style="color: #ccc;"
+                    {% elif category.id == default_chat_category.id %}
+                      selected style="color: black;"
+                    {% elif not access_large_models and category.is_large %}
+                      disabled style="color: #ccc;"
+                    {% elif not access_advanced_models and category.is_advanced %}
+                      disabled style="color: #ccc;"
+
+                    {% else %}
+                       style="color: black;"
+                    {% endif %}
+                >
+                  {{ category.name }} ({{ category.price }})
+                </option>
+            {% endfor %}
+            <option value="learn_more" style="color: #007bff;">
+                Learn more…
+            </option>
+        </select>
+        <br><br>
+
+        <h4>Projects</h4>
         <select id="project-dropdown" style="background-color: #c6cacb; width: 20vh ; color: #1f1e23; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
             <option disabled selected value>–– Select a project ––</option>
               {% for project in projects %}
@@ -904,13 +940,14 @@ button:active {
                 </option>
               {% endfor %}
         </select>
-        <br><br>
+        <br><br><br>
 
 
 
 
 
             <!--<h3 style="font-weight: bold;">Your Chats</h3>-->
+            <h4>Chats</h4>
             <button type="submit" class="new-chat-btn" onclick="window.location.href='/ai/kenshi'">
                 + new chat
             </button>
@@ -919,7 +956,7 @@ button:active {
                 <ul style="width: 25vh">
                     {% for chat in chats %}
                         <li style="margin-top: 10px;">
-                            <span {% if chat.public_id == current_chat.public_id %}class="selected-chat" style="color: white; font-size: xx-large " {% endif %}>
+                            <span {% if chat.public_id == current_chat.public_id %}class="selected-chat" style="color: white; font-size: xx-small " {% endif %}>
                             <a href="?chat_id={{ chat.public_id }}" style="color: white; font-size: small; font-weight: bold;">{{ chat.title }}</a>
                             </span>
                             <span class="toggle-important" data-chat-id="{{ chat.public_id }}" data-important="{{ chat.important|yesno:'true,false' }}" style="cursor:pointer; color:{% if chat.important %}gold{% else %}gray{% endif %}; margin-left:5px; float: right;">&#9733;</span>
@@ -937,8 +974,6 @@ button:active {
             </div>
         </div>
 
-    </div>
-    <img class="ai-avatar-img" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748726600/Kenshi_a7zk40.png" alt="IA" style="width:6em;height:9em; margin-left: 2em; margin-top: 2em">
     </div>
 
 
@@ -978,31 +1013,7 @@ button:active {
 
 
 
-    <!-- New dropdown for ChatCategory -->
-    <select id="chatcategory-dropdown" style="background-color: unset; max-width: 20vh; color: white; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
-        {% for category in chatcategories %}
-            <option
-              value="{{ category.id }}"
-                {% if default_project.is_large and not category.is_large %}
-                  disabled style="color: #ccc;"
-                {% elif category.id == default_chat_category.id %}
-                  selected style="color: black;"
-                {% elif not access_large_models and category.is_large %}
-                  disabled style="color: #ccc;"
-                {% elif not access_advanced_models and category.is_advanced %}
-                  disabled style="color: #ccc;"
 
-                {% else %}
-                   style="color: black;"
-                {% endif %}
-            >
-              {{ category.name }} ({{ category.price }})
-            </option>
-        {% endfor %}
-        <option value="learn_more" style="color: #007bff;">
-            Learn more…
-        </option>
-    </select>
 
 
 
@@ -1029,18 +1040,9 @@ button:active {
                             <div class="step" data-step-number="{{ forloop.counter0 }}" {% if not forloop.first %}style="display:none;"{% endif %}>
                                 {% if message.steps|length > 1 %}
                                 <br>
-
-                                <div class="rating-container" style="margin-bottom: 20px;">
-                                    <span class="star" data-value="1" style="cursor: pointer;">&#9733;</span>
-                                    <span class="star" data-value="2" style="cursor: pointer;">&#9733;</span>
-                                    <span class="star" data-value="3" style="cursor: pointer;">&#9733;</span>
-                                    <span class="star" data-value="4" style="cursor: pointer;">&#9733;</span>
-                                    <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
-                                </div>
-
-
                                 <p><strong>Step {{ step.step_number }}/{{ message.steps|length }}:</strong></p>
                                 {% endif %}
+
                                 <p>{{ step.justification }}</p>
 
                                 {% if step.file|length > 0 %}
@@ -1063,19 +1065,29 @@ button:active {
                     </div>
                 </div>
             {% endif %}
+
+            <div class="rating-container" style="margin-bottom: 20px;">
+                <span class="star" data-value="1" style="cursor: pointer;">&#9733;</span>
+                <span class="star" data-value="2" style="cursor: pointer;">&#9733;</span>
+                <span class="star" data-value="3" style="cursor: pointer;">&#9733;</span>
+                <span class="star" data-value="4" style="cursor: pointer;">&#9733;</span>
+                <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
+            </div>
         {% endfor %}
     </div>
+
 
     <br>
     <div id="loading-spinner" {% if not in_progress %}style="display:none;"{% endif %}></div>
     <div id="loading-text"  {% if not in_progress %}style="display:none;"{% else %} style="display:none; color: #c6cacb; font-weight: bold; margin-top: 10px;" {% endif %}></div>
-    <br>
+
+
     <form id="chat-form">
         {% csrf_token %}
         <input type="hidden" name="chat_id" value="{{ current_chat.public_id }}" id="chat_id">
 
         {% if current_chat %}
-            <div>({{ current_chat.chat_category.price_secondary_prompt }} credits for next prompts)</div> <br>
+            <div>({{ current_chat.chat_category.price_secondary_prompt }}<img style="max-width: 18px;  display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1749095379/bolt_j4tbpk.svg" alt="magic"> for next prompt)</div> <br>
         {% endif %}
         <input type="hidden" name="attempt_no" value="{{ selected_attempt }}" id="attempt_no">
         <textarea name="prompt" id="prompt" rows="3" style="width: 80%; background-color: #333333; overflow:hidden;"></textarea><br><br>
