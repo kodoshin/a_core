@@ -294,6 +294,48 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 </style>
 
+<style>
+/* Kenshi avatar section */
+.kenshi-section {
+  display: flex;
+  align-items: center;
+  background: unset;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 80%;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.kenshi-avatar {
+  flex: 0 0 auto;
+  width: 150px;
+  margin-right: 2rem;
+}
+.kenshi-avatar img {
+  width: 100%;
+}
+.kenshi-bubble {
+  position: relative;
+  background:rebeccapurple ;    /*#262626;*/
+  border-radius: 3rem;
+  padding: 1rem 2.5rem;
+  color: White;
+  font-size: 1rem;
+  line-height: 2;
+  font-family: 'Comic Sans MS';
+}
+.kenshi-bubble:before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -20px;
+  transform: translateY(-50%);
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent rebeccapurple transparent transparent;
+}
+</style>
+
 {% if not user.is_authenticated %}
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <br><br><br><br>
@@ -337,9 +379,29 @@ document.addEventListener('DOMContentLoaded', function(){
   </div>
 </div>
 
-<br>
+<br><br>
 
-<br>
+<section class="kenshi-section" style="width: 65%">
+  <div class="kenshi-avatar">
+    <img class="ai-avatar-img" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748726600/Kenshi_a7zk40.png" alt="Kenshi Avatar" >
+  </div>
+  <div class="kenshi-bubble">
+    <p style="font-size: large; margin-bottom: 0">Hi there — I’m Kenshi and I’m not like any other AI assistant.
+    </p>
+    <p>
+    I’m your elite code strategist — built to understand your entire repository and tackle your toughest technical challenges.
+    <br>
+    Trained across 15+ popular frameworks, I go beyond generic completions.
+    <br>
+    I manage complexities and I deliver precision, and context-awareness at a level no other tool can match.
+    <br>
+    I’m here to change your coding game — forever.
+    And now, it’s your turn.
+    </p>
+  </div>
+</section>
+
+<br><br>
 
 <div style="margin: 0 20%">
   <video controls>
@@ -380,8 +442,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 <br><br>
-
-
 
 
 <div class="text-center mb-20">
@@ -504,6 +564,8 @@ document.addEventListener('DOMContentLoaded', function(){
     </button>
   </div>
 </div>
+
+
 
 
 
