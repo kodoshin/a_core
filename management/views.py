@@ -15,8 +15,8 @@ from django.contrib.auth.models import User
 
 
 def pricing_credits(request):
-    monthly_plans = SubscriptionPlan.objects.filter(is_yearly=False).order_by('original_yearly_price')
-    yearly_plans = SubscriptionPlan.objects.filter(is_yearly=True).order_by('original_yearly_price')
+    monthly_plans = SubscriptionPlan.objects.filter(is_yearly=False).order_by('original_price')
+    yearly_plans = SubscriptionPlan.objects.filter(is_yearly=True).order_by('original_price')
     credit_offers = CreditOffer.objects.order_by('original_price')
     context = {
         'monthly_plans': monthly_plans,
@@ -62,7 +62,7 @@ def create_checkout_session(request, offer_id):
 def create_checkout_session_plan(request, plan_id):
     stripe.api_key = settings.STRIPE_SECRET_KEY
     plan = get_object_or_404(SubscriptionPlan, id=plan_id)
-    price_id = plan.stripe_plan_id 
+    price_id = plan.stripe_plan_id
     success_url = f"{settings.DOMAIN}{reverse('pricing_credits')}?session_id={{CHECKOUT_SESSION_ID}}"
     cancel_url = f"{settings.DOMAIN}{reverse('pricing_credits')}"
     line_item = {
@@ -73,7 +73,7 @@ def create_checkout_session_plan(request, plan_id):
                 # use plan-specific tax code or fallback to digital services code
                 'tax_code': plan.stripe_tax_code or None,
             },
-            'unit_amount': int((plan.yearly_price if plan.is_yearly else plan.monthly_price) * 100),
+            'unit_amount': int(plan.current_price * 100),
             'tax_behavior': 'exclusive',
         },
         'quantity': 1,

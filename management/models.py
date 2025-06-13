@@ -53,10 +53,8 @@ class APIKey(models.Model):
 
 class SubscriptionPlan(models.Model):
     name = models.CharField(max_length=100)
-    monthly_price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    yearly_price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    original_monthly_price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    original_yearly_price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    current_price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    original_price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     monthly_credits = models.PositiveIntegerField(default=0)
     daily_credits = models.PositiveIntegerField(default=0)
     project_limits = models.PositiveIntegerField(default=0)
@@ -100,7 +98,7 @@ class Subscription(models.Model):
     tax_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     amount_total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     currency = models.CharField(max_length=3, null=True, blank=True)
-    is_yearly = models.BooleanField(default=False)
+    #is_yearly = models.BooleanField(default=False)
 
     stripe_subscription_id = models.CharField(
         max_length=100,
