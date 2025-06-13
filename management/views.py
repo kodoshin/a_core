@@ -62,7 +62,7 @@ def create_checkout_session(request, offer_id):
 def create_checkout_session_plan(request, plan_id):
     stripe.api_key = settings.STRIPE_SECRET_KEY
     plan = get_object_or_404(SubscriptionPlan, id=plan_id)
-    price_id = plan.stripe_yearly_price_id if plan.is_yearly else plan.stripe_monthly_price_id
+    price_id = plan.stripe_plan_id 
     success_url = f"{settings.DOMAIN}{reverse('pricing_credits')}?session_id={{CHECKOUT_SESSION_ID}}"
     cancel_url = f"{settings.DOMAIN}{reverse('pricing_credits')}"
     line_item = {

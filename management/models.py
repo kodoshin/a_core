@@ -69,24 +69,12 @@ class SubscriptionPlan(models.Model):
     large_models = models.BooleanField(default=False)
     advanced_models = models.BooleanField(default=False)
     is_yearly = models.BooleanField(default=False)
-
+    stripe_plan_id = models.CharField(max_length=100, null=True, blank=True)
     stripe_tax_code = models.CharField(
         max_length=50,
         null=True,
         blank=True,
         help_text='Stripe Tax Code for automatic_tax (e.g., txcd_56151200 for digital services)'
-    )
-    stripe_monthly_price_id = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        help_text="Price ID Stripe pour l'abonnement mensuel"
-    )
-    stripe_yearly_price_id = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        help_text="Price ID Stripe pour l'abonnement annuel"
     )
 
     def __str__(self):

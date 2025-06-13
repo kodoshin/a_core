@@ -509,7 +509,7 @@ $(document).ready(function() {
                             setTimeout(function() {
                                 var fileName = comp.getElementsByTagName('file')[0].textContent;
                                 var compName = comp.getElementsByTagName('name')[0].textContent;
-                                $('#loading-text').append(fileName + ' : ' + compName + '<br>');
+                                $('#loading-text').append(fileName + ' → ' + compName + '<br>');
                             }, index * 500);
                         });
                     } else {
