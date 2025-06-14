@@ -32,11 +32,11 @@ class RegionAdmin(ImportExportModelAdmin):
 
 
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'role', 'current_plan',)
-    def current_plan(self, obj):
-        plan = obj.current_plan
-        return plan.name if plan else '-'
-    current_plan.short_description = 'Plan actuel'
+    list_display = ('user', 'role')
+    #def current_plan(self, obj):
+    #    plan = obj.current_plan
+    #    return plan.name if plan else '-'
+    #current_plan.short_description = 'Plan actuel'
 
 
 admin.site.register(Profile, ProfileAdmin)

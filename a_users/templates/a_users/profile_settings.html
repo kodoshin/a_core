@@ -65,6 +65,20 @@
         </tr>
 
         <tr class="border-b">
+            <th scope="row" class="pt-4 pb-1 text-base font-bold text-gray-900" style="color: white">
+                Github Token Expiration (UTC)
+            </th>
+            <td id="github-token-expiration" class="pt-4 pb-1 pl-4" style="color: white">
+                {% if user.profile.github_access_key %}
+                    {{ user.profile.github_token_expiration|date:"Y-m-d H:i" }}
+                {% else %}
+                    Unknown
+                {% endif %}
+            </td>
+            <td class="pt-4 pb-1 pl-4"></td>
+        </tr>
+
+        <tr class="border-b">
             <th scope="row" class="py-4 text-base font-bold text-gray-900" style="color: white">
                 Delete Account
             </th>

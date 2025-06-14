@@ -7,6 +7,11 @@ from b_planning.models import PlanningChatCategory
 from fernet_fields import EncryptedCharField
 from django.utils import timezone
 from management.models import Subscription, SubscriptionPlan, SubscriptionBonus
+import requests
+from datetime import datetime, timezone as dt_timezone
+from dateutil import parser as date_parser
+
+
 
 
 class Country(models.Model):
@@ -62,6 +67,7 @@ class Profile(models.Model):
     default_chat_category = models.ForeignKey(ChatCategory, on_delete=models.DO_NOTHING, related_name='profiles_with_default_chat_category', blank=True, null=True)
     default_planning_chat_category = models.ForeignKey(PlanningChatCategory, on_delete=models.DO_NOTHING, related_name='profiles_with_default_planning_chat_category', blank=True, null=True)
     github_access_key = EncryptedCharField(max_length=200, null=True, blank=True) # FallbackEncryptedTextField(max_length=255, null=True, blank=True) # models.CharField(max_length=255, null=True, blank=True) #
+    github_token_expiration = models.DateTimeField(null=True, blank=True)
     xp_points = models.IntegerField(default=0)
     available_credits = models.IntegerField(default=0)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='other')
@@ -111,6 +117,62 @@ class Profile(models.Model):
             return subscription.plan
         # fallback vers le plan gratuit
         return SubscriptionPlan.get_default_free_plan()
+
+    def _parse_github_expiration(self, value: str):
+        """
+        Convert the GitHub-Authentication-Token-Expiration header
+        into a timezone-aware UTC datetime.
+        """
+        if not value:
+            return None
+
+        patterns = (
+            "%Y-%m-%dT%H:%M:%SZ",
+            "%Y-%m-%d %H:%M:%S %Z",
+            "%Y-%m-%d %H:%M:%S %z",
+        )
+
+        for fmt in patterns:
+            try:
+                dt = datetime.strptime(value, fmt)
+                # if naïve, attach UTC
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=dt_timezone.utc)
+                return dt.astimezone(dt_timezone.utc)
+            except ValueError:
+                continue
+
+        # fallback to dateutil
+        try:
+            dt = date_parser.parse(value)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=dt_timezone.utc)
+            return dt.astimezone(dt_timezone.utc)
+        except Exception:
+            return None
+
+    def fetch_github_token_expiration(self):
+        """
+        Call GitHub, read the expiration header and persist it.
+        """
+        if not self.github_access_key:
+            return None
+
+        headers = {
+            "Authorization": f"token {self.github_access_key}",
+            "Accept": "application/vnd.github+json",
+        }
+        try:
+            r = requests.get("https://api.github.com/user", headers=headers, timeout=5)
+            exp_str = r.headers.get("GitHub-Authentication-Token-Expiration")
+            exp_dt = self._parse_github_expiration(exp_str)
+            if exp_dt:
+                self.github_token_expiration = exp_dt
+                self.save(update_fields=["github_token_expiration"])
+                return exp_dt
+        except requests.RequestException:
+            pass
+        return self.github_token_expiration
 
     @property
     def name(self):

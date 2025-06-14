@@ -44,6 +44,17 @@ class GithubKeyForm(ModelForm):
                 return original
         return data
 
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+
+        # Refresh expiration only when the key actually changed
+        if profile.github_access_key and profile.github_access_key != getattr(self, "_original_key", ""):
+            profile.fetch_github_token_expiration()
+
+        if commit:
+            profile.save()
+        return profile
+
 
 class ProfileForm(forms.ModelForm):
     coupon_code = forms.CharField(
