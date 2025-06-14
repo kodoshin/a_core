@@ -272,7 +272,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/'
 
 #ACCOUNT_SIGNUP_REDIRECT_URL = "{% url 'account_signup' %}?next={% url 'profile' %}"
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+if ENVIRONMENT == 'development':
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = env('EMAIL_HOST', default='smtp.sendgrid.net')   # ou votre SMTP
+    EMAIL_PORT = env('EMAIL_PORT', default=587)
+    EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='apikey')    # SendGrid ⇒ « apikey »
+    EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')  # clé réelle dans le .env
+    EMAIL_USE_TLS = True
+
+DEFAULT_FROM_EMAIL = 'no-reply@kodoshin.ai'
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ENCRYPTION_KEY = "wj67r5s6sxIHe5tkqvC6ZJ7L6ekr61S5lS3CXXjXXgA="

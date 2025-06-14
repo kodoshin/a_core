@@ -65,19 +65,27 @@ def create_checkout_session_plan(request, plan_id):
     price_id = plan.stripe_plan_id
     success_url = f"{settings.DOMAIN}{reverse('pricing_credits')}?session_id={{CHECKOUT_SESSION_ID}}"
     cancel_url = f"{settings.DOMAIN}{reverse('pricing_credits')}"
+
     line_item = {
-        'price_data': {
-            'currency': 'usd',
-            'product_data': {
-                'name': plan.name,
-                # use plan-specific tax code or fallback to digital services code
-                'tax_code': plan.stripe_tax_code or None,
-            },
-            'unit_amount': int(plan.current_price * 100),
-            'tax_behavior': 'exclusive',
-        },
+        'price': price_id,
         'quantity': 1,
     }
+
+    # Fallback si aucun price_id n'est stocké dans la base.
+    if not price_id:
+        line_item = {
+            'price_data': {
+                'currency': 'usd',
+                'product_data': {
+                    'name': plan.name,
+                    # use plan-specific tax code or fallback to digital services code
+                    'tax_code': plan.stripe_tax_code or None,
+                },
+                'unit_amount': int(plan.current_price * 100),
+                'tax_behavior': 'exclusive',
+            },
+            'quantity': 1,
+        }
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
         line_items=[line_item],
