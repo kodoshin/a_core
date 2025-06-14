@@ -92,7 +92,7 @@ class Profile(models.Model):
         Retourne True si l'utilisateur est sur un plan payant (prix mensuel ou annuel > 0).
         """
         plan = self.current_plan
-        return (plan.original_monthly_price or 0) > 0 or (plan.original_monthly_price or 0) > 0
+        return (plan.original_price or 0) > 0 or (plan.original_price or 0) > 0
 
     @property
     def current_subscription(self):
