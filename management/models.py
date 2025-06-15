@@ -84,7 +84,7 @@ class SubscriptionPlan(models.Model):
         Retourne le plan dont le prix est égal à zéro (plan gratuit).
         """
         return cls.objects.filter(
-            Q(monthly_price=0) | Q(yearly_price=0)
+            Q(original_price=0) | Q(current_price=0)
         ).order_by('created_at').first()
 
 

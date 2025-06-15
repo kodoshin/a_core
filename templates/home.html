@@ -124,6 +124,11 @@ document.addEventListener('DOMContentLoaded', function(){
   margin-bottom: 2rem;
 }
 
+.workflow-schema-img{
+  width: 30%;
+  height: auto;
+}
+
 /* Pour les écrans moyens et supérieurs */
 @media (min-width: 768px) {
 .title {
@@ -277,26 +282,11 @@ document.addEventListener('DOMContentLoaded', function(){
 
 </style>
 
-<style>
-  /* Responsive fix for the CTA section */
-  @media (max-width: 768px) {
-    .cta-container {
-      margin: 0 1rem;   /* almost full-width */
-      padding: 2rem;
-    }
-    .cta-buttons {
-      flex-direction: column; /* stack buttons */
-      gap: 1rem;
-    }
-    .cta-buttons .btn {
-      width: 100%;      /* each button fills the line */
-    }
-  }
-</style>
 
 <style>
 /* Kenshi avatar section */
 .kenshi-section {
+  width: 65%;
   display: flex;
   align-items: center;
   background: unset;
@@ -334,7 +324,50 @@ document.addEventListener('DOMContentLoaded', function(){
   border-style: solid;
   border-color: transparent rebeccapurple transparent transparent;
 }
+.kenshi-bubble-main{
+  font-size: large;
+  margin-bottom: 0;
+}
 </style>
+
+
+<style>
+  /* Responsive fix for the CTA section */
+  @media (max-width: 768px) {
+    .cta-container {
+      margin: 0 1rem;   /* almost full-width */
+      padding: 2rem;
+    }
+    .cta-buttons {
+      flex-direction: column; /* stack buttons */
+      gap: 1rem;
+    }
+    .cta-buttons .btn {
+      width: 100%;      /* each button fills the line */
+    }
+    .kenshi-section{
+      width: 100%;
+    }
+    .kenshi-avatar{
+        width: 80px;          /* avatar réduit sur mobile */
+        margin-right: 0rem;
+    }
+    .kenshi-bubble{
+        font-size: 0.6rem;   /* texte plus petit dans la bulle */
+        padding: 0.75rem 1.25rem;
+        line-height: 1.4;
+    }
+    .workflow-schema-img{
+      width: 80%;
+      height: auto;
+    }
+    .kenshi-bubble-main{
+      font-size: small;
+      margin-bottom: 0;
+    }
+  }
+</style>
+
 
 {% if not user.is_authenticated %}
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
@@ -381,12 +414,12 @@ document.addEventListener('DOMContentLoaded', function(){
 
 <br><br>
 
-<section class="kenshi-section" style="width: 65%">
+<section class="kenshi-section" style="">
   <div class="kenshi-avatar">
     <img class="ai-avatar-img" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748726600/Kenshi_a7zk40.png" alt="Kenshi Avatar" >
   </div>
   <div class="kenshi-bubble">
-    <p style="font-size: large; margin-bottom: 0">Hi there — I’m Kenshi and I’m not like any other AI assistant.
+    <p class="kenshi-bubble-main">Hi there — I’m Kenshi and I’m not like any other AI assistant.
     </p>
     <p>
     I’m your elite code strategist — built to understand your entire repository and tackle your toughest technical challenges.
@@ -437,7 +470,7 @@ document.addEventListener('DOMContentLoaded', function(){
   </h1>
 </div>
 <div class="workflow-schema" style="display: flex; justify-content: center;">
-  <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721447/Chat_Code_Commit_ryyq1t.png" style="width: 30%; height: auto">
+  <img class="workflow-schema-img" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748721447/Chat_Code_Commit_ryyq1t.png">
 </div>
 
 
