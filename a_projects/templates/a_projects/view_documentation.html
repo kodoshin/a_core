@@ -5,6 +5,52 @@
 
 {% block content %}
 
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    /* Chat with Kenshi handler */
+    function chatWithKenshi() {
+        const projectId = document.getElementById("project-id").textContent.trim();
+        if (!projectId) {
+            alert("Project ID not found.");
+            return;
+        }
+
+        /* 1. set current project as default */
+        fetch("{% url 'update_default_project' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": getCookie('csrftoken')
+            },
+            body: new URLSearchParams({project_id: projectId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                /* 2. open Kenshi chat */
+                window.location.href = "{% url 'code_chat_view' %}";
+            } else {
+                alert("Error while setting default project.");
+            }
+        })
+        .catch(() => alert("Server error while contacting Kenshi."));
+    }
+</script>
+
 <div style="padding-left: 2em">
     <br> <br> <br> <br>
 
@@ -23,6 +69,14 @@
 
 
     <br><br>
+    <button type="button"
+            class="chat-kenshi-button"
+            onclick="chatWithKenshi()"
+            style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; background-color:#1f1e23; color:white;">
+        Chat with Kenshi
+    </button>
+    <br><br>
+
     <table>
         <tr>
             <th>Name</th>
