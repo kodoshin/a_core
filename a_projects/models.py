@@ -25,6 +25,7 @@ class Technology(models.Model):
     image = CloudinaryField('image', blank=True, null=True)
     status = models.ForeignKey(Status, on_delete=models.CASCADE, null=True, blank=True)
     prompt_example = models.TextField(blank=True, null=True)
+    insight_prompt_example = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name

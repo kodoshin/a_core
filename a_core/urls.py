@@ -33,6 +33,7 @@ urlpatterns = [
     path('projects/', include('a_projects.urls')),
     path('ai/', include('b_coding.urls')),
     path('ai/', include('b_planning.urls')),
+    path('ai/', include('b_insights.urls')),
     path('@<username>/', profile_view, name="profile"),
     path('pricing/', include('management.urls')),
 ]

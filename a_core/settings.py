@@ -90,7 +90,7 @@ INSTALLED_APPS = [
     'a_users',
     'git_auth',
     'b_coding',
-    #'b_insights',
+    'b_insights',
     'b_planning',
     'management',
     'tasks',

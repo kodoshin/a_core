@@ -1,0 +1,1157 @@
+<title>Kenshi</title>
+{% extends 'layouts/blank.html' %}
+{% block header %}{% endblock %}
+{% block class %}bg-[#1f1e23] text-white code-chat-page{% endblock %}
+{% load static %}
+
+
+{% block content %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> <!-- for trash icon -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+
+{% if in_progress %}
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+      $('#loading-spinner').show();
+      $('#loading-text').show().empty().text('Loading...');
+      if(typeof pollUpdates === 'function'){
+          pollUpdates();
+      }
+  });
+</script>
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Flag to know if a default project is selected
+    var hasDefaultProject = {% if default_project %}true{% else %}false{% endif %};
+    // Expose to global scope for other handlers
+    window.hasDefaultProject = hasDefaultProject;
+});
+
+
+$(document).ready(function(){
+    $('#regenerate-btn').on('click', function(e){
+        e.preventDefault();
+        // Clear previous steps and hide controls
+        $('.steps-container').empty();
+        $('.prev-step-btn, .next-step-btn, .message-user, .ai-avatar-img').hide();
+        // Show loading spinner and message
+
+        $('#loading-spinner').show();
+        $('#loading-text').text('Regenerating...').append('<br>').show();
+        // Start polling during regeneration
+        if (typeof window.pollUpdates === 'function') {
+            pollUpdates();
+        }
+        $.ajax({
+            url: "{% url 'insights_chat_view' %}",
+            method: "POST",
+            data: {
+                regenerate: 1,
+                chat_id: "{{ current_chat.public_id }}",
+                csrfmiddlewaretoken: "{{ csrf_token }}"
+            },
+            success: function(data){
+                if(data.status === 'success'){
+                    window.location.href = '?chat_id={{ current_chat.public_id }}&attempt=' + ({{ total_attempts }} + 1);
+                } else {
+                    alert(data.message);
+                }
+            },
+            error: function(){
+                alert('Error while regenerating.');
+            },
+            complete: function(){
+                $('#loading-spinner').hide();
+                $('#loading-text').hide();
+            }
+        });
+    });
+});
+
+
+$(function(){
+  console.log('DOM ready, binding regenerate');
+  var chatId = "{{ current_chat.public_id }}";
+  $('#prev-attempt').on('click', function(){
+    window.location.href = '?chat_id='+chatId+'&attempt=' + ({{ selected_attempt }} - 1);
+  });
+  $('#next-attempt').on('click', function(){
+    window.location.href = '?chat_id='+chatId+'&attempt=' + ({{ selected_attempt }} + 1);
+  });
+});
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+const dropdown = document.getElementById('chatcategory-dropdown');
+
+dropdown.addEventListener('change', function() {
+  if (this.value === 'learn_more') {
+      window.open('/ai/hiko/categories/comparison/', '_blank', 'noopener,noreferrer');
+      // (Optionnel) Remettre la sélection sur la catégorie par défaut
+      this.value = '{{ default_chat_category.id }}';
+  }
+});
+});
+
+
+$(document).ready(function(){
+    // Toggle important status on star click
+    $(document).on('click', '.toggle-important', function(){
+        var $star = $(this);
+        var chatId = $star.data('chat-id');
+        $.ajax({
+            url: '{% url "toggle_chat_importance" %}',
+            type: 'POST',
+            data: {
+                'chat_id': chatId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response){
+                if(response.status === 'success'){
+                    $star.css('color', response.important ? 'gold' : 'gray');
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(){
+                alert('An error occurred while toggling importance.');
+            }
+        });
+    });
+});
+
+
+
+//Next & Previous buttons with right left arrows
+document.addEventListener('DOMContentLoaded', () => {
+    let activeContainer = null;
+
+    // When clicking on an AI message, mark it as active
+    document.querySelectorAll('.message.ai').forEach(container => {
+        //container.style.cursor = 'pointer';
+        container.addEventListener('click', function() {
+            document.querySelectorAll('.message.ai').forEach(c => c.classList.remove('active-ai-message'));
+            this.classList.add('active-ai-message');
+            activeContainer = this;
+        });
+    });
+
+    // Scoped arrow‐key navigation
+    document.addEventListener('keydown', function(event) {
+        // Skip when typing in textarea or contentEditable
+        if (document.activeElement.tagName.toLowerCase() === 'textarea' ||
+            document.activeElement.isContentEditable) {
+            return;
+        }
+        if (!activeContainer) return;
+
+        if (event.key === 'ArrowRight') {
+            const nextBtn = activeContainer.querySelector('.next-step-btn');
+            if (nextBtn) nextBtn.click();
+        } else if (event.key === 'ArrowLeft') {
+            const prevBtn = activeContainer.querySelector('.prev-step-btn');
+            if (prevBtn) prevBtn.click();
+        }
+    });
+});
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    var toggleBtn = document.getElementById("toggle-chats");
+    var sidebar = document.querySelector(".chats-list-container");
+
+    toggleBtn.addEventListener("click", function() {
+        sidebar.classList.toggle("collapsed");
+        // Switch icon between ◀ and ▶
+        if (sidebar.classList.contains("collapsed")) {
+            toggleBtn.innerHTML = "&#x226B;"; //"&#x22B3;"; // ▶
+            toggleBtn.style.left      = "0";
+            toggleBtn.style.marginLeft = "0";
+        } else {
+            toggleBtn.innerHTML = "&#x226A;"; // "&#x22B2;"; // ◀
+            toggleBtn.style.left      = "22vh";
+        }
+    });
+});
+
+
+
+
+$(document).ready(function() {
+    $('#prompt').on('input', function() {
+        $(this).css('height', 'auto');
+        $(this).css('height', this.scrollHeight + 'px');
+    });
+});
+
+
+
+
+
+$(document).ready(function() {
+    $('#prompt').on('keydown', function(e) {
+        // Si la touche "Enter" est pressée sans 'Shift'
+        if (e.keyCode === 13 && !e.shiftKey) {
+            e.preventDefault();
+            $('#chat-form').submit();
+        }
+    });
+});
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    let textarea = document.getElementById("prompt");
+
+    function setPlaceholder() {
+      if (textarea.value.trim() === "") {
+        textarea.value = "Ask anything";
+        textarea.style.color = "#d4e6fc"; // Grisé pour indiquer que c'est un placeholder
+        textarea.style.fontSize = "large";
+        textarea.style.margin = "5px";
+      }
+    }
+
+    function clearPlaceholder() {
+      if (textarea.value === "Ask anything") {
+        textarea.value = "";
+        textarea.style.color = "#ffffff"; // Couleur normale du texte
+        textarea.style.fontSize = "large";
+        textarea.style.margin = "5px";
+      }
+    }
+
+    textarea.addEventListener("focus", clearPlaceholder);
+    textarea.addEventListener("blur", setPlaceholder);
+
+    setPlaceholder(); // Appliquer au chargement de la page
+});
+
+
+
+
+//Delete chat
+$(document).ready(function() {
+  // Handle delete icon click: show confirm and cancel icons
+  $('.delete-chat').click(function() {
+      var chatId = $(this).data('chat-id');
+      $(this).hide();
+      $('span.confirm-delete[data-chat-id="' + chatId + '"]').show();
+      $('span.cancel-delete[data-chat-id="' + chatId + '"]').show();
+  });
+
+  // Handle cancel icon click: hide confirm and cancel icons, show delete icon
+  $('.cancel-delete').click(function() {
+      var chatId = $(this).data('chat-id');
+      $(this).hide();
+      $('span.confirm-delete[data-chat-id="' + chatId + '"]').hide();
+      $('span.delete-chat[data-chat-id="' + chatId + '"]').show();
+  });
+
+  // Handle confirm icon click: send AJAX request to delete the chat from the DB
+  $('.confirm-delete').click(function() {
+      var chatId = $(this).data('chat-id');
+      console.log('Deleting chat')
+      console.log(chatId)
+      var $li = $(this).closest('li');
+      $.ajax({
+          url: '{% url "insights_delete_chat" %}',
+          type: 'POST',
+          data: {
+              'chat_id': chatId,
+              'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function(response) {
+              console.log(response)
+              if (response.status === 'success') {
+                  $li.remove();
+              } else {
+                  alert('Failed to delete chat: ' + response.message);
+                  // Revert UI on failure
+                  $('span.confirm-delete[data-chat-id="' + chatId + '"]').hide();
+                  $('span.cancel-delete[data-chat-id="' + chatId + '"]').hide();
+                  $('span.delete-chat[data-chat-id="' + chatId + '"]').show();
+              }
+          },
+          error: function() {
+              alert('An error occurred while deleting the chat.');
+              // Revert UI on error
+              $('span.confirm-delete[data-chat-id="' + chatId + '"]').hide();
+              $('span.cancel-delete[data-chat-id="' + chatId + '"]').hide();
+              $('span.delete-chat[data-chat-id="' + chatId + '"]').show();
+          }
+      });
+  });
+});
+
+
+
+
+// Manage reviews
+document.addEventListener("DOMContentLoaded", function () {
+  const stars = document.querySelectorAll(".star");
+
+  // Définir la couleur par défaut de toutes les étoiles en gris
+  stars.forEach(star => {
+      star.style.color = "gray";
+  });
+
+  // Fonction pour mettre en surbrillance les étoiles jusqu'au rang donné
+  function highlightStars(rating) {
+      stars.forEach(star => {
+          if (parseInt(star.getAttribute("data-value")) <= rating) {
+              star.style.color = "gold";
+          } else {
+              star.style.color = "gray";
+          }
+      });
+  }
+
+  // Récupérer la note enregistrée depuis le contexte et mettre en surbrillance les étoiles si la note > 0
+  var currentChatRating = parseInt("{{ current_chat.rate|default:'0' }}");
+  if (currentChatRating > 0) {
+      highlightStars(currentChatRating);
+  }
+
+  // Gestion du clic sur une étoile pour envoyer la note via AJAX
+  stars.forEach(star => {
+      star.addEventListener("click", function () {
+          const rating = this.getAttribute("data-value");
+          const chatId = "{{ current_chat.public_id }}";
+          if (!chatId) {
+              console.error("Chat ID is not defined.");
+              return;
+          }
+          fetch("{% url 'insights_chat_view' %}", {
+              method: "POST",
+              headers: {
+                  "X-CSRFToken": "{{ csrf_token }}",
+                  "Content-Type": "application/x-www-form-urlencoded"
+              },
+              body: new URLSearchParams({
+                  "rate": rating,
+                  "chat_id": chatId
+              })
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.status === "success") {
+                  console.log("Note saved :", data.rate);
+                  highlightStars(rating);
+              } else {
+                  console.error("Error while saving the note.");
+              }
+          })
+          .catch(error => console.error("Erreur AJAX :", error));
+      });
+  });
+});
+
+
+
+$(document).ready(function() {
+$('#chatcategory-dropdown').on('change', function() {
+    var SelectedChatCategoryId = $(this).val();
+    console.log(SelectedChatCategoryId)
+    if (SelectedChatCategoryId === 'learn_more') {
+            return;          // on quitte la fonction
+        }
+    $.ajax({
+        url: '{% url "update_insights_default_chatcategory" %}',
+        type: 'POST',
+        data: {
+            'chatcategory_id': SelectedChatCategoryId,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+            }
+        })
+    })
+});
+
+$(document).ready(function() {
+    $('#project-dropdown').on('change', function() {
+        var selectedProjectId = $(this).val();
+        $.ajax({
+            url: '{% url "insights_update_default_project" %}',
+            type: 'POST',
+            data: {
+                'project_id': selectedProjectId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Rebuild chats list
+                    window.hasDefaultProject = true;
+                    var chatList = $('#chats-list ul');
+                    chatList.empty();
+                    if (response.chats && response.chats.length > 0) {
+                        console.log(response.chats)
+                        response.chats.forEach(function(chat) {
+                            console.log(chat.important)
+
+                            var li = $('<li>').css('margin-top','10px');
+                            var link = $('<a>')
+                                .attr('href', '?chat_id=' + chat.id)
+                                .text(chat.title)
+                                .css({'color':'white','font-size':'small','font-weight':'bold'});
+
+                            var toggleImportantSpan = $('<span>')
+                                .addClass('toggle-important')
+                                .attr('data-chat-id', chat.id)
+                                .html('&#9733;')
+                                .css({'cursor':'pointer', 'margin-left':'5px', 'float': 'right', 'color': chat.important === true ? 'gold' : 'gray' }) ;
+                            var deleteSpan = $('<span>')
+                                .addClass('delete-chat glyphicon')
+                                .attr('data-chat-id', chat.id)
+                                .css({'cursor':'pointer','color':'white','margin-left':'0','float':'right'})
+                                .html('&#xe020;');
+                            var cancelSpan = $('<span>')
+                                .addClass('cancel-delete')
+                                .attr('data-chat-id', chat.id)
+                                .css({'display':'none','cursor':'pointer','color':'gray','margin-left':'0','float':'right'})
+                                .html('&#x274C;');
+                            var confirmSpan = $('<span>')
+                                .addClass('confirm-delete')
+                                .attr('data-chat-id', chat.id)
+                                .css({'display':'none','cursor':'pointer','color':'green','margin-left':'0','float':'right'})
+                                .html('&#x2714;');
+                            li.append(link, toggleImportantSpan, deleteSpan, cancelSpan, confirmSpan);
+                            chatList.append(li);
+                        });
+                    } else {
+                        chatList.append(
+                            $('<li>').text('No Chats.').css('font-weight','bold')
+                        );
+                    }
+
+                    // Rebuild chatcategory dropdown if it exists
+                    var catSelect = $('#chatcategory-dropdown');
+                    if (catSelect.length) {
+                        catSelect.empty();
+                        response.chatcategories.forEach(function(category) {
+                            var disabled = false;
+                            if (response.default_project_is_large && !category.is_large) {
+                                disabled = true;
+                            } else if (!response.access_large_models && category.is_large) {
+                                disabled = true;
+                            } else if (!response.access_advanced_models && category.is_advanced) {
+                                disabled = true;
+                            }
+                            var option = $('<option>')
+                                .val(category.id)
+                                .text(category.name + ' (' + category.price + ')');
+                            if (disabled) {
+                                option.prop('disabled', true).css('color', '#ccc');
+                            } else {
+                                option.css('color', 'black');
+                            }
+                            catSelect.append(option);
+                        });
+                    }
+                } else {
+                    alert('Error while updating default project.');
+                }
+            },
+            error: function() {
+                alert('Server error while updating default project.');
+            }
+        });
+    });
+});
+
+
+
+// Polls management
+$(document).ready(function() {
+    var lastAiMessageId = 0;
+    window.pollingStopped = false;
+
+    function pollUpdates() {
+        if(window.pollingStopped){ return; }
+        var chatId = $('#chat_id').val();
+        $.ajax({
+            url: '{% url "code_chat_updates" %}',
+            data: { chat_id: chatId, last_id: lastAiMessageId },
+            success: function(data) {
+
+                /* ---------- ⬇️  NEW : stop on error  ---------- */
+                if (data.error) {
+                    $('#loading-text').append(
+                        '<span style="color:red;font-weight:bold;">'+ data.error +'</span><br>'
+                    );
+                    $('#loading-spinner').hide();
+                    window.pollingStopped = true;      // prevent further loops
+                    return;                            // exit success handler
+                }
+                /* ----------  END NEW PART  ---------- */
+
+                data.messages.forEach(function(msg) {
+                    var parser = new DOMParser();
+                    var xmlDoc = parser.parseFromString(msg.content, 'application/xml');
+                    var rootTag = xmlDoc.documentElement.tagName;
+                    if (rootTag === 'files') {
+                        var items = Array.from(xmlDoc.getElementsByTagName('file'));
+                        items.forEach(function(file, index) {
+                            setTimeout(function() {
+                                $('#loading-text').append(file.textContent + '<br>');
+                            }, index * 500);
+                        });
+                    } else if (rootTag === 'components') {
+                        var items = Array.from(xmlDoc.getElementsByTagName('component'));
+                        items.forEach(function(comp, index) {
+                            setTimeout(function() {
+                                var fileName = comp.getElementsByTagName('file')[0].textContent;
+                                var compName = comp.getElementsByTagName('name')[0].textContent;
+                                $('#loading-text').append(fileName + ' → ' + compName + '<br>');
+                            }, index * 500);
+                        });
+                    } else {
+                        $('#loading-text').append(msg.content + '<br>');
+                    }
+                    lastAiMessageId = msg.id;
+                });
+            },
+            complete: function() {
+                // ⬇️ keep polling only if not stopped
+                if(!window.pollingStopped){
+                    setTimeout(pollUpdates, 2000);
+                }
+            }
+        });
+    }
+
+    // Expose for external calls (e.g. regenerate)
+    window.pollUpdates = pollUpdates;
+
+    $(document).ready(function() {
+        $('#chat-form').on('submit', function(e) {
+            if (!window.hasDefaultProject) {
+                e.preventDefault();
+                alert('Please select a project');
+                return;
+            }
+            e.preventDefault();
+            var prompt = $('#prompt').val().trim();
+            if (prompt === "Ask anything" || prompt === "") {
+                alert('Please enter a prompt.');
+                return;
+            }
+            // Show loader and clear previous text
+            $('#loading-spinner').show();
+            $('#loading-text').show().empty();
+            $('#loading-text').show().empty();
+            // Start polling for AI processing updates
+            pollUpdates();
+            // Send the chat request
+            $.ajax({
+                url: '{% url "insights_chat_view" %}',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(data) {
+                    $('#loading-spinner').hide();
+                    // Preserve the selected attempt in the redirect
+                    var attempt = $('#attempt_no').val();
+                    window.location.href = '?chat_id=' + data.chat_id + '&attempt=' + attempt;
+                },
+                error: function() {
+                    $('#loading-spinner').hide();
+                    alert('An error has occured.');
+                }
+            });
+        });
+    });
+});
+
+
+
+
+
+ //Step Navigation & copy button
+    $(document).ready(function() {
+        // Handle step navigation
+        $('.next-step-btn').click(function() {
+            var $stepsContainer = $(this).siblings('.steps-container');
+            var $currentStep = $stepsContainer.find('.step:visible');
+            var $nextStep = $currentStep.next('.step');
+            if ($nextStep.length) {
+                $currentStep.hide();
+                $nextStep.show();
+            }
+        });
+        $('.prev-step-btn').click(function() {
+            var $stepsContainer = $(this).siblings('.steps-container');
+            var $currentStep = $stepsContainer.find('.step:visible');
+            var $prevStep = $currentStep.prev('.step');
+            if ($prevStep.length) {
+                $currentStep.hide();
+                $prevStep.show();
+            }
+        });
+
+        // Handle "Copy Code" button
+        document.querySelectorAll(".copy-code-btn").forEach(button => {
+            button.addEventListener("click", () => {
+                const codeElement = button.nextElementSibling.querySelector("code");
+                const text = codeElement.innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    button.innerText = "Copied!";
+                    setTimeout(() => {
+                        button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg> Copy`;
+                    }, 2000);
+                });
+            });
+        });
+
+    });
+
+
+</script>
+
+<style>
+
+/*body*/
+Copy {
+    overflow: hidden; /* Hide the default browser scrollbar */
+}
+
+#loading-spinner{
+    display:none;               /* visibility still handled by JS */
+    position:relative;
+    width:80%;                 /* full width of the container */
+    max-width:600px;            /* optional max width */
+    height:8px;                 /* height of the bar */
+    background:rgba(255,255,255,0.2); /* track color */
+    border:none;                /* remove former circle border */
+    border-radius:4px;
+    overflow:hidden;
+    margin:auto;                /* centred horizontally */
+    margin-bottom: 10px;
+    margin-left:5px;
+}
+
+#loading-spinner::before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:-40%;
+    width:40%;
+    height:100%;
+    background:#4e44ce;         /* bar colour */
+    border-radius:4px;
+    animation:loadingBar 1.2s linear infinite;   /* endless loop */
+
+}
+
+@keyframes loadingBar{
+    0%   {left:-40%;}
+    100% {left:100%;}
+}
+
+#chat-form {
+    padding-top: 20px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+    /* Apply Flexbox to the parent container */
+.main-container {
+    display: flex;
+    background-color: #1f1e23;
+}
+
+/* Set the width for the chats list container */
+.chats-list-container {
+    flex: 1; /* This will take up 1 part of the available space */
+    padding-left: 10px;
+    /* height: 100vh;
+    /* background-color: #1f1e23; /* Optional: Background color for visual separation */
+    align-self: stretch;
+    overflow-y: auto; /* Optional: Enable scrolling if content overflows */
+}
+
+/* Set the width for the chat area container */
+.chat-area-container {
+    min-height: 100vh;
+    flex: 5; /* This will take up 3 parts of the available space */
+    padding: 20px; /* Optional: Add some padding */
+    /*overflow-y: auto; /* Optional: Enable scrolling if content overflows */
+}
+
+.chat-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Set the width for the project elements container */
+.project-elements-container {
+    flex: 1; /* This will take up 1 part of the available space */
+    /*background-color: #f0f0f0;  Optional: Background color for visual separation */
+    overflow-y: auto; /* Optional: Enable scrolling if content overflows */
+}
+
+
+.copy-code-btn {
+  top: 8px;
+  right: 8px;
+  background-color: #1a1a1a; /* Couleur de fond proche d'OpenAI */
+  color: #fff; /* Texte en blanc */
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.copy-code-btn:hover {
+  opacity: 1;
+}
+
+.code-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.copy-code-btn {
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: background 0.2s, border 0.2s;
+}
+
+.copy-code-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.copy-code-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.copy-code-btn:active {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+
+pre {
+    background: #161b22; /* Fond sombre comme OpenAI */
+    color: #c9d1d9;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 14px;
+}
+
+
+.chats-list-container::-webkit-scrollbar,
+.chat-area-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chats-list-container::-webkit-scrollbar-track,
+.chat-area-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.chats-list-container::-webkit-scrollbar-thumb,
+.chat-area-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.chats-list-container::-webkit-scrollbar-thumb:hover,
+.chat-area-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+
+button {
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 10px; /* Coins arrondis */
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.3);
+    position: relative;
+}
+
+button:active {
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2),
+                inset 2px 2px 5px rgba(0, 0, 0, 0.2);
+    transform: translateY(2px); /* Effet d'enfoncement */
+}
+
+.prev-step-btn {
+    background: linear-gradient(145deg, #d1d1d1, #a6a6a6);
+    color: #333;
+}
+
+.next-step-btn {
+    background: linear-gradient(145deg, #4CAF50, #388E3C);
+    color: white;
+}
+
+.selected-chat {
+    text-decoration: underline;
+}
+.selected-chat a {
+    color: #ffffff !important;
+}
+
+
+/*************************************************************************************************************************************************/
+/*************************************************************************************************************************************************/
+/*************************************************************************************************************************************************/
+
+/* Ensure main container can position the toggle button */
+.prev-step-btn,
+.next-step-btn,
+.copy-code-btn {
+    cursor: pointer;
+}
+.code-container pre {
+    cursor: text;
+}
+.message.ai {
+    cursor: auto;
+}
+.message p {
+    cursor: text;
+}
+.main-container {
+    display: flex;
+    position: relative;
+}
+
+/* Style for the toggle button */
+.toggle-chats-btn {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5em;
+    cursor: pointer;
+    z-index: 1;
+    top: 0;
+    left: 5px;
+    padding: 0;
+}
+
+.toggle-chats-btn:hover {
+    background-color: transparent; /* Rend le fond transparent au survol */
+}
+
+.new-chat-btn {
+    background-color: #c6cacb;
+    border: none;
+    color: #1f1e23;
+    font-size: 0.8em;
+    padding: 0.2em 0.5em;
+    height: 2em;
+    width: 60%;
+    line-height: 1.2em;
+    cursor: pointer;
+  }
+
+.new-chat-btn:hover {
+    background-color: darkgray;
+  }
+
+/* Hide sidebar when collapsed */
+.chats-list-container.collapsed {
+    display: none;
+}
+
+.code-chat-page > div[style*="padding-bottom: 80px"],
+.code-chat-page > div > div[style*="padding-bottom: 100px"]{
+    padding-bottom: 0 !important;
+}
+</style>
+
+
+<!-- Wrap child containers in a parent container -->
+<div class="main-container" style="margin-top: 0px;">
+
+
+    <button id="toggle-chats" class="toggle-chats-btn" style="margin-left: 22vh; font-size: x-large; margin-top: 1vh;">&#x226A;</button>
+
+
+    <div class="chats-list-container" style="background-color: #333333; flex: 0 0 30vh; width: 30vh; min-width: 30vh;" >
+
+
+
+
+    <br>
+        <div class="sidebar">
+        <a class="flex items-center gap-2" href="/">
+            <img class="max-h-12 min-w-24 w-auto max-w-full" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748605954/My%20Brand/Kodoshin_logo_uoe1n5.png" alt="Logo"/>
+        </a>
+        <br>
+         <span style="display: inline; font-weight: bold; padding-right: 5px; padding-left: 10px">{{ user.profile.available_credits }} </span>
+        <img style="max-width: 18px;  display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1749095379/bolt_j4tbpk.svg" alt="magic"  >
+
+
+        <br><br>
+        <h4>Model</h4>
+        <select id="chatcategory-dropdown" style="background-color: #c6cacb; max-width: 20vh; color: black; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
+            {% for category in chatcategories %}
+                <option
+                  value="{{ category.id }}"
+                    {% if default_project.is_large and not category.is_large %}
+                      disabled style="color: #ccc;"
+                    {% elif category.id == default_chat_category.id %}
+                      selected style="color: black;"
+                    {% elif not access_large_models and category.is_large %}
+                      disabled style="color: #ccc;"
+                    {% elif not access_advanced_models and category.is_advanced %}
+                      disabled style="color: #ccc;"
+
+                    {% else %}
+                       style="color: black;"
+                    {% endif %}
+                >
+                  {{ category.name }} ({{ category.price }})
+                </option>
+            {% endfor %}
+            <option value="learn_more" style="color: #007bff;">
+                Learn more…
+            </option>
+        </select>
+        <br><br>
+
+        <h4>Projects</h4>
+        <select id="project-dropdown" style="background-color: #c6cacb; width: 20vh ; color: #1f1e23; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
+            <option disabled selected value>–– Select a project ––</option>
+              {% for project in projects %}
+                <option
+                  value="{{ project.id }}"
+                  {% if default_project and project.id == default_project.id %}selected{% endif %}
+                >
+                  {{ project.name }} : {{ project.git_branch }} {% if project.is_large %} (Large) {% endif %}
+                </option>
+              {% endfor %}
+        </select>
+        <br><br><br>
+
+
+
+
+
+            <!--<h3 style="font-weight: bold;">Your Chats</h3>-->
+            <h4>Chats</h4>
+            <button type="submit" class="new-chat-btn" onclick="window.location.href='/ai/kenshi'">
+                + new chat
+            </button>
+
+            <div class="toggle-content" id="chats-list">
+                <ul style="width: 25vh">
+                    {% for chat in chats %}
+                        <li style="margin-top: 10px;">
+                            <span {% if chat.public_id == current_chat.public_id %}class="selected-chat" style="color: white; font-size: xx-small " {% endif %}>
+                            <a href="?chat_id={{ chat.public_id }}" style="color: white; font-size: small; font-weight: bold;">{{ chat.title }}</a>
+                            </span>
+                            <span class="toggle-important" data-chat-id="{{ chat.public_id }}" data-important="{{ chat.important|yesno:'true,false' }}" style="cursor:pointer; color:{% if chat.important %}gold{% else %}gray{% endif %}; margin-left:5px; float: right;">&#9733;</span>
+                            <span class="delete-chat glyphicon" data-chat-id="{{ chat.public_id }}" style="cursor:pointer; color:white; margin-left:0px; float: right;">&#xe020;</span>
+                            <span class="cancel-delete" data-chat-id="{{ chat.public_id }}" style="display:none; cursor:pointer; color:gray; margin-left:0px; float: right;">&#x274C;</span>
+                            <span class="confirm-delete" data-chat-id="{{ chat.public_id }}" style="display:none; cursor:pointer; color:green; margin-left:0px; float: right;">&#x2714;</span>
+
+                            <!--<span class="glyphicon">&#x1F5D1;</span> -->
+
+                        </li>
+                    {% empty %}
+                    <br>
+                        <li style="font-weight: bold;">No Chats.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+
+
+<div class="chat-area-container" style="margin-left: 1em; width: 100%">
+
+<br>
+<div class="chat-area">
+
+    <!-- Display the star rating only if a current chat is selected -->
+    {% if current_chat %}
+
+    <div style="align-self: center; width: 80%">
+        <div style="display: flex; align-items: center; gap: 1em;">
+
+
+      <div style="font-weight: bold; color: #cccccc;">
+        {{ current_chat.chat_category.name }}
+      </div>
+
+      <div class="regeneration-controls" style="display: flex; align-items: center;">
+        {% if total_attempts > 1 %}
+          <button id="prev-attempt" type="button" style="background-color: unset;" {% if selected_attempt <= 1 %}disabled{% endif %}>←</button>
+          <span style="margin: 0 0.5em;">Attempt {{ selected_attempt }} of {{ total_attempts }}</span>
+          <button id="next-attempt" type="button" style="background-color: unset;" {% if selected_attempt >= total_attempts %}disabled{% endif %}>→</button>
+        {% endif %}
+        <button id="regenerate-btn" type="button" style="background-color: unset; padding: 0; border: none;" {% if current_chat.regeneration_count >= 3 %}disabled title="Max regenerations reached"{% endif %}>
+          <span aria-hidden="true"  class="text-2xl relative -top-0.5 p-1 rounded transition-colors duration-200 hover:bg-gray-700" style="font-size: x-large; position: relative; top: -3px; color: #cccccc;">⟳</span>
+          <span class="sr-only">Regenerate</span>
+        </button>
+      </div>
+
+
+        </div>
+        <br>
+        <div class="rating-container" style="margin-bottom: 20px;">
+            <span class="star" data-value="1" style="cursor: pointer;">&#9733;</span>
+            <span class="star" data-value="2" style="cursor: pointer;">&#9733;</span>
+            <span class="star" data-value="3" style="cursor: pointer;">&#9733;</span>
+            <span class="star" data-value="4" style="cursor: pointer;">&#9733;</span>
+            <span class="star" data-value="5" style="cursor: pointer;">&#9733;</span>
+        </div>
+    </div>
+
+
+
+    {% else %}
+
+    <!-- Texte par défaut quand aucun chat n’est sélectionné -->
+    <div style="align-self: center; width: 60%">
+        <div class="intro-text" style="color: #bfdbfe; font-size:5vh; margin-top:2em; ">
+            <img class="ai-avatar-img" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748716164/d6nl77n3c8jkfwrnkr7c.png" alt="IA" style="width:2em;height:3em;display: inline;margin-right: 0.5em"> How can I help you?
+        </div>
+    </div>
+
+
+
+
+
+    <br><br>
+    {% endif %}
+    <div style="align-self: center; width: 80%">
+        <div class="message-container" id="message-container" style="width: 80%">
+        {% for message in messages %}
+            {% if message.type == 'prompt' and message.attempt_number == selected_attempt%}
+                <div class="message-user">
+                    <br>
+                    <p style="font-weight: bold;"><img style="width:2.2em;height:2.2em;display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748726826/6594712_ljqxyj.webp"/> {{ message.content|linebreaksbr }}</p>
+                </div>
+            {% elif message.type == 'gpt-a' and message.attempt_number == selected_attempt %}
+                <div class="message ai">
+                    <img class="ai-avatar-img" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748716164/d6nl77n3c8jkfwrnkr7c.png" alt="IA" style="width:2em;height:3em;display: inline;margin-right: 2em">
+                    <!-- Display steps here -->
+                    {% if message.steps|length > 1 %}
+                    <button class="prev-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-weight: bold;">Previous</button>
+                    <button class="next-step-btn" style="height: 2em; width: 6em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; font-weight: bold;">Next</button>
+                    {% endif %}
+                    <div class="steps-container">
+                        {% for step in message.steps %}
+                            <div class="step" data-step-number="{{ forloop.counter0 }}" {% if not forloop.first %}style="display:none;"{% endif %}>
+                                {% if message.steps|length > 1 %}
+                                <br>
+                                <p><strong>Step {{ step.step_number }}/{{ message.steps|length }}:</strong></p>
+                                {% endif %}
+
+                                <p>{{ step.justification }}</p>
+
+                                {% if step.file|length > 0 %}
+                                <p><strong>Location :</strong> {{ step.file }}</p>
+                                {% endif %}
+                                {% if step.code %}
+                                    <div class="code-container">
+                                        <button class="copy-code-btn" style="margin-left: 10px">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                            </svg>
+                                            Copy
+                                        </button>
+                                        <pre style="max-width: 160vh"><code class="language-{{ step.code.language }}">{{ step.code.content|escape }}</code></pre>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+
+        {% endfor %}
+
+    </div>
+    </div>
+
+    <br>
+    <div style="align-self: center; width: 80%">
+        <div id="loading-spinner" {% if not in_progress %}style="display:none;"{% endif %}></div>
+        <div id="loading-text"  {% if not in_progress %}style="display:none;"{% else %} style="display:none; color: #c6cacb; font-weight: bold; margin-top: 10px;" {% endif %}></div>
+
+        <form id="chat-form">
+            {% csrf_token %}
+            <input type="hidden" name="chat_id" value="{{ current_chat.public_id }}" id="chat_id">
+
+            {% if current_chat %}
+                <div>({{ current_chat.chat_category.price_secondary_prompt }}<img style="max-width: 18px;  display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1749095379/bolt_j4tbpk.svg" alt="magic"> for next prompt)</div> <br>
+            {% endif %}
+            <input type="hidden" name="attempt_no" value="{{ selected_attempt }}" id="attempt_no">
+            <textarea name="prompt" id="prompt" rows="1" style="width: 80%; background-color: #333333; overflow:hidden;">
+            </textarea><br><br>
+            <button type="submit" style="background-color: slategrey; color: #ffffff; height: 2em; width: 4em; font-size: 1em; padding: 0.2em 0.5em; margin: 5px; line-height: 1.2em; font-family: 'DynaPuff';">>>> </button>
+        </form>
+    </div>
+
+
+
+</div>
+</div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock %}
