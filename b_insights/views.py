@@ -245,7 +245,7 @@ async def insights_chat_view(request):
                                          .filter(type='gpt-a', attempt_number=selected_attempt)
                                          .exists())()
             has_error = await sync_to_async(lambda: InsightProcessingError.objects
-                                            .filter(coding_chat=current_chat)
+                                            .filter(insight_chat=current_chat)
                                             .exists())()
             in_progress = not (has_ai or has_error)
 

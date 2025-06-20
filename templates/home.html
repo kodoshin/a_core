@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function(){
 .kenshi-avatar {
   flex: 0 0 auto;
   width: 150px;
-  margin-right: 2rem;
+  /*margin-right: 2rem;*/
 }
 .kenshi-avatar img {
   width: 100%;
@@ -329,6 +329,54 @@ document.addEventListener('DOMContentLoaded', function(){
   margin-bottom: 0;
 }
 </style>
+
+<style>
+/* Kenshi avatar section */
+.hiko-section {
+  width: 65%;
+  display: flex;
+  align-items: center;
+  background: unset;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 80%;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.hiko-avatar {
+  flex: 0 0 auto;
+  width: 150px;
+  /*margin-right: 2rem;*/
+}
+.hiko-avatar img {
+  width: 100%;
+}
+.hiko-bubble {
+  position: relative;
+  background: cornflowerblue ;    /*#262626;*/
+  border-radius: 3rem;
+  padding: 1rem 2.5rem;
+  color: White;
+  font-size: 1rem;
+  line-height: 2;
+  font-family: 'Comic Sans MS';
+}
+.hiko-bubble:after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -20px;
+  transform: translateY(-50%);
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent transparent transparent cornflowerblue;
+}
+.hiko-bubble-main{
+  font-size: large;
+  margin-bottom: 0;
+}
+</style>
+
 
 
 <style>
@@ -362,6 +410,23 @@ document.addEventListener('DOMContentLoaded', function(){
       height: auto;
     }
     .kenshi-bubble-main{
+      font-size: small;
+      margin-bottom: 0;
+    }
+
+    .hiko-section{
+      width: 100%;
+    }
+    .hiko-avatar{
+        width: 80px;          /* avatar réduit sur mobile */
+        margin-right: 0rem;
+    }
+    .hiko-bubble{
+        font-size: 0.6rem;   /* texte plus petit dans la bulle */
+        padding: 0.75rem 1.25rem;
+        line-height: 1.4;
+    }
+    .hiko-bubble-main{
       font-size: small;
       margin-bottom: 0;
     }
@@ -434,11 +499,31 @@ document.addEventListener('DOMContentLoaded', function(){
   </div>
 </section>
 
+<section class="hiko-section" style="">
+  <div class="hiko-bubble">
+    <p class="hiko-bubble-main">Hi there — I’m Hiko, your intelligent code whisperer.
+    </p>
+    <p>
+    I don’t just answer questions — I investigate, and reveal hidden insights from your entire project.
+    <br>
+    From architectural flaws to optimization opportunities, I guide you with precision, clarity, and depth.
+    <br>
+    Think of me as your technical advisor — always ready to help you understand, investigate, and evolve your code.
+    <!--<br>
+    I’m here to change your coding game — forever.
+    And now, it’s your turn. -->
+    </p>
+  </div>
+  <div class="hiko-avatar">
+    <img class="ai-avatar-img" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748716164/d6nl77n3c8jkfwrnkr7c.png" alt="Hiko Avatar" >
+  </div>
+</section>
+
 <br><br>
 
 <div style="margin: 0 20%">
   <video controls>
-      <source src="https://kodoshinstaticfiles.blob.core.windows.net/mediafiles/images/KODOSHIN-HOME-VIDEO.mp4" type="video/mp4">
+      <source src="https://res.cloudinary.com/ddyepbtzx/video/upload/v1750390865/Home_ghnrxv.mp4" type="video/mp4">
   </video>
 </div>
 <br> <br>

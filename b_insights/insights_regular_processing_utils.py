@@ -54,7 +54,7 @@ def generate_components_string(components):
 async def ai_processing(prompt, components, chat, is_first_prompt, technology, attempt):
     technology_name = await sync_to_async(lambda: technology.name)()
     technology_format_example = await sync_to_async(lambda: technology.prompt_example)()
-    chat_category = await sync_to_async(InsightChatCategory.objects.get)(type='regular')
+    chat_category = await sync_to_async(InsightChatCategory.objects.get)(type='navigator')
     processing_steps = await sync_to_async(lambda: {f'{chat_category} : {step.order}': step
                                                     for step in
                                                     InsightProcessingStep.objects.filter(chat_category=chat_category)})()

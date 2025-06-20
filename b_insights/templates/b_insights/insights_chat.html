@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function() {
     window.hasDefaultProject = hasDefaultProject;
 });
 
-
+/*
 $(document).ready(function(){
     $('#regenerate-btn').on('click', function(e){
         e.preventDefault();
@@ -74,7 +74,7 @@ $(document).ready(function(){
         });
     });
 });
-
+*/
 
 $(function(){
   console.log('DOM ready, binding regenerate');
@@ -496,31 +496,6 @@ $(document).ready(function() {
                 }
                 /* ----------  END NEW PART  ---------- */
 
-                data.messages.forEach(function(msg) {
-                    var parser = new DOMParser();
-                    var xmlDoc = parser.parseFromString(msg.content, 'application/xml');
-                    var rootTag = xmlDoc.documentElement.tagName;
-                    if (rootTag === 'files') {
-                        var items = Array.from(xmlDoc.getElementsByTagName('file'));
-                        items.forEach(function(file, index) {
-                            setTimeout(function() {
-                                $('#loading-text').append(file.textContent + '<br>');
-                            }, index * 500);
-                        });
-                    } else if (rootTag === 'components') {
-                        var items = Array.from(xmlDoc.getElementsByTagName('component'));
-                        items.forEach(function(comp, index) {
-                            setTimeout(function() {
-                                var fileName = comp.getElementsByTagName('file')[0].textContent;
-                                var compName = comp.getElementsByTagName('name')[0].textContent;
-                                $('#loading-text').append(fileName + ' → ' + compName + '<br>');
-                            }, index * 500);
-                        });
-                    } else {
-                        $('#loading-text').append(msg.content + '<br>');
-                    }
-                    lastAiMessageId = msg.id;
-                });
             },
             complete: function() {
                 // ⬇️ keep polling only if not stopped
@@ -976,7 +951,7 @@ button:active {
 
             <!--<h3 style="font-weight: bold;">Your Chats</h3>-->
             <h4>Chats</h4>
-            <button type="submit" class="new-chat-btn" onclick="window.location.href='/ai/kenshi'">
+            <button type="submit" class="new-chat-btn" onclick="window.location.href='/ai/hiko'">
                 + new chat
             </button>
 

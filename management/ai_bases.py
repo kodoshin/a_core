@@ -1,13 +1,12 @@
 import requests
 import json
-import tiktoken
-from b_coding.models import TokenUsage, CodingChatMessage
+from b_coding.models import TokenUsage, CodingChat
 from a_projects.models import Project, File
-
-import httpx
-from asgiref.sync import sync_to_async
 from .utils import get_api_key, release_api_key
-
+import httpx
+import tiktoken
+from asgiref.sync import sync_to_async
+from b_insights.models import InsightTokenUsage, InsightChat
 
 
 
@@ -138,12 +137,6 @@ async def async_get_gpt_output(content):
 
 
 
-import httpx
-import tiktoken
-from asgiref.sync import sync_to_async
-
-
-
 
 async def async_get_response_ai_1(prompt, chat):
     key = await sync_to_async(get_api_key)('chat')
@@ -168,12 +161,23 @@ async def async_get_response_ai_1(prompt, chat):
             enc = tiktoken.get_encoding('cl100k_base')
             tokens_used = len(enc.encode(prompt))
             tokens_used_response = len(enc.encode(ai_answer))
-            await sync_to_async(TokenUsage.objects.create)(
-                prompt=prompt, tokens_used=tokens_used, coding_chat=chat
-            )
-            await sync_to_async(TokenUsage.objects.create)(
-                prompt=ai_answer, tokens_used=tokens_used_response, coding_chat=chat
-            )
+            if isinstance(chat, CodingChat):
+                await sync_to_async(TokenUsage.objects.create)(
+                    prompt=prompt, tokens_used=tokens_used, coding_chat=chat
+                )
+                await sync_to_async(TokenUsage.objects.create)(
+                    prompt=ai_answer, tokens_used=tokens_used_response, coding_chat=chat
+                )
+            elif isinstance(chat, InsightChat):
+                await sync_to_async(InsightTokenUsage.objects.create)(
+                    prompt=prompt, tokens_used=tokens_used, insight_chat=chat
+                )
+                await sync_to_async(InsightTokenUsage.objects.create)(
+                    prompt=ai_answer, tokens_used=tokens_used_response, insight_chat=chat
+                )
+            else:
+                pass
+
             return ai_answer.replace("'", "'").replace("('')", "('')")
         return response.text
     finally:
@@ -203,12 +207,20 @@ async def async_get_response_ai_2(prompt, chat):
             enc = tiktoken.get_encoding('cl100k_base')
             tokens_used = len(enc.encode(prompt))
             tokens_used_response = len(enc.encode(ai_answer))
-            await sync_to_async(TokenUsage.objects.create)(
-                prompt=prompt, tokens_used=tokens_used, coding_chat=chat
-            )
-            await sync_to_async(TokenUsage.objects.create)(
-                prompt=ai_answer, tokens_used=tokens_used_response, coding_chat=chat
-            )
+            if isinstance(chat, CodingChat):
+                await sync_to_async(TokenUsage.objects.create)(
+                    prompt=prompt, tokens_used=tokens_used, coding_chat=chat
+                )
+                await sync_to_async(TokenUsage.objects.create)(
+                    prompt=ai_answer, tokens_used=tokens_used_response, coding_chat=chat
+                )
+            elif isinstance(chat, InsightChat):
+                await sync_to_async(InsightTokenUsage.objects.create)(
+                    prompt=prompt, tokens_used=tokens_used, insight_chat=chat
+                )
+                await sync_to_async(InsightTokenUsage.objects.create)(
+                    prompt=ai_answer, tokens_used=tokens_used_response, insight_chat=chat
+                )
             return ai_answer.replace("'", "'").replace("('')", "('')")
         return response.text
     finally:
@@ -256,16 +268,20 @@ async def async_get_response_ai_1_large(prompt: str, chat) -> str:
             response_tokens = len(encoder.encode(ai_answer))
 
             # Persist token usage records
-            await sync_to_async(TokenUsage.objects.create)(
-                prompt=prompt,
-                tokens_used=prompt_tokens,
-                coding_chat=chat
-            )
-            await sync_to_async(TokenUsage.objects.create)(
-                prompt=ai_answer,
-                tokens_used=response_tokens,
-                coding_chat=chat
-            )
+            if isinstance(chat, CodingChat):
+                await sync_to_async(TokenUsage.objects.create)(
+                    prompt=prompt, tokens_used=prompt_tokens, coding_chat=chat
+                )
+                await sync_to_async(TokenUsage.objects.create)(
+                    prompt=ai_answer, tokens_used=response_tokens, coding_chat=chat
+                )
+            elif isinstance(chat, InsightChat):
+                await sync_to_async(InsightTokenUsage.objects.create)(
+                    prompt=prompt, tokens_used=prompt_tokens, insight_chat=chat
+                )
+                await sync_to_async(InsightTokenUsage.objects.create)(
+                    prompt=ai_answer, tokens_used=response_tokens, insight_chat=chat
+                )
 
             # Return cleaned answer
             return ai_answer
@@ -317,16 +333,28 @@ async def async_get_response_ai_2_ultimate(prompt: str, chat) -> str:
             response_tokens = len(encoder.encode(ai_answer))
 
             # Persist token usage records
-            await sync_to_async(TokenUsage.objects.create)(
-                prompt=prompt,
-                tokens_used=prompt_tokens,
-                coding_chat=chat
-            )
-            await sync_to_async(TokenUsage.objects.create)(
-                prompt=ai_answer,
-                tokens_used=response_tokens,
-                coding_chat=chat
-            )
+            if isinstance(chat, CodingChat):
+                await sync_to_async(TokenUsage.objects.create)(
+                    prompt=prompt,
+                    tokens_used=prompt_tokens,
+                    coding_chat=chat
+                )
+                await sync_to_async(TokenUsage.objects.create)(
+                    prompt=ai_answer,
+                    tokens_used=response_tokens,
+                    coding_chat=chat
+                )
+            elif isinstance(chat, InsightChat):
+                await sync_to_async(InsightTokenUsage.objects.create)(
+                    prompt=prompt,
+                    tokens_used=prompt_tokens,
+                    insight_chat=chat
+                )
+                await sync_to_async(InsightTokenUsage.objects.create)(
+                    prompt=ai_answer,
+                    tokens_used=response_tokens,
+                    insight_chat=chat
+                )
 
             return ai_answer
 
