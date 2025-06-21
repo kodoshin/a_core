@@ -801,7 +801,7 @@ button:active {
 }
 
 .next-step-btn {
-    background: linear-gradient(145deg, #4CAF50, #388E3C);
+    background: linear-gradient(145deg, #1aa3ff, #008ae6);
     color: white;
 }
 
@@ -1008,10 +1008,12 @@ button:active {
           <span style="margin: 0 0.5em;">Attempt {{ selected_attempt }} of {{ total_attempts }}</span>
           <button id="next-attempt" type="button" style="background-color: unset;" {% if selected_attempt >= total_attempts %}disabled{% endif %}>→</button>
         {% endif %}
+      <!--
         <button id="regenerate-btn" type="button" style="background-color: unset; padding: 0; border: none;" {% if current_chat.regeneration_count >= 3 %}disabled title="Max regenerations reached"{% endif %}>
           <span aria-hidden="true"  class="text-2xl relative -top-0.5 p-1 rounded transition-colors duration-200 hover:bg-gray-700" style="font-size: x-large; position: relative; top: -3px; color: #cccccc;">⟳</span>
           <span class="sr-only">Regenerate</span>
         </button>
+      -->
       </div>
 
 

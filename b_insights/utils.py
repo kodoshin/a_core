@@ -8,6 +8,7 @@ def clean_mermaid_code(code):
     code = code.replace(')', '')
     code = code.replace('(', '')
     code = code.replace(';', ' ')
+    code = code.replace('[/', '[')
     return code
 
 
@@ -27,8 +28,8 @@ def parse_steps(message_content: str):
 
     # Autorise à la fois <insight>…</insight> et <insight1>…</insight1>
     for match in re.finditer(r'<insight(\d*)>(.*?)</insight\1>', message_content, re.DOTALL):
-        block_num  = match.group(1)           # chaîne vide si pas de numéro
-        block_xml  = match.group(2)
+        block_num = match.group(1)           # chaîne vide si pas de numéro
+        block_xml = match.group(2)
 
         insight = {
             "number": int(block_num) if block_num else None,
