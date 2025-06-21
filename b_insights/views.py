@@ -171,6 +171,7 @@ async def insights_chat_view(request):
                     profile.available_credits = available_credits - default_chat_category.price_secondary_prompt
                 await sync_to_async(profile.save)()
                 steps = parse_steps(fix_response_format(ai_response))
+
                 return JsonResponse({
                     'user_message': prompt,
                     'ai_response': ai_response,
@@ -190,6 +191,7 @@ async def insights_chat_view(request):
                 )
                 ai_response = '<step1><Justifications>Please come back tomorrow to claim your free credits or buy more credits! </Justifications></step1>'
                 steps = parse_steps(fix_response_format(ai_response))
+
                 await sync_to_async(InsightChatMessage.objects.create)(
                     chat=chat, type='gpt-a', content=ai_response, order=5, api_key=None,
                     processing_step=processing_steps.get('5 : ai answer 2')
@@ -260,6 +262,8 @@ async def insights_chat_view(request):
                 else:
                     msg_dict['content'] = msg.content
                 messages.append(msg_dict)
+            #print('VIEW STEPS')
+            #print(messages)
         else:
             current_chat = None
             messages = []

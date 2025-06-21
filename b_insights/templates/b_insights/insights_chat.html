@@ -1,6 +1,7 @@
 <title>Kenshi</title>
 {% extends 'layouts/blank.html' %}
-{% block header %}{% endblock %}
+{% block header %}
+{% endblock %}
 {% block class %}bg-[#1f1e23] text-white code-chat-page{% endblock %}
 {% load static %}
 
@@ -10,11 +11,14 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 
 
 {% if in_progress %}
+
+
+
 <script>
   document.addEventListener("DOMContentLoaded", function(){
       $('#loading-spinner').show();
@@ -1060,14 +1064,15 @@ button:active {
                             <div class="step" data-step-number="{{ forloop.counter0 }}" {% if not forloop.first %}style="display:none;"{% endif %}>
                                 {% if message.steps|length > 1 %}
                                 <br>
-                                <p><strong>Step {{ step.step_number }}/{{ message.steps|length }}:</strong></p>
+                                <p><strong>Step {{ step.number }}/{{ message.steps|length }}:</strong></p>
                                 {% endif %}
-
-                                <p>{{ step.justification }}</p>
-
                                 {% if step.file|length > 0 %}
                                 <p><strong>Location :</strong> {{ step.file }}</p>
                                 {% endif %}
+                                {% if step.component|length > 0 %}
+                                <p><strong>Component :</strong> {{ step.component }}</p>
+                                {% endif %}
+                                <p>{{ step.summary }}</p>
                                 {% if step.code %}
                                     <div class="code-container">
                                         <button class="copy-code-btn" style="margin-left: 10px">
@@ -1077,8 +1082,37 @@ button:active {
                                             </svg>
                                             Copy
                                         </button>
-                                        <pre style="max-width: 160vh"><code class="language-{{ step.code.language }}">{{ step.code.content|escape }}</code></pre>
+                                        <pre style="max-width: 160vh"> <code class="language-{{ step.code.language }}">{{ step.code.content|escape }}</code> </pre>
+
+
+
                                     </div>
+                                {% endif %}
+                                {% if step.diagram %}
+                                  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+                                  <script>
+                                    mermaid.initialize({
+                                          startOnLoad: true,
+                                          securityLevel: 'loose',
+                                          theme: 'base',            // neutre, on écrase ensuite les variables
+                                          themeVariables: {
+                                            /* --- arrière-plans --- */
+                                            background: 'transparent',   // laisse voir le body #000
+                                            mainBkg:      '#ffffff',     // remplissage des boîtes
+                                            clusterBkg:   '#ffffff',
+
+                                            /* --- bordures, flèches, textes hors boîtes --- */
+                                            lineColor:        '#ffffff', // traits des flèches
+                                            arrowheadColor:   '#ffffff',
+                                            textColor:        '#ffffff', // textes « hors » boîte (étiquettes de liens, titres)
+                                            secondaryTextColor:'#ffffff',
+
+                                            /* --- texte dans les boîtes --- */
+                                            nodeTextColor: '#000000'     // reste noir comme demandé
+                                          }
+                                    });
+                                  </script>
+                                  <div class="mermaid" style="height: fit-content">{{ step.diagram.content|escape }}</div>
                                 {% endif %}
                             </div>
                         {% endfor %}

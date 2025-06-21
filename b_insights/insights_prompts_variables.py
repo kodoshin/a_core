@@ -60,31 +60,37 @@ Provide me a detailed solution using the resources to solve the request.
 pe_final_answer_format = """
 Please analyze the current code and provide a structured insight response in the following format:
 
-<insight>
-<file>/full/path/to/file.py</file>
-<summary>
-A good explanation of what the file or section does.
+<insight1>
+<diagram>mermaid code for diagram</diagram>
+<summary> 
+A General explanation symmary of the insights.
 </summary>
-<opportunities>
-<item>Brief insight or improvement opportunity #1.</item>
-<code><language>Code of the improvement #1 if pertinent.</language></code>
-<item>Brief insight or improvement opportunity #2.</item>
-<code><language>Code of the improvement #2 if pertinent.</language></code>
-...
-</opportunities>
-<risk_zones>
-<item>Optional: risky or unclear parts of the code.</item>
-<code><language>Code of the risk #1 if pertinent.</language></code>
-</risk_zones>
-<recommendations>
-<item>Specific and actionable recommendation #1.</item>
-<code><language>Code of the recommendation #1 if pertinent.</language></code>
-<item>Specific and actionable recommendation #2.</item>
-<code><language>Code of the recommendation #2 if pertinent.</language></code>
-</recommendations>
-</insight>
+</insight1>
+<insight2>
+<file>/full/path/to/file.py</file>
+<component>name_of_component</component>
+<summary> 
+A detailed explanation of the insight.
+</summary>
+</insight2>
+<insight3>
+<file>/full/path/to/file.py</file>
+<component>name_of_component</component>
+<summary> 
+A detailed explanation of the insight.
+</summary>
+</insight3>
+... other insights
+
+Instructions:
+
+The insight1 should containt a general summary of all the other insights, and <diagram> if it makes sense.
+
+The insight2, insight3, etc. should containt a <file> and <component> blocks with a detailed explanation of the insight.
 
 Constraints:
+
+Include <diagram> only when it makes sense.
 
 Only return structured XML-style blocks as shown.
 

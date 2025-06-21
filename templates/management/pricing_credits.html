@@ -90,7 +90,7 @@
 <!-- ---------- SWITCH BUTTONS ---------- -->
 <div class="pricing-toggle">
     <button id="monthly-btn" class="toggle-btn active">Monthly</button>
-    <button id="yearly-btn"  class="toggle-btn">Annual</button>
+    <button id="yearly-btn"  class="toggle-btn">Annual (-20%)</button>
 </div>
 <!-- Ajouter muted dans class si on veut enlever un avantage -->
 <div class="flex flex-col md:flex-row gap-6 justify-center">
@@ -103,11 +103,11 @@
       <div class="pricing-card" style="font-weight: bold">
         <div class="pricing-card-header">
           <div class="pricing-title">{{ plan.name }}</div>
-          {% if plan.monthly_price and plan.monthly_price != plan.original_monthly_price %}
-            <span class="pricing-old-price">${{ plan.original_monthly_price|floatformat:0 }}</span>
-            <span class="pricing-price-promo">${{ plan.monthly_price|floatformat:0 }}</span>
+          {% if plan.current_price and plan.current_price != plan.original_price %}
+            <span class="pricing-old-price">${{ plan.original_price|floatformat:0 }}</span>
+            <span class="pricing-price-promo">${{ plan.current_price|floatformat:0 }}</span>
           {% else %}
-            <span class="pricing-price">${{ plan.monthly_price|floatformat:0 }}</span>
+            <span class="pricing-price">${{ plan.current_price|floatformat:0 }}</span>
           {% endif %}
         </div>
         <div class="pricing-table-content">
@@ -194,11 +194,11 @@
       <div class="pricing-card" style="font-weight: bold">
         <div class="pricing-card-header">
           <div class="pricing-title">{{ plan.name }}</div>
-          {% if plan.monthly_price and plan.monthly_price != plan.original_monthly_price %}
-            <span class="pricing-old-price">${{ plan.original_monthly_price|floatformat:0 }}</span>
-            <span class="pricing-price-promo">${{ plan.monthly_price|floatformat:0 }}</span>
+          {% if plan.current_price and plan.current_price != plan.original_price %}
+            <span class="pricing-old-price">${{ plan.original_price|floatformat:0 }}</span>
+            <span class="pricing-price-promo">${{ plan.current_price|floatformat:0 }}</span>
           {% else %}
-            <span class="pricing-price">${{ plan.monthly_price|floatformat:0 }}</span>
+            <span class="pricing-price">${{ plan.current_price|floatformat:0 }}</span>
           {% endif %}
         </div>
         <div class="pricing-table-content">
@@ -281,7 +281,7 @@
 </div>
 
 <div class="max-w-4xl ml-[15%]">
-  <label>*daily Raikos are not cumulative</label>
+  <label>*daily Rikos are not automatic, you need to claim them by connecting to Kodoshin</label>
 </div>
 
 <style>
