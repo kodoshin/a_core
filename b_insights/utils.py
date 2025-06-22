@@ -3,14 +3,22 @@ import re
 import textwrap  # pour enlever proprement l’indentation éventuelle
 
 
+def squeeze_after_arrow(text: str) -> str:
+    _PAT = re.compile(r'(-->\s*)([^\n]*?)(?=\s--|\n|$)')
+    """Enlève les espaces du nœud situé juste après chaque '-->'."""
+    return _PAT.sub(lambda m: m.group(1) + m.group(2).replace(' ', ''), text)
+
 def clean_mermaid_code(code):
     code = code.replace('mermaid\n', '')
     code = code.replace(')', '')
     code = code.replace('(', '')
+    code = code.replace('}', '')
+    code = code.replace('{', '')
     code = code.replace(';', ' ')
     code = code.replace('[/', '[')
     code = code.replace("```", '')
     code = code.replace('→', '->')
+    code = squeeze_after_arrow(code)
     return code
 
 

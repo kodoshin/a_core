@@ -1083,7 +1083,7 @@ button:active {
                                 <p><strong>Step {{ step.step_number }}/{{ message.steps|length }}:</strong></p>
                                 {% endif %}
 
-                                <p>{{ step.justification|escape }}</p>
+                                <p>{{ step.justification|escape|linebreaksbr }}</p>
 
                                 {% if step.file|length > 0 %}
                                 <p><strong>Location :</strong> {{ step.file }}</p>

@@ -1074,7 +1074,7 @@ button:active {
                                 {% if step.component|length > 0 %}
                                 <p><strong>Component :</strong> {{ step.component }}</p>
                                 {% endif %}
-                                <p>{{ step.summary|escape }}</p>
+                                <p>{{ step.summary|escape|linebreaksbr }}</p>
                                 {% if step.code %}
                                     <div class="code-container">
                                         <button class="copy-code-btn" style="margin-left: 10px">
