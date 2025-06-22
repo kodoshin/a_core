@@ -221,7 +221,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function setPlaceholder() {
       if (textarea.value.trim() === "") {
-        textarea.value = "Ask anything about how your app works";
+        textarea.value = "Ask anything about how your project works";
         textarea.style.color = "#d4e6fc"; // Grisé pour indiquer que c'est un placeholder
         textarea.style.fontSize = "large";
         textarea.style.margin = "5px";
@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function clearPlaceholder() {
-      if (textarea.value === "Ask anything about how your app works") {
+      if (textarea.value === "Ask anything about how your project works") {
         textarea.value = "";
         textarea.style.color = "#ffffff"; // Couleur normale du texte
         textarea.style.fontSize = "large";
@@ -522,7 +522,7 @@ $(document).ready(function() {
             }
             e.preventDefault();
             var prompt = $('#prompt').val().trim();
-            if (prompt === "Ask anything about how your app works" || prompt === "") {
+            if (prompt === "Ask anything about how your project works" || prompt === "") {
                 alert('Please enter a prompt.');
                 return;
             }
@@ -1074,7 +1074,7 @@ button:active {
                                 {% if step.component|length > 0 %}
                                 <p><strong>Component :</strong> {{ step.component }}</p>
                                 {% endif %}
-                                <p>{{ step.summary }}</p>
+                                <p>{{ step.summary|escape }}</p>
                                 {% if step.code %}
                                     <div class="code-container">
                                         <button class="copy-code-btn" style="margin-left: 10px">

@@ -10,6 +10,7 @@ def clean_mermaid_code(code):
     code = code.replace(';', ' ')
     code = code.replace('[/', '[')
     code = code.replace("```", '')
+    code = code.replace('→', '->')
     return code
 
 
