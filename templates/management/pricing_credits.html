@@ -103,11 +103,11 @@
       <div class="pricing-card" style="font-weight: bold">
         <div class="pricing-card-header">
           <div class="pricing-title">{{ plan.name }}</div>
-          {% if plan.current_price and plan.current_price != plan.original_price %}
+          {% if plan.monthly_price and plan.monthly_price != plan.original_price %}
             <span class="pricing-old-price">${{ plan.original_price|floatformat:0 }}</span>
-            <span class="pricing-price-promo">${{ plan.current_price|floatformat:0 }}</span>
+            <span class="pricing-price-promo">${{ plan.monthly_price|floatformat:0 }}</span>
           {% else %}
-            <span class="pricing-price">${{ plan.current_price|floatformat:0 }}</span>
+            <span class="pricing-price">${{ plan.monthly_price|floatformat:0 }}</span>
           {% endif %}
         </div>
         <div class="pricing-table-content">
@@ -194,11 +194,11 @@
       <div class="pricing-card" style="font-weight: bold">
         <div class="pricing-card-header">
           <div class="pricing-title">{{ plan.name }}</div>
-          {% if plan.current_price and plan.current_price != plan.original_price %}
+          {% if plan.monthly_price and plan.monthly_price != plan.original_price %}
             <span class="pricing-old-price">${{ plan.original_price|floatformat:0 }}</span>
-            <span class="pricing-price-promo">${{ plan.current_price|floatformat:0 }}</span>
+            <span class="pricing-price-promo">${{ plan.monthly_price|floatformat:0 }}</span>
           {% else %}
-            <span class="pricing-price">${{ plan.current_price|floatformat:0 }}</span>
+            <span class="pricing-price">${{ plan.monthly_price|floatformat:0 }}</span>
           {% endif %}
         </div>
         <div class="pricing-table-content">

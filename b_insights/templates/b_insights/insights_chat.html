@@ -221,7 +221,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function setPlaceholder() {
       if (textarea.value.trim() === "") {
-        textarea.value = "Ask anything";
+        textarea.value = "Ask anything about how your app works";
         textarea.style.color = "#d4e6fc"; // Grisé pour indiquer que c'est un placeholder
         textarea.style.fontSize = "large";
         textarea.style.margin = "5px";
@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function clearPlaceholder() {
-      if (textarea.value === "Ask anything") {
+      if (textarea.value === "Ask anything about how your app works") {
         textarea.value = "";
         textarea.style.color = "#ffffff"; // Couleur normale du texte
         textarea.style.fontSize = "large";
@@ -522,7 +522,7 @@ $(document).ready(function() {
             }
             e.preventDefault();
             var prompt = $('#prompt').val().trim();
-            if (prompt === "Ask anything" || prompt === "") {
+            if (prompt === "Ask anything about how your app works" || prompt === "") {
                 alert('Please enter a prompt.');
                 return;
             }
@@ -1104,8 +1104,8 @@ button:active {
                                             clusterBkg:   '#ffffff',
 
                                             /* --- bordures, flèches, textes hors boîtes --- */
-                                            lineColor:        '#ffffff', // traits des flèches
-                                            arrowheadColor:   '#ffffff',
+                                            lineColor:        '#66c2ff', // traits des flèches
+                                            arrowheadColor:   '#66c2ff',
                                             textColor:        '#ffffff', // textes « hors » boîte (étiquettes de liens, titres)
                                             secondaryTextColor:'#ffffff',
 

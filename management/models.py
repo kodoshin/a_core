@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.db.models import F
 from django.utils import timezone
+from decimal import Decimal
 
 
 class AIModel(models.Model):
@@ -53,6 +54,7 @@ class APIKey(models.Model):
 
 class SubscriptionPlan(models.Model):
     name = models.CharField(max_length=100)
+    monthly_price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     current_price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     original_price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     monthly_credits = models.PositiveIntegerField(default=0)
@@ -111,6 +113,23 @@ class Subscription(models.Model):
         if not self.end_date:
             self.end_date = self.start_date + timedelta(days=self.plan.duration_days)
         super().save(*args, **kwargs)
+
+    def remaining_amount(self) -> Decimal:
+        """
+        Retourne le montant à créditer (Decimal) correspondant
+        aux jours non utilisés de l’abonnement actuel.
+        """
+        if not self.amount_subtotal:
+            return Decimal('0')
+
+        remaining_days = (self.end_date - timezone.now()).days
+
+        if remaining_days <= 0:
+            return Decimal('0')
+
+        return (Decimal(self.amount_subtotal) *
+                Decimal(remaining_days) /
+                Decimal(self.plan.duration_days))
 
 
 class CreditOffer(models.Model):
