@@ -22,11 +22,32 @@ def view_documentation(request, project_id):
     if project :
         project_files = File.objects.filter(project_id=project_id)
         project_components = Component.objects.filter(file_id__project_id=project_id)
+
+        token_expired = False
+        token = get_github_token(request.user)
+        if not token:
+            token_expired = True
+        else:
+            try:
+                gh_response = requests.get(
+                    "https://api.github.com/user",
+                    headers={
+                        "Authorization": f"token {token}",
+                        "Accept": "application/vnd.github.v3+json",
+                    },
+                    timeout=10,
+                )
+                if gh_response.status_code == 401:
+                    token_expired = True
+            except requests.RequestException:
+                token_expired = True
+
         context = {
             'project_id' : project_id,
             'project': project,
             'project_components': project_components,
             'project_files': project_files,
+            'token_expired': token_expired,
         }
         return render(request, 'a_projects/view_documentation.html', context)
     else :

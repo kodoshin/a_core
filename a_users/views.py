@@ -12,7 +12,7 @@ from django.utils import timezone
 from .models import CreditClaim, Policy, Region
 from django.http import JsonResponse
 from management.models import SubscriptionBonus
-
+from b_insights.models import InsightChatCategory
 
 
 
@@ -33,7 +33,7 @@ def profile_view(request):
         return redirect('account_login')
 
     onboarding = not profile.profile_is_filled
-    print('onboarding', str(onboarding))
+    #print('onboarding', str(onboarding))
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
@@ -52,6 +52,9 @@ def profile_view(request):
                 # Sauvegarde du profil
                 profile = form.save()
                 if onboarding:
+                    first_active_category = InsightChatCategory.objects.filter(is_active=True).first()
+                    if first_active_category:
+                        profile.default_insight_chat_category = first_active_category
                     profile.profile_is_filled = True
                     profile.save()
                     # Attribution des crédits bonus

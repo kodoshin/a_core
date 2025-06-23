@@ -53,6 +53,15 @@
 
 <div style="padding-left: 2em">
     <br> <br> <br> <br>
+
+    {% if token_expired %}
+        <div style="color:red;font-weight:bold;margin-bottom:1em;">
+            Your GitHub access token has expired. Please reconnect your GitHub account
+            from your profile settings by following this <a href="{% url 'token_tutorial' %}" target="_blank" rel="noopener noreferrer">tutorial</a>
+        </div>
+    {% endif %}
+
+
     <button type="button"
         class="chat-kenshi-button"
         onclick="chatWithKenshi()"
@@ -63,11 +72,11 @@
     <br><br><br>
 
     {% if not project.github_sync %}
-        <button type="button" class="select-button" onclick="redirectToRepo()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em;">Reload Source Code</button>
+        <button type="button" class="select-button" {% if token_expired %}disabled{% endif %} onclick="redirectToRepo()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em;">Reload Source Code</button>
         {% if user.profile.is_paid_user %}
-        <button type="button" class="sync-button" onclick="redirectToSyncGithub()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; background-color: green; color: white;">Sync with Github</button>
+        <button type="button" class="sync-button" {% if token_expired %}disabled{% endif %} onclick="redirectToSyncGithub()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; background-color: green; color: white;">Sync with Github</button>
         {% else %}
-        <a href="{% url 'pricing_credits' %}"><button type="button" class="sync-button" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; background-color: green; color: white;">Sync with Github</button></a>
+        <a href="{% url 'pricing_credits' %}"><button type="button" {% if token_expired %}disabled{% endif %} class="sync-button" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; background-color: green; color: white;">Sync with Github</button></a>
         {% endif %}
     {% else %}
         <button type="button" class="delete-github-sync-button" onclick="redirectToDeleteGithubSync()" style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; background-color: orange; color: white;">Delete Github Sync</button>

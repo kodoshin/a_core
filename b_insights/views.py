@@ -291,7 +291,7 @@ async def insights_chat_view(request):
 
 @login_required
 @require_POST
-def update_default_project(request):
+def update_default_insights_project(request):
     project_id = request.POST.get('project_id')
     try:
         project = Project.objects.get(id=project_id, user=request.user)

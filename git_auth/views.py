@@ -24,6 +24,13 @@ def get_github_token(user):
     except :
         return None
 
+def get_github_token_expiration(user):
+    try :
+        profile = user.profile
+        github_token_expiration = profile.github_token_expiration
+        return github_token_expiration
+    except :
+        return None
 
 def get_repo_branches(request, repo_name):
     token = get_github_token(request.user)
