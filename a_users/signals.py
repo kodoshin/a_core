@@ -11,7 +11,9 @@ def send_welcome_email(sender, instance, created, **kwargs):
     """
     Envoie un e-mail de bienvenue dès qu’un nouvel utilisateur est enregistré.
     """
+    print('New Subscription')
     if created and instance.email:
+        print('Sending Email')
         subject = "Bienvenue sur Kodoshin"
         message = (
             f"Welcome {instance.username},\n\n"

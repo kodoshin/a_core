@@ -285,6 +285,8 @@ else:
 DEFAULT_FROM_EMAIL = 'no-reply@kodoshin.ai'
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION    = 'mandatory'      # ← déclenche l’e-mail de confirmation
+ACCOUNT_CONFIRM_EMAIL_ON_GET  = True
 ENCRYPTION_KEY = "wj67r5s6sxIHe5tkqvC6ZJ7L6ekr61S5lS3CXXjXXgA="
 
 
