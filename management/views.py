@@ -196,10 +196,10 @@ def stripe_webhook(request):
                 Subscription.objects.create(
                     user=user,
                     plan=plan,
-                    amount_subtotal=10, #Decimal(session["amount_subtotal"]) / 100,
-                    tax_amount=1, #Decimal(session["total_details"]["amount_tax"] or 0) / 100,
-                    amount_total=11, #Decimal(session["amount_total"]) / 100,
-                    currency='USD', #session["currency"].upper(),
+                    #amount_subtotal=Decimal(session["amount_subtotal"]) / 100,
+                    #tax_amount=Decimal(session["total_details"]["amount_tax"] or 0) / 100,
+                    #amount_total=Decimal(session["amount_total"]) / 100,
+                    #currency=session["currency"].upper(),
                 )
 
             except SubscriptionPlan.DoesNotExist:
