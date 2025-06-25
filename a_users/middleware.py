@@ -7,6 +7,8 @@ class ProfileCompletionMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        if request.path.startswith("/pricing/stripe/webhook/"):
+            return self.get_response(request)
         if request.user.is_authenticated:
             ajax_url = reverse('ajax_load_regions')
             onboarding_url = reverse('profile-onboarding')
