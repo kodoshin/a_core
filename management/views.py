@@ -142,6 +142,7 @@ def stripe_webhook(request):
     La fonction DOIT toujours retourner un 2xx à Stripe lorsqu’elle a
     correctement traité (ou ignoré) l’évènement, afin d’éviter des retries.
     """
+    """
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
 
@@ -197,6 +198,6 @@ def stripe_webhook(request):
                 )
             except SubscriptionPlan.DoesNotExist:
                 logger.error("Stripe webhook ‑ plan %s inexistant", plan_id)
-
+    """
     # 3. Réponse ----------------------------------------------------------------------
     return HttpResponse(status=200)
