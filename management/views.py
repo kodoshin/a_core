@@ -167,7 +167,7 @@ def stripe_webhook(request):
 
         # --- Récupération de l’utilisateur -------------------------------------------
         try:
-            user = User.objects.get(pk=int(metadata.get("user_id", 0)))
+            user = User.objects.get(pk=23)#.get(pk=int(metadata.get("user_id", 0)))
             logger.info("USER FOUND: %s", user)
         except (User.DoesNotExist, ValueError):
             logger.error("Stripe webhook ‑ user introuvable dans la metadata : %s", metadata)
@@ -191,15 +191,15 @@ def stripe_webhook(request):
         plan_id = metadata.get("plan_id")
         if plan_id:
             try:
-                plan = SubscriptionPlan.objects.get(pk=int(plan_id))
+                plan = SubscriptionPlan.objects.filter(name='Pro').first() #.get(pk=int(plan_id))
 
                 Subscription.objects.create(
                     user=user,
                     plan=plan,
-                    #amount_subtotal=Decimal(session["amount_subtotal"]) / 100,
-                    #tax_amount=Decimal(session["total_details"]["amount_tax"] or 0) / 100,
-                    #amount_total=Decimal(session["amount_total"]) / 100,
-                    #currency=session["currency"].upper(),
+                    amount_subtotal=Decimal(session["amount_subtotal"]) / 100,
+                    tax_amount=Decimal(session["total_details"]["amount_tax"] or 0) / 100,
+                    amount_total=Decimal(session["amount_total"]) / 100,
+                    currency=session["currency"].upper(),
                 )
 
             except SubscriptionPlan.DoesNotExist:
