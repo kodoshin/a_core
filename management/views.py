@@ -167,7 +167,7 @@ def stripe_webhook(request):
 
         # --- Récupération de l’utilisateur -------------------------------------------
         try:
-            user = User.objects.get(pk=23)#.get(pk=int(metadata.get("user_id", 0)))
+            user = User.objects.get(id=23)#.get(pk=int(metadata.get("user_id", 0)))
             logger.info("USER FOUND: %s", user)
         except (User.DoesNotExist, ValueError):
             logger.error("Stripe webhook ‑ user introuvable dans la metadata : %s", metadata)
