@@ -192,16 +192,16 @@ def stripe_webhook(request):
         if plan_id:
             try:
                 plan = SubscriptionPlan.objects.get(pk=int(plan_id))
-                """
+
                 Subscription.objects.create(
                     user=user,
                     plan=plan,
-                    amount_subtotal=Decimal(session["amount_subtotal"]) / 100,
-                    tax_amount=Decimal(session["total_details"]["amount_tax"] or 0) / 100,
-                    amount_total=Decimal(session["amount_total"]) / 100,
-                    currency=session["currency"].upper(),
+                    amount_subtotal=10, #Decimal(session["amount_subtotal"]) / 100,
+                    tax_amount=1, #Decimal(session["total_details"]["amount_tax"] or 0) / 100,
+                    amount_total=11, #Decimal(session["amount_total"]) / 100,
+                    currency='USD', #session["currency"].upper(),
                 )
-                """
+
             except SubscriptionPlan.DoesNotExist:
                 logger.error("Stripe webhook ‑ plan %s inexistant", plan_id)
 
