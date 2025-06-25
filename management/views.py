@@ -132,63 +132,71 @@ def create_checkout_session_plan(request, plan_id):
     return redirect(session.url, code=303)
 
 
+import logging
+logger = logging.getLogger(__name__)
 @csrf_exempt
-@require_POST
 def stripe_webhook(request):
-    """Réception des évènements Stripe."""
+    """
+    Réception des évènements Stripe.
+    Seul checkout.session.completed est géré actuellement.
+    La fonction DOIT toujours retourner un 2xx à Stripe lorsqu’elle a
+    correctement traité (ou ignoré) l’évènement, afin d’éviter des retries.
+    """
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
 
+    # 1. Vérification de la signature -------------------------------------------------
     try:
         event = stripe.Webhook.construct_event(
-            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+            payload=payload,
+            sig_header=sig_header,
+            secret=settings.STRIPE_WEBHOOK_SECRET,
         )
-    except (ValueError, stripe.error.SignatureVerificationError):
-        # Payload invalide ou signature incorrecte ⇒ 400.
-        return HttpResponse(status=400)
+    except ValueError:
+        logger.exception("Stripe webhook ‑ payload invalide")
+        return HttpResponse("Invalid payload", status=400)
+    except stripe.error.SignatureVerificationError:
+        logger.exception("Stripe webhook ‑ signature invalide")
+        return HttpResponse("Invalid signature", status=400)
 
-    # Nous ne traitons ici que le checkout réussi.
+    # 2. Traitement de checkout.session.completed -------------------------------------
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
+        metadata = session.get("metadata", {}) or {}
 
-        # On récupère la session « complète » pour avoir total_details.
-        session_full = stripe.checkout.Session.retrieve(
-            session["id"], expand=["total_details"]
-        )
-        metadata = session_full.get("metadata", {}) or {}
-
+        # --- Récupération de l’utilisateur -------------------------------------------
         try:
-            user = User.objects.get(id=metadata.get("user_id"))
-        except User.DoesNotExist:
-            # Pas d’utilisateur ⇒ on arrête, mais on renvoie 200 à Stripe.
-            return HttpResponse(status=200)
+            user = User.objects.get(pk=int(metadata.get("user_id", 0)))
+        except (User.DoesNotExist, ValueError):
+            logger.error("Stripe webhook ‑ user introuvable dans la metadata : %s", metadata)
+            return HttpResponse(status=200)     # On stoppe mais on confirme à Stripe
 
-        # ---------- 1. Désactivation de l’ancien abonnement ----------
-        previous_subscription_id = metadata.get("previous_subscription_id")
-        if previous_subscription_id:
-            try:
-                old_sub = Subscription.objects.get(id=previous_subscription_id)
-                if old_sub.active:
-                    old_sub.active = False
-                    old_sub.end_date = timezone.now()
-                    old_sub.save()
-            except Subscription.DoesNotExist:
-                pass  # Rien à désactiver
-
-        # ---------- 2. Création du nouvel abonnement ----------
-        plan = get_object_or_404(SubscriptionPlan, id=metadata.get("plan_id"))
-
-        Subscription.objects.create(
-            user=user,
-            plan=plan,
-            amount_subtotal=Decimal(session_full.amount_subtotal or 0) / 100,
-            tax_amount=Decimal(
-                (session_full.total_details.amount_tax or 0)
-            ) / 100,
-            amount_total=Decimal(session_full.amount_total or 0) / 100,
-            currency=(session_full.currency or "usd").upper(),
+        # --- Désactivation de l’abonnement précédent --------------------------------
+        previous_subscription = (
+            Subscription.objects.filter(user=user, active=True)
+            .order_by("-start_date")
+            .first()
         )
+        if previous_subscription:
+            previous_subscription.active = False
+            previous_subscription.end_date = timezone.now()
+            previous_subscription.save(update_fields=["active", "end_date"])
 
-    # Toujours renvoyer 200 pour indiquer à Stripe que l’évènement est géré.
+        # --- Création du nouvel abonnement ------------------------------------------
+        plan_id = metadata.get("plan_id")
+        if plan_id:
+            try:
+                plan = SubscriptionPlan.objects.get(pk=int(plan_id))
+                Subscription.objects.create(
+                    user=user,
+                    plan=plan,
+                    amount_subtotal=Decimal(session["amount_subtotal"]) / 100,
+                    tax_amount=Decimal(session["total_details"]["amount_tax"] or 0) / 100,
+                    amount_total=Decimal(session["amount_total"]) / 100,
+                    currency=session["currency"].upper(),
+                )
+            except SubscriptionPlan.DoesNotExist:
+                logger.error("Stripe webhook ‑ plan %s inexistant", plan_id)
+
+    # 3. Réponse ----------------------------------------------------------------------
     return HttpResponse(status=200)
-
