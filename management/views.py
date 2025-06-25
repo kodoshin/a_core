@@ -10,7 +10,8 @@ from django.views.decorators.http import require_POST
 from a_users.models import Profile
 from django.contrib.auth.models import User
 from django.utils import timezone
-
+import logging
+from datetime import timedelta
 
 
 
@@ -132,7 +133,8 @@ def create_checkout_session_plan(request, plan_id):
     return redirect(session.url, code=303)
 
 
-import logging
+
+
 logger = logging.getLogger(__name__)
 @csrf_exempt
 def stripe_webhook(request):
@@ -196,6 +198,7 @@ def stripe_webhook(request):
                 Subscription.objects.create(
                     user=user,
                     plan=plan,
+                    end_date=timezone.now() + timedelta(days=plan.duration_days),
                     amount_subtotal=Decimal(session["amount_subtotal"]) / 100,
                     tax_amount=Decimal(session["total_details"]["amount_tax"] or 0) / 100,
                     amount_total=Decimal(session["amount_total"]) / 100,
