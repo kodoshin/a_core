@@ -159,7 +159,7 @@ def stripe_webhook(request):
     except stripe.error.SignatureVerificationError:
         logger.exception("Stripe webhook ‑ signature invalide")
         return HttpResponse("Invalid signature", status=400)
-    """
+
     # 2. Traitement de checkout.session.completed -------------------------------------
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
@@ -168,10 +168,11 @@ def stripe_webhook(request):
         # --- Récupération de l’utilisateur -------------------------------------------
         try:
             user = User.objects.get(pk=int(metadata.get("user_id", 0)))
+            logger.info("USER FOUND: %s", user)
         except (User.DoesNotExist, ValueError):
             logger.error("Stripe webhook ‑ user introuvable dans la metadata : %s", metadata)
             return HttpResponse(status=200)     # On stoppe mais on confirme à Stripe
-
+        """
         # --- Désactivation de l’abonnement précédent --------------------------------
         previous_subscription = (
             Subscription.objects.filter(user=user, active=True)
