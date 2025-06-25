@@ -172,22 +172,24 @@ def stripe_webhook(request):
         except (User.DoesNotExist, ValueError):
             logger.error("Stripe webhook ‑ user introuvable dans la metadata : %s", metadata)
             return HttpResponse(status=200)     # On stoppe mais on confirme à Stripe
-        """
+
         # --- Désactivation de l’abonnement précédent --------------------------------
-        previous_subscription = None
         try:
             previous_subscription = (
                 Subscription.objects.filter(user=user, active=True)
                 .order_by("-start_date")
                 .first()
             )
+        except :
+            previous_subscription = None
         if previous_subscription:
             previous_subscription.active = False
             previous_subscription.end_date = timezone.now()
             previous_subscription.save(update_fields=["active", "end_date"])
-        """
+
         # --- Création du nouvel abonnement ------------------------------------------
         plan_id = metadata.get("plan_id")
+        """
         if plan_id:
             try:
                 plan = SubscriptionPlan.objects.get(pk=int(plan_id))
@@ -201,6 +203,6 @@ def stripe_webhook(request):
                 )
             except SubscriptionPlan.DoesNotExist:
                 logger.error("Stripe webhook ‑ plan %s inexistant", plan_id)
-
+        """
     # 3. Réponse ----------------------------------------------------------------------
     return HttpResponse(status=200)
