@@ -189,10 +189,10 @@ def stripe_webhook(request):
 
         # --- Création du nouvel abonnement ------------------------------------------
         plan_id = metadata.get("plan_id")
-        """
         if plan_id:
             try:
                 plan = SubscriptionPlan.objects.get(pk=int(plan_id))
+                """
                 Subscription.objects.create(
                     user=user,
                     plan=plan,
@@ -201,8 +201,9 @@ def stripe_webhook(request):
                     amount_total=Decimal(session["amount_total"]) / 100,
                     currency=session["currency"].upper(),
                 )
+                """
             except SubscriptionPlan.DoesNotExist:
                 logger.error("Stripe webhook ‑ plan %s inexistant", plan_id)
-        """
+
     # 3. Réponse ----------------------------------------------------------------------
     return HttpResponse(status=200)
