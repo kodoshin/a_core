@@ -22,9 +22,12 @@ from a_users.views import profile_view
 from a_home.views import home, learn_more_about_ai_models
 from a_projects.views import github_webhook
 
+def trigger_error(request):
+    division_by_zero = 1 / 0
 
 urlpatterns = [
     path('', home, name='home'),
+    path('sentry-debug/', trigger_error),
     path('learn-more-about-ai-models/', learn_more_about_ai_models, name='learn_more_about_ai_models'),
     path('admin/', admin.site.urls),
     path('git/', include('git_auth.urls')),

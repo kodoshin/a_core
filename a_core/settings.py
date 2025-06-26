@@ -17,7 +17,14 @@ from django.utils.encoding import force_str
 import django.utils.encoding
 import cloudinary
 import cloudinary_storage
+import sentry_sdk
 
+sentry_sdk.init(
+    dsn="https://1fad0f8723ff747178877646366f144a@o4509562693615616.ingest.us.sentry.io/4509562695581696",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+)
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 2048 * 2048  # en octets
 
