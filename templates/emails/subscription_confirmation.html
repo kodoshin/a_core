@@ -1,0 +1,34 @@
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+  <p>
+    Hello&nbsp;{{ user.first_name|default:user.username }},
+  </p>
+
+  <p>
+    Thank you for your purchase on <strong>KodoShin</strong>.
+  </p>
+
+  <table style="border-collapse: collapse;">
+    <tr>
+      <td style="padding: 4px 8px;"><strong>Your new plan&nbsp;:</strong></td>
+      <td style="padding: 4px 8px;">{{ plan_name }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 4px 8px;"><strong>Amount paid&nbsp;:</strong></td>
+      <td style="padding: 4px 8px;">{{ amount_total }} {{ currency|upper }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 4px 8px;"><strong>Valid until&nbsp;:</strong></td>
+      <td style="padding: 4px 8px;">{{ end_date|date:"d F Y" }}</td>
+    </tr>
+  </table>
+
+  <p>
+    You can now enjoy all the features associated with your subscription by logging in to
+    <a href="{{ site_domain }}" style="color: #1a73e8;">{{ site_domain }}</a>.
+  </p>
+
+  <p>
+    Best regards,<br />
+    The KodoShin Team
+  </p>
+</body>
