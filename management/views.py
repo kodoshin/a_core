@@ -204,6 +204,8 @@ def stripe_webhook(request):
                     amount_total=Decimal(session["amount_total"]) / 100,
                     currency=session["currency"].upper(),
                 )
+                profile = Profile.objects.get(user=user)
+                profile.available_credits += plan.monthly_credits
 
             except SubscriptionPlan.DoesNotExist:
                 logger.error("Stripe webhook ‑ plan %s inexistant", plan_id)
