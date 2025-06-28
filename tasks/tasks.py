@@ -6,7 +6,12 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 
-@shared_task
+@shared_task(
+    bind=True,
+    autoretry_for=(Exception,),        # retry auto si erreur temporaire SMTP
+    retry_backoff=60,                  # attente exponentielle de base 60 s
+    retry_kwargs={"max_retries": 5},   # 5 tentatives max
+)
 def send_subscription_confirmation_email(user_id, plan_name, end_date_iso, amount_total, currency):
     """
     Send a confirmation e-mail to the user when a new subscription has
