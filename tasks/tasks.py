@@ -8,11 +8,13 @@ from django.utils import timezone
 
 @shared_task(
     bind=True,
-    autoretry_for=(Exception,),        # retry auto si erreur temporaire SMTP
-    retry_backoff=60,                  # attente exponentielle de base 60 s
-    retry_kwargs={"max_retries": 5},   # 5 tentatives max
+    name="send_subscription_confirmation_email",
+    autoretry_for=(Exception,),      # retry auto si erreur temporaire SMTP
+    retry_backoff=60,                # attente exponentielle de base 60 s
+    retry_kwargs={"max_retries": 5}, # max 5 tentatives
 )
-def send_subscription_confirmation_email(user_id, plan_name, end_date_iso, amount_total, currency):
+#@shared_task(bind=True, name="send_subscription_confirmation_email")
+def send_subscription_confirmation_email(self, user_id, plan_name, end_date_iso, amount_total, currency):
     """
     Send a confirmation e-mail to the user when a new subscription has
     been successfully created.
@@ -50,7 +52,6 @@ def send_subscription_confirmation_email(user_id, plan_name, end_date_iso, amoun
         recipient_list=[user.email],
         html_message=html_message,
     )
-
 
 @shared_task
 def add(x, y):
