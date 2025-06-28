@@ -12,6 +12,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 import logging
 from datetime import timedelta
+from tasks.tasks import send_subscription_confirmation_email
 
 
 
@@ -195,7 +196,7 @@ def stripe_webhook(request):
             try:
                 plan = SubscriptionPlan.objects.get(id=int(plan_id))
 
-                Subscription.objects.create(
+                subscription = Subscription.objects.create(
                     user=user,
                     plan=plan,
                     end_date=timezone.now() + timedelta(days=plan.duration_days),
@@ -206,6 +207,15 @@ def stripe_webhook(request):
                 )
                 profile = Profile.objects.get(user=user)
                 profile.available_credits += plan.monthly_credits
+                profile.save()
+
+                send_subscription_confirmation_email.delay(
+                    user.id,
+                    plan.name,
+                    subscription.end_date.isoformat(),
+                    str(subscription.amount_total),
+                    subscription.currency,
+                )
 
             except SubscriptionPlan.DoesNotExist:
                 logger.error("Stripe webhook ‑ plan %s inexistant", plan_id)

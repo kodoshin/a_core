@@ -1,0 +1,12 @@
+Hello {{ user.first_name|default:user.username }},
+
+Thank you for your purchase on KodoShin.
+
+Your new plan: {{ plan_name }}
+Amount paid: {{ amount_total }} {{ currency|upper }}
+Valid until: {{ end_date|date:"d F Y" }}
+
+You can now enjoy all the features associated with your subscription by logging in to {{ site_domain }}.
+
+Best regards,
+The KodoShin Team
