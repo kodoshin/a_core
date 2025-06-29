@@ -130,6 +130,7 @@
             <th>Repo</th>
             <th>Techno</th>
             <th>URL</th>
+            <th>Last Update (UTC)</th>
         </tr>
         <tr>
             <td id="project-name">{{ project.name }}</td>
@@ -138,6 +139,7 @@
             <td id="project-repo">{{ project.git_repo_id }}</td>
             <td>{{ project.technology.name }}</td>
             <td><a href="#" onclick="window.open('{{ project.git_repo_url }}', '_blank')"> {{ project.git_repo_url }} </a></td>
+            <td>{{ project.last_update }}</td>
         </tr>
     </table>
     <h5 id="project-id" style="display: none;">{{ project.id }}</h5>

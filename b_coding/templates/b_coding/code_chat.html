@@ -19,6 +19,7 @@
   document.addEventListener("DOMContentLoaded", function(){
       $('#loading-spinner').show();
       $('#loading-text').show().empty().text('Loading...');
+      $('#prompt').prop('readonly', true);
       if(typeof pollUpdates === 'function'){
           pollUpdates();
       }
@@ -546,7 +547,7 @@ $(document).ready(function() {
             // Show loader and clear previous text
             $('#loading-spinner').show();
             $('#loading-text').show().empty();
-            $('#loading-text').show().empty();
+            $('#prompt').prop('readonly', true);
             // Start polling for AI processing updates
             pollUpdates();
             // Send the chat request

@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 import json
 import tiktoken
-
+from django.utils import timezone
 
 
 
@@ -135,6 +135,7 @@ def github_webhook(request):
     if removed:
         File.objects.filter(project=project, path__in=removed).delete()
     project.github_sync = True
+    project.last_update = timezone.now()
     project.save()
     return HttpResponse('OK', status=200)
 
@@ -401,6 +402,7 @@ def view_modified_repo_files(request, git_repo_id, repo_name, project_id):
     existing_project.name = name
     existing_project.git_repo_name = git_repo_name
     existing_project.git_repo_url = git_repo_url
+    existing_project.last_update = timezone.now()
     existing_project.save()  # Sauvegarder les changements
     project = existing_project
 

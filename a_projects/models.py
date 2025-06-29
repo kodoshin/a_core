@@ -42,17 +42,26 @@ class Project(models.Model):
     github_sync = models.BooleanField(default=False)
     tokens_count = models.PositiveIntegerField(default=0)
     is_large = models.BooleanField(default=False)
+    is_x_large = models.BooleanField(default=False)
+    is_xx_large = models.BooleanField(default=False)
+    is_xxx_large = models.BooleanField(default=False)
+    is_blocked = models.BooleanField(default=False)
     git_branch = models.CharField(max_length=100, null=True, blank=True, default='main')
+    last_update = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ("user", "git_repo_id", "git_branch")
     def update_tokens(self):
         total = self.file_set.aggregate(total=Sum('tokens_count'))['total'] or 0
         self.tokens_count = total
-        super().save(update_fields=['tokens_count', 'is_large'])
+        super().save(update_fields=['tokens_count', 'is_large', 'is_x_large'])
 
     def save(self, *args, **kwargs):
         self.is_large = self.tokens_count > 150_000
+        self.is_x_large = self.tokens_count > 300_000
+        self.is_xx_large = self.tokens_count > 500_000
+        self.is_xxx_large = self.tokens_count > 700_000
+        self.is_blocked = self.tokens_count > 900_000
         super().save(*args, **kwargs)
 
     def __str__(self):
