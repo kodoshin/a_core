@@ -2,7 +2,9 @@ from django.shortcuts import render
 from .models import Persona
 from a_projects.models import Project, Status, Technology
 from .ai_tools_radar_chart import create_ai_tools_radar_chart
-
+from b_coding.models import CodingChat
+from b_insights.models import InsightChat
+from git_auth.views import get_github_token
 
 def home(request):
     personas = Persona.objects.all()
@@ -14,6 +16,16 @@ def home(request):
         status = None
 
     if request.user.is_authenticated:
+        onboarding = {
+            "token": bool(get_github_token(request.user)),
+            "project": Project.objects.filter(user=request.user).exists(),
+            "coding": CodingChat.objects.filter(user=request.user).exists(),
+            "insight": InsightChat.objects.filter(user=request.user).exists(),
+        }
+
+        onboarding_track = onboarding["true_count"] = sum(onboarding.values())
+
+
         user_projects = Project.objects.filter(user=request.user, status=status).order_by('-id')
         plan_limit = request.user.profile.current_plan.project_limits
         can_create = user_projects.count() < plan_limit
@@ -23,6 +35,8 @@ def home(request):
             'technologies': technologies,
             'can_create': can_create,
             'plan_limit': plan_limit,
+            'onboarding': onboarding,
+            'onboarding_track': onboarding_track,
         }
     else:
         context = {

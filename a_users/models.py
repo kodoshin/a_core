@@ -80,6 +80,7 @@ class Profile(models.Model):
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     accept_marketing_communication = models.BooleanField(default=False) #S'il accepts de recevoir les nouveautés marketing
     profile_is_filled = models.BooleanField(default=False)
+    onboarding_is_done = models.BooleanField(default=False)
     has_claimed_credits = models.BooleanField(default=False)
     accept_data_usage_policy = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')

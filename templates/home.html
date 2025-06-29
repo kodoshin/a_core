@@ -16,6 +16,24 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const header   = document.getElementById('onboarding-header');
+    const body     = document.getElementById('onboarding-body');
+    const icon     = document.getElementById('onboarding-icon');
+
+    header.addEventListener('click', function(){
+        if (body.style.display === 'none'){
+            body.style.display = 'block';
+            icon.style.transform = 'rotate(180deg)'; // arrow up
+        }else{
+            body.style.display = 'none';
+            icon.style.transform = 'rotate(0deg)';   // arrow down
+        }
+    });
+});
+</script>
+
 <style>
 
         /* Carousel technologies */
@@ -693,6 +711,59 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 {% if user.is_authenticated %}
+<!-- ============  NEW ONBOARDING COLLAPSIBLE  ============ -->
+<div class="w-[60%] mx-auto mt-12">
+  <div id="onboarding-header" class="flex justify-between items-center bg-gray-800 text-white px-6 py-4 rounded-t-lg cursor-pointer">
+      <h2 class="text-xl font-semibold">Get Started – Onboarding ({{ onboarding_track }}/4)</h2>
+      <span id="onboarding-icon" class="text-2xl transition-transform">&#10097;</span>
+  </div>
+
+  <div id="onboarding-body" class="bg-gray-900 text-gray-200 px-8 py-6 rounded-b-lg space-y-4" style="display:none;">
+      <div class="flex justify-between items-center">
+          <p>1. Add your GitHub access token</p>
+          {% if onboarding.token %}
+            <span class="text-green-400 font-bold text-lg">&#10003;</span>
+          {% else %}
+            <span class="text-red-500 font-bold text-lg">&#10007;</span>
+          {% endif %}
+      </div>
+      <div class="flex justify-between items-center">
+          <p>2. Upload a project from GitHub</p>
+          {% if onboarding.project %}
+            <span class="text-green-400 font-bold text-lg">&#10003;</span>
+          {% else %}
+            <span class="text-red-500 font-bold text-lg">&#10007;</span>
+          {% endif %}
+      </div>
+      <div class="flex justify-between items-center">
+          <p>3. Ask a question to Kenshi</p>
+          {% if onboarding.coding %}
+            <span class="text-green-400 font-bold text-lg">&#10003;</span>
+          {% else %}
+            <span class="text-red-500 font-bold text-lg">&#10007;</span>
+          {% endif %}
+      </div>
+      <div class="flex justify-between items-center">
+          <p>4. Ask a question to Hiko</p>
+          {% if onboarding.insight %}
+            <span class="text-green-400 font-bold text-lg">&#10003;</span>
+          {% else %}
+            <span class="text-red-500 font-bold text-lg">&#10007;</span>
+          {% endif %}
+      </div>
+      <div class="flex justify-between items-center">
+          <p>5. Get 100 <img style="max-width: 18px;  display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1749095379/bolt_j4tbpk.svg" alt="magic">Rikos</p>
+          {% if onboarding_track == 4 %}
+            <button style="background-color: slategrey; height: 2em; width: 4em; font-size: 0.8em; padding: 0.2em 0.5em; margin: 5px; line-height: 1.2em;">Claim</button>
+          {% else %}
+            <span class="text-red-500 font-bold text-lg">&#10007;</span>
+          {% endif %}
+      </div>
+  </div>
+</div>
+
+
+
 <div class="max-w-4xl ml-[20%] mt-[10rem]">
 <h1 class="cta-title">Select Assistant</h1>
 </div>
