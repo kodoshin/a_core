@@ -16,6 +16,7 @@ def home(request):
         status = None
 
     if request.user.is_authenticated:
+        profile = request.user.profile
         onboarding = {
             "token": bool(get_github_token(request.user)),
             "project": Project.objects.filter(user=request.user).exists(),
@@ -37,6 +38,7 @@ def home(request):
             'plan_limit': plan_limit,
             'onboarding': onboarding,
             'onboarding_track': onboarding_track,
+            'onboarding_done': profile.onboarding_is_done,
         }
     else:
         context = {

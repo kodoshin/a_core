@@ -13,4 +13,6 @@ urlpatterns = [
     path('user/projects/', user_projects_view, name='user-projects'),
     path('claim-credits/', claim_credits_view, name="claim-credits"),
     path('ajax/load-provinces/', load_regions, name='ajax_load_regions'),
+    path("claim/onboarding/", onboarding_claim_view, name="onboarding_claim",
+    ),
 ]

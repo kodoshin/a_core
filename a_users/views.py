@@ -13,6 +13,7 @@ from .models import CreditClaim, Policy, Region
 from django.http import JsonResponse
 from management.models import SubscriptionBonus
 from b_insights.models import InsightChatCategory
+from django.views.decorators.http import require_POST
 
 
 
@@ -202,3 +203,23 @@ def claim_credits_view(request):
 
         return redirect(request.META.get('HTTP_REFERER', '/'))
     return HttpResponseForbidden()
+
+@require_POST
+@login_required
+def onboarding_claim_view(request):
+    """
+    Give 100 free credits the very first time a user finishes the onboarding.
+    """
+    profile = request.user.profile
+
+    # If the user has never claimed the onboarding bonus:
+    if not profile.onboarding_is_done:
+        profile.available_credits += 100
+        profile.onboarding_is_done = True
+        profile.save(update_fields=["available_credits", "onboarding_is_done"])
+
+        # Traceability
+        CreditClaim.objects.create(profile=profile, credits=100)
+
+    # Go back to the page the user was on
+    return redirect(request.META.get("HTTP_REFERER", "/"))
