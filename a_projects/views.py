@@ -211,7 +211,8 @@ def delete_github_sync(request, project_id):
 
     # Retrieve existing webhooks for the repository
     response = requests.get(api_url, headers=headers)
-    print(response.text)
+    print(response)
+
     if response.status_code != 200:
         messages.error(request, f'Failed to retrieve webhooks: {response.text}')
         return redirect('view_documentation', project_id=project_id)
@@ -224,12 +225,15 @@ def delete_github_sync(request, project_id):
             break
 
     if not hook_id:
+        project.github_sync = False
+        project.save()
         messages.error(request, 'Webhook not found.')
         return redirect('view_documentation', project_id=project_id)
 
     # Delete the identified webhook
     delete_url = f'https://api.github.com/repos/{owner}/{repo}/hooks/{hook_id}'
     delete_response = requests.delete(delete_url, headers=headers)
+
     if delete_response.status_code == 204:
         project.github_sync = False
         project.save()
