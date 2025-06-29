@@ -449,7 +449,7 @@ $(document).ready(function() {
                                 .val(category.id)
                                 .text(category.name + ' (' + category.price + ')');
                             if (disabled) {
-                                option.prop('disabled', true).css('color', '#ccc');
+                                option.prop('disabled', true).css('color', '#444d56');
                             } else {
                                 option.css('color', 'black');
                             }
@@ -927,18 +927,18 @@ button:active {
 
         <br><br>
         <h4>Model</h4>
-        <select id="chatcategory-dropdown" style="background-color: #c6cacb; max-width: 20vh; color: black; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
+        <select id="chatcategory-dropdown" style="background-color: #c6cacb; width: 20vh; color: black; font-size: 0.8em; padding: 0.2em 0.5em; height: 2em; line-height: 1.2em; font-weight: bold;">
             {% for category in chatcategories %}
                 <option
                   value="{{ category.id }}"
                     {% if default_project.is_large and not category.is_large %}
-                      disabled style="color: #555555;"
+                      disabled style="color: #444d56;"
                     {% elif category.id == default_chat_category.id %}
                       selected style="color: black;"
                     {% elif not access_large_models and category.is_large %}
-                      disabled style="color: #ccc;"
+                      disabled style="color: #444d56;"
                     {% elif not access_advanced_models and category.is_advanced %}
-                      disabled style="color: #ccc;"
+                      disabled style="color: #444d56;"
 
                     {% else %}
                        style="color: black;"
