@@ -846,7 +846,11 @@ document.addEventListener('DOMContentLoaded', function(){
                 <span style="font-family: 'Courier New', monospace; font-size: 12px; font-weight: bold; color: #aaaaaa; font-family: bold; vertical-align: top;">
                   beta
                 </span>
-
+                {% endif %}
+                {% if project.is_blocked %}
+                <span style="font-family: 'Courier New', monospace; font-size: 12px; font-weight: bold; color: darkred; font-family: bold; vertical-align: top;">
+                  maximum size
+                </span>
                 {% endif %}
               </p>
 

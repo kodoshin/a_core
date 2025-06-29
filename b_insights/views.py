@@ -43,7 +43,7 @@ async def insights_chat_view(request):
     except:
         technology = None
     projects = await sync_to_async(lambda: list(
-        Project.objects.filter(user=user).exclude(technology__name='Other').exclude(status__name='inactive')))()
+        Project.objects.filter(user=user, is_blocked=False).exclude(technology__name='Other').exclude(status__name='inactive')))()
 
     if request.method == 'POST':
 

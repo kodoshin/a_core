@@ -40,7 +40,7 @@ async def code_chat_view(request):
         technology = await sync_to_async(lambda: default_project.technology)()
     except :
         technology = None
-    projects = await sync_to_async(lambda: list(Project.objects.filter(user=user).exclude(technology__name='Other').exclude(status__name='inactive')))()
+    projects = await sync_to_async(lambda: list(Project.objects.filter(user=user, is_blocked=False).exclude(technology__name='Other').exclude(status__name='inactive')))()
 
     if request.method == 'POST':
 
