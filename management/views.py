@@ -68,6 +68,8 @@ def create_checkout_session_plan(request, plan_id):
     amount_multiplier = 100
 
     # ---------- 1. Calcul du crédit éventuel ----------
+    previous_subscription = None
+    credit_amount = 0
     if plan.is_yearly :
         previous_subscription = Subscription.objects.filter(
             user=request.user,
@@ -78,9 +80,19 @@ def create_checkout_session_plan(request, plan_id):
         # Soustraire le montant restant de l'abonnement actuel
         if previous_subscription:
             credit_amount = previous_subscription.remaining_amount()
-    else :
-        previous_subscription = None
-        credit_amount = 0
+
+    elif not plan.is_yearly :
+        previous_subscription = Subscription.objects.filter(
+            user=request.user,
+            active=True,
+            plan__is_yearly=False,
+            end_date__gt=timezone.now()
+        ).order_by('-start_date').first()
+        credit_amount = Decimal('0')
+        # Soustraire le montant restant de l'abonnement actuel
+        if previous_subscription:
+            credit_amount = previous_subscription.remaining_amount()
+
 
     # ---------- 2. Préparation du line_item ----------
     price_id = plan.stripe_plan_id

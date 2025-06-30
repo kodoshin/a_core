@@ -22,7 +22,7 @@ class SubscriptionPlanAdmin(admin.ModelAdmin):
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('user', 'plan', 'start_date', 'end_date', 'active')
+    list_display = ('user', 'plan', 'start_date', 'end_date', 'remaining_amount', 'active')
 
 @admin.register(DiscountCoupon)
 class DiscountCouponAdmin(admin.ModelAdmin):
