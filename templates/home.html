@@ -714,6 +714,68 @@ document.addEventListener('DOMContentLoaded', function(){
 
   {% if not onboarding_done %}
   <!-- ============  NEW ONBOARDING COLLAPSIBLE  ============ -->
+  <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          /* ===========  BUILD & ATTACH ONE MODAL  =========== */
+          const overlay = document.createElement('div');
+          overlay.className =
+            'onboard-overlay hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50';
+          overlay.innerHTML = `
+             <div class="onboard-modal bg-gray-800 text-gray-100 rounded-lg  w-[90%] p-12 relative">
+                <button class="close-btn absolute top-2 right-4 text-xl leading-none hover:text-red-400" style="background-color: unset; color: white">&times;</button>
+                <div class="modal-content space-y-4" style="background-color: #444d56"></div>
+             </div>`;
+          document.body.appendChild(overlay);
+
+          const closeModal = () => {
+            overlay.classList.add('hidden');
+            overlay.querySelector('.modal-content').innerHTML = '';
+          };
+          overlay.querySelector('.close-btn').addEventListener('click', closeModal);
+          overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeModal();
+          });
+
+          /* ===========  STEP → HTML CONTENT  =========== */
+          function htmlForStep(step) {
+            switch (step) {
+              case '1':
+                return `
+                <div>
+                  <video controls>
+                      <source src="https://res.cloudinary.com/ddyepbtzx/video/upload/v1751357877/Github_Token_Tuto_-_Made_with_Clipchamp_a1cwlu.mp4" type="video/mp4">
+                  </video>
+                </div>`;
+              case '2':
+                return `
+                  <h2 class="text-xl font-bold">Step 2 – Import a GitHub project</h2>
+                  <p>Click on <em>&ldquo;+ Create New Project&rdquo; at the bottom of this page</em>, Select your repo,
+                     select the branch and submit. Your repo will be analyzed in the backend.</p>`;
+              case '3':
+                return `
+                  <h2 class="text-xl font-bold">Step 3 – Ask Kenshi</h2>
+                  <p>Click on <strong>Kenshi</strong> and ask your first question
+                     about yout code. Example : <em>&ldquo;How can I optimize the security of my app?&rdquo;</em></p>`;
+              case '4':
+                return `
+                  <h2 class="text-xl font-bold">Step 4 – Ask Hiko</h2>
+                  <p>Open <strong>Hiko</strong> to get a global insight
+                     or a specific advanced insight. Example : <em>&ldquo;How does my app work?&rdquo;</em></p>`;
+              default:
+                return '';
+            }
+          }
+
+          /* ===========  CLICK HANDLERS  =========== */
+          document.querySelectorAll('.onboarding-step').forEach((row) => {
+            row.addEventListener('click', () => {
+              const step = row.dataset.step;
+              overlay.querySelector('.modal-content').innerHTML = htmlForStep(step);
+              overlay.classList.remove('hidden');
+            });
+          });
+        });
+  </script>
   <div class="w-[60%] mx-auto mt-12">
     <div id="onboarding-header" class="flex justify-between items-center bg-gray-800 text-white px-6 py-4 rounded-t-lg cursor-pointer">
         <h2 class="text-xl font-semibold">Get Started – Onboarding ({{ onboarding_track }}/4)</h2>
@@ -721,7 +783,7 @@ document.addEventListener('DOMContentLoaded', function(){
     </div>
 
     <div id="onboarding-body" class="bg-gray-900 text-gray-200 px-8 py-6 rounded-b-lg space-y-4" style="display:none;">
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center onboarding-step hover:bg-gray-800 cursor-pointer" data-step="1">
             <p>1. Add your GitHub access token</p>
             {% if onboarding.token %}
               <span class="text-green-400 font-bold text-lg">&#10003;</span>
@@ -729,7 +791,8 @@ document.addEventListener('DOMContentLoaded', function(){
               <span class="text-red-500 font-bold text-lg">&#10007;</span>
             {% endif %}
         </div>
-        <div class="flex justify-between items-center">
+
+        <div class="flex justify-between items-center onboarding-step hover:bg-gray-800 cursor-pointer" data-step="2">
             <p>2. Upload a project from GitHub</p>
             {% if onboarding.project %}
               <span class="text-green-400 font-bold text-lg">&#10003;</span>
@@ -737,7 +800,8 @@ document.addEventListener('DOMContentLoaded', function(){
               <span class="text-red-500 font-bold text-lg">&#10007;</span>
             {% endif %}
         </div>
-        <div class="flex justify-between items-center">
+
+        <div class="flex justify-between items-center onboarding-step hover:bg-gray-800 cursor-pointer" data-step="3">
             <p>3. Ask a question to Kenshi</p>
             {% if onboarding.coding %}
               <span class="text-green-400 font-bold text-lg">&#10003;</span>
@@ -745,7 +809,8 @@ document.addEventListener('DOMContentLoaded', function(){
               <span class="text-red-500 font-bold text-lg">&#10007;</span>
             {% endif %}
         </div>
-        <div class="flex justify-between items-center">
+
+        <div class="flex justify-between items-center onboarding-step hover:bg-gray-800 cursor-pointer" data-step="4">
             <p>4. Ask a question to Hiko</p>
             {% if onboarding.insight %}
               <span class="text-green-400 font-bold text-lg">&#10003;</span>
