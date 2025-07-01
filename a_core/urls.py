@@ -20,6 +20,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 from a_users.views import profile_view
 from a_home.views import home, learn_more_about_ai_models
+from django.views.generic import TemplateView
 from a_projects.views import github_webhook
 
 def trigger_error(request):
@@ -39,6 +40,10 @@ urlpatterns = [
     path('ai/', include('b_insights.urls')),
     path('@<username>/', profile_view, name="profile"),
     path('pricing/', include('management.urls')),
+    #FOOTER PAGES
+    path('privacy-policy/', TemplateView.as_view(template_name='footerpages/privacy_policy.html'), name='privacy_policy'),
+    path('terms-of-service/', TemplateView.as_view(template_name='footerpages/terms_of_service.html'), name='terms_of_service'),
+    path('legal-center/', TemplateView.as_view(template_name='footerpages/legal_center.html'), name='legal_center'),
 ]
 
 # Only used when DEBUG=True, whitenoise can serve files when DEBUG=False

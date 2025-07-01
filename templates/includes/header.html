@@ -1,3 +1,45 @@
+<style>
+.github-login-button {
+    display: inline-flex;
+    align-items: center;
+    background-color: #24292e;
+    color: #ffffff;
+    padding: 10px 20px;
+    text-decoration: none !important;
+    border-radius: 5px;
+}
+
+.github-login-button:hover {
+    background-color: #444d56;
+    color: #ffffff;
+}
+
+.github-login-button {
+    display: inline-flex;
+    align-items: center;
+    background-color: #24292e;
+    color: #ffffff !important;;
+    padding: 10px 20px;
+    text-decoration: none !important;
+    border-radius: 5px;
+}
+
+
+.github-login-button:hover,
+.github-login-button:focus {
+    background-color: #444d56;
+    color: #ffffff;
+    text-decoration: none !important;
+}
+
+.github-logo {
+    width: 25px;
+    height: 25px;
+    margin-right: 5px;
+    text-decoration: none !important;
+}
+</style>
+
 <header class="flex items-center justify-between bg-[#1f1e23] h-20 px-8 text-white sticky top-0 z-40">
     <div>
         <a class="flex items-center gap-2" href="/">
@@ -62,9 +104,16 @@
             </li>
             
             {% else %}
+            <!--
             <button style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; background-color: #3B82F6; border-radius: 10px;">
                 <a href="{% url 'account_login' %}" style="color: white; text-align: left;">Login with Github</a>
             </button>
+            -->
+            <a href="/accounts/github/login/" class="github-login-button">
+                <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1750585179/github-white-logo_wxdy1b.png" alt="GitHub Logo" class="github-logo">
+                Sign in with GitHub
+            </a>
+
             {% endif %}
         </ul>
     </nav>

@@ -8,16 +8,25 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}{% trans "Sign In Via GitHub" %}{% endblock %}</title>
+    <title>{% block title %}{% trans "Sign In Securely with GitHub" %}{% endblock %}</title>
 </head>
 <body>
-<h1>{% trans "Sign In Via GitHub" %}</h1>
+<h1>{% trans "Sign In Securely with GitHub" %}</h1>
 
-<p>
     {% block description %}
-        {% trans "You are about to sign in using a third-party account from GitHub." %}
+        <p class="description text-left">
+          <br>
+            <strong>No code is ever modified, accessed or shared unless you allow it from your Github settings</strong> — your data stays safe, and you stay 100% in control.<br>
+          Kodoshin uses your GitHub account to personalize your experience and analyze your code with full context.
+        </p>
+
+        <ul style="max-width: 600px; margin: 2rem auto; color: #9CA3AF; font-size: 1rem;">
+          <li>✔️ We only access the repositories you select</li>
+          <li>✔️ You can revoke access anytime</li>
+          <li>✔️ No password required — GitHub handles authentication</li>
+          <li> 🔒 Want to know more? See our <a href="{% url 'terms_of_service' %}" class="text-blue-400 underline">Terms of Service</a>, <a href="{% url 'privacy_policy' %}" class="text-blue-400 underline">Privacy Policy</a> and <a href="{% url 'legal_center' %}" class="text-blue-400 underline">Legal Center</a> for complete transparency.</li>
+        </ul>
     {% endblock %}
-</p>
 
 
 <form method="POST">

@@ -1,0 +1,15 @@
+{% extends 'layouts/blank.html' %}
+
+{% block content %}
+<!-- Privacy Policy content goes here -->
+<div class="container text-white px-10 py-16" style="background-color:#1f1e23;">
+  <h1 class="text-4xl font-bold mb-6">Legal Center</h1>
+  <p class="mb-4">Welcome to the Legal Center. Here you can find key legal documents and policies governing your use of Kodoshin.</p>
+
+  <ul class="list-disc ml-6 space-y-4 mt-6">
+    <li><a href="{% url 'privacy_policy' %}" class="text-blue-400 underline">Privacy Policy</a> — Learn how we handle your data.</li>
+    <li><a href="{% url 'terms_of_service' %}" class="text-blue-400 underline">Terms of Service</a> — Understand your rights and responsibilities.</li>
+    <li><a href="mailto:legal@kodoshin.com" class="text-blue-400 underline">Contact Legal</a> — For questions about compliance or usage rights.</li>
+  </ul>
+</div>
+{% endblock %}
