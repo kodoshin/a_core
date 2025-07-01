@@ -25,10 +25,10 @@ document.addEventListener('DOMContentLoaded', function(){
     header.addEventListener('click', function(){
         if (body.style.display === 'none'){
             body.style.display = 'block';
-            icon.style.transform = 'rotate(180deg)'; // arrow up
+            icon.style.transform = 'rotate(270deg)'; // arrow up
         }else{
             body.style.display = 'none';
-            icon.style.transform = 'rotate(0deg)';   // arrow down
+            icon.style.transform = 'rotate(90deg)';   // arrow down
         }
     });
 });
@@ -816,12 +816,12 @@ document.addEventListener('DOMContentLoaded', function(){
   <div class="w-[60%] mx-auto mt-12">
     <div id="onboarding-header" class="flex justify-between items-center bg-gray-800 text-white px-6 py-4 rounded-t-lg cursor-pointer">
         <h2 class="text-xl font-semibold">Get Started – Onboarding ({{ onboarding_track }}/4)</h2>
-        <span id="onboarding-icon" class="text-2xl transition-transform">&#10097;</span>
+        <span id="onboarding-icon" class="text-2xl rotate-90 transition-transform">&#10097;</span>
     </div>
 
     <div id="onboarding-body" class="bg-gray-900 text-gray-200 px-8 py-6 rounded-b-lg space-y-4" style="display:none;">
         <div class="flex justify-between items-center onboarding-step hover:bg-gray-800 cursor-pointer" data-step="1">
-            <p>1. Add your GitHub access token</p>
+            <p>1. Link a fine-grained GitHub access token with only the permissions you allow</p>
             {% if onboarding.token %}
               <span class="text-green-400 font-bold text-lg">&#10003;</span>
             {% else %}
