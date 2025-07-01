@@ -14,7 +14,7 @@ def send_welcome_email(sender, instance, created, **kwargs):
     print('New Subscription')
     if created and instance.email:
         print('Sending Email')
-        subject = "Bienvenue sur Kodoshin"
+        subject = "Welcome to Kodoshin"
         message = (
             f"Welcome {instance.username},\n\n"
             "Welcome to Kodoshin !\n"
