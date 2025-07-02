@@ -601,6 +601,36 @@ $(document).ready(function() {
 
 </script>
 
+<script>
+$(document).on('click', '.delete-group-btn', function(){
+    if(!confirm('Are you sure about deleting this answer ?')) return;
+    var promptId = $(this).data('prompt-id');
+    var chatId = "{{ current_chat.public_id }}";
+    var attemptNo = "{{ selected_attempt }}";
+    $.ajax({
+        url: "{% url 'insights_delete_group_messages' %}",
+        type: "POST",
+        data: {
+            chat_id: chatId,
+            attempt_no: attemptNo,
+            prompt_id: promptId,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function(response){
+            if(response.status === 'success'){
+                window.location.reload();
+            } else {
+                alert('Erreur : ' + response.message);
+            }
+        },
+        error: function(){
+            alert('An error has occured.');
+        }
+    });
+});
+</script>
+
+
 <style>
 
 /*body*/
@@ -1052,6 +1082,10 @@ button:active {
             {% if message.type == 'prompt' and message.attempt_number == selected_attempt%}
                 <div class="message-user">
                     <br>
+                    {% if not message.order == 1 %}
+                    <br>
+                    <span class="delete-group-btn glyphicon" data-prompt-id="{{ message.id }}" style="cursor:pointer; color:white; margin-left:0px; float: right;">&#xe020;</span>
+                    {% endif %}
                     <p style="font-weight: bold;"><img style="width:2.2em;height:2.2em;display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748726826/6594712_ljqxyj.webp"/> {{ message.content|linebreaksbr }}</p>
                 </div>
             {% elif message.type == 'gpt-a' and message.attempt_number == selected_attempt %}

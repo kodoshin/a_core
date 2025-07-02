@@ -254,6 +254,8 @@ async def insights_chat_view(request):
             messages = []
             for msg in raw_messages:
                 msg_dict = {
+                    'id': msg.id,
+                    'order': msg.order,
                     'type': msg.type,
                     'attempt_number': msg.attempt_number,
                 }
@@ -437,4 +439,33 @@ async def insights_chat_category_comparison_view(request):
         {'chatcategories': chatcategories}
     )
 
+@require_POST
+@login_required
+def insights_delete_group_messages(request):
+    chat_id = request.POST.get('chat_id')
+    attempt_no = request.POST.get('attempt_no')
+    prompt_id = request.POST.get('prompt_id')
+    try:
+        attempt_no = int(attempt_no)
+        prompt_msg_id = int(prompt_id)
+    except (TypeError, ValueError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid Parameters'})
+
+    try:
+        chat = InsightChat.objects.get(public_id=chat_id, user=request.user)
+    except InsightChat.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Chat not found'})
+
+    # Fetch all messages for this attempt ordered by ID
+    msgs = list(InsightChatMessage.objects.filter(chat=chat, attempt_number=attempt_no).order_by('id'))
+    # Find the next user-prompt message after the selected one
+    next_prompt = next((m for m in msgs if m.type == 'prompt' and m.id > prompt_msg_id), None)
+
+    # Delete from the selected prompt up to before the next prompt (or until end)
+    qs = InsightChatMessage.objects.filter(chat=chat, attempt_number=attempt_no, id__gte=prompt_msg_id)
+    if next_prompt:
+        qs = qs.filter(id__lt=next_prompt.id)
+
+    deleted_count, _ = qs.delete()
+    return JsonResponse({'status': 'success', 'deleted_count': deleted_count})
 
