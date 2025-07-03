@@ -147,12 +147,7 @@ document.addEventListener('DOMContentLoaded', function(){
   height: auto;
 }
 
-/* Pour les écrans moyens et supérieurs */
-@media (min-width: 768px) {
-.title {
-    font-size: 3.75rem;
-  }
-}
+
 
 /* Style du paragraphe */
 .description {
@@ -393,6 +388,18 @@ document.addEventListener('DOMContentLoaded', function(){
   font-size: large;
   margin-bottom: 0;
 }
+.home-video {
+    margin: 0 20%;
+}
+.demo-home-img{
+    margin: 0 15%
+}
+.models-home-img{
+    margin: 0 10%
+}
+.tech-carousel{
+    width: 80%; margin: 0 auto;
+}
 </style>
 
 
@@ -412,6 +419,7 @@ document.addEventListener('DOMContentLoaded', function(){
       width: 100%;      /* each button fills the line */
     }
     .kenshi-section{
+      margin: 0;
       width: 100%;
     }
     .kenshi-avatar{
@@ -433,6 +441,7 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     .hiko-section{
+      margin: 0;
       width: 100%;
     }
     .hiko-avatar{
@@ -447,6 +456,21 @@ document.addEventListener('DOMContentLoaded', function(){
     .hiko-bubble-main{
       font-size: small;
       margin-bottom: 0;
+    }
+    .title{
+        font-size: 2em;
+    }
+    .home-video{
+        margin: 0 5%;
+    }
+    .demo-home-img{
+        margin: 0 0%;
+    }
+    .models-home-img{
+        margin: 0 5%;
+    }
+    .tech-carousel{
+        width: 100%; margin: 0 auto;
     }
   }
 </style>
@@ -497,14 +521,14 @@ document.addEventListener('DOMContentLoaded', function(){
 
 <br><br>
 
-<div style="margin: 0 20%">
+<div class="home-video">
   <video controls>
       <source src="https://res.cloudinary.com/ddyepbtzx/video/upload/v1751250279/YT_Ad_-_new_music_cjfbkv.mp4" type="video/mp4">
   </video>
 </div>
 <br> <br>
 
-<section class="kenshi-section" style="">
+<section class="kenshi-section" >
   <div class="kenshi-avatar">
     <img class="ai-avatar-img" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1748726600/Kenshi_a7zk40.png" alt="Kenshi Avatar" >
   </div>
@@ -523,11 +547,11 @@ document.addEventListener('DOMContentLoaded', function(){
     </p>
   </div>
 </section>
-<div style="margin: 0 20%">
+<div class="demo-home-img" >
   <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1751410156/Kenshi_ff9ck4.png">
 </div>
 
-<section class="hiko-section" style="">
+<section class="hiko-section">
   <div class="hiko-bubble">
     <p class="hiko-bubble-main">Hello Devs — I’m Hiko, your intelligent code whisperer.
     </p>
@@ -547,7 +571,7 @@ document.addEventListener('DOMContentLoaded', function(){
   </div>
 </section>
 
-<div style="margin: 0 20%">
+<div class="demo-home-img">
   <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1751410156/Hiko_-_Copy_ylk9df.png">
 </div>
 <br> <br>
@@ -556,16 +580,16 @@ document.addEventListener('DOMContentLoaded', function(){
 <div class="text-center mb-20">
   <h2 class="title">Multiple AI Thinking Models</h2>
   <br> <br>
-  <div style="margin: 0 10%">
+  <div class="models-home-img">
       <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1751410537/AI_Coding_Models_Comparison_bg76e7.png">
   </div>
 </div>
 
 
 <div class="text-center mb-20">
-    <section class="tech-carousel" style="width: 80%; margin: 0 auto;">
+    <section class="tech-carousel">
       <h2 class="title">Native Tech Stack</h2>
-      <br> <br>
+      <br>
       <div class="carousel-wrapper">
         <button class="carousel-arrow left">&larr;</button>
         <div class="tech-list">
@@ -580,7 +604,6 @@ document.addEventListener('DOMContentLoaded', function(){
     </section>
 </div>
 
-<br>
 <div class="text-center mb-20">
     <h1 class="title">
       Top Standards of Security & Data Privacy
@@ -601,10 +624,9 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 
-<br>
 <div class="text-center mb-20">
   <h1 class="title">
-      3C Seamless Workflow
+      Seamless Workflow
   </h1>
 </div>
 <div class="workflow-schema" style="display: flex; justify-content: center;">
@@ -612,7 +634,7 @@ document.addEventListener('DOMContentLoaded', function(){
 </div>
 
 
-<br><br>
+<br>
 
 
 <div class="text-center mb-20">
