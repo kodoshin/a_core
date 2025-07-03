@@ -407,7 +407,7 @@ async def get_processing_updates(request):
 
 @require_POST
 @login_required
-def toggle_chat_importance(request):
+def toggle_chat_importance_insights(request):
     chat_id = request.POST.get('chat_id')
     try:
         chat = InsightChat.objects.get(public_id=chat_id, user=request.user)

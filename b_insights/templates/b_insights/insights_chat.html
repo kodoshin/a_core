@@ -114,7 +114,7 @@ $(document).ready(function(){
         var $star = $(this);
         var chatId = $star.data('chat-id');
         $.ajax({
-            url: '{% url "toggle_chat_importance" %}',
+            url: '{% url "toggle_chat_importance_insights" %}',
             type: 'POST',
             data: {
                 'chat_id': chatId,
