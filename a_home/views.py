@@ -5,6 +5,7 @@ from .ai_tools_radar_chart import create_ai_tools_radar_chart
 from b_coding.models import CodingChat
 from b_insights.models import InsightChat
 from git_auth.views import get_github_token
+from newsletter.forms import NewsletterSubscriptionForm
 
 def home(request):
     personas = Persona.objects.all()
@@ -41,10 +42,12 @@ def home(request):
             'onboarding_done': profile.onboarding_is_done,
         }
     else:
+        form = NewsletterSubscriptionForm()
         context = {
             'personas': personas,
             'radar_chart': radar_chart,
-            'technologies': technologies
+            'technologies': technologies,
+            'newsletter_form': form,
         }
 
 

@@ -475,6 +475,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 {% if not user.is_authenticated %}
+{% include 'newsletter/modal.html' with form=newsletter_form %}
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <br><br><br><br>
 <div class="text-center mb-20">
@@ -484,8 +485,8 @@ document.addEventListener('DOMContentLoaded', function(){
   <p class="description">
     Code smarter, not harder! Let AI handle the heavy lifting! Our smart assistants understand your code, provide solutions, and offer context-aware suggestions to boost your efficiency.
   </p>
-  <button class="cta-button" onclick="window.location.href='/accounts/github/login/'">
-    Start For Free
+  <button class="cta-button" onclick="window.location.href='/pricing/'">
+    See Pricing Plans
   </button>
 </div>
 

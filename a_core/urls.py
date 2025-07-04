@@ -28,6 +28,7 @@ def trigger_error(request):
 
 urlpatterns = [
     path('', home, name='home'),
+    path('', include('newsletter.urls')),
     path('sentry-debug/', trigger_error),
     path('learn-more-about-ai-models/', learn_more_about_ai_models, name='learn_more_about_ai_models'),
     path('admin/', admin.site.urls),

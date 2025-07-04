@@ -1,0 +1,23 @@
+<div id="newsletter-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+  <div class="relative bg-black rounded-lg p-6 w-full max-w-md">
+    <button id="newsletter-close" class="absolute top-2 right-2 text-white hover:text-gray-700">&times;</button>
+    <h2 class="text-xl font-semibold mb-4">Subscribe to our Newsletter</h2>
+    <h3 style="font-size: medium">Get promo codes and exclusive coupons & promos</h3>
+    <form method="post" action="{% url 'subscribe_newsletter' %}">
+      {% csrf_token %}
+      {{ form.email }}
+      <button id="newsletter-submit" type="submit" class="mt-4 cta-button w-full">Subscribe</button>
+    </form>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(localStorage.getItem('newsletterClosed') !== 'true') {
+    document.getElementById('newsletter-modal').classList.remove('hidden');
+  }
+  document.getElementById('newsletter-close').addEventListener('click', function(){
+    document.getElementById('newsletter-modal').classList.add('hidden');
+    localStorage.setItem('newsletterClosed', 'true');
+  });
+});
+</script>

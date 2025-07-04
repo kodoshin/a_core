@@ -104,6 +104,7 @@ INSTALLED_APPS = [
     'tasks',
     'cloudinary',
     'cloudinary_storage',
+    'newsletter',
 ]
 
 
