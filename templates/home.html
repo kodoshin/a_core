@@ -400,6 +400,45 @@ document.addEventListener('DOMContentLoaded', function(){
 }
 </style>
 
+<style>
+/* Testimonials Section */
+.testimonials-section {
+  background-color: #1f1e23;
+  Width: 90%;
+  padding-left: 10%;
+  margin: 4rem 0;
+  border-radius: 10px;
+}
+.testimonials-section .title {
+  color: #fff;
+  margin-bottom: 2rem;
+}
+.testimonials-grid {
+  display: grid;
+  gap: 2rem;
+}
+@media (min-width: 768px) {
+  .testimonials-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.testimonial-card {
+  background-color: #2a2a2a;
+  color: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.testimonial-card p {
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+.testimonial-card .author {
+  font-weight: bold;
+  color: #3B82F6;
+}
+</style>
 
 
 <style>
@@ -485,8 +524,8 @@ document.addEventListener('DOMContentLoaded', function(){
   <p class="description">
     Code smarter, not harder! Let AI handle the heavy lifting! Our smart assistants understand your code, provide solutions, and offer context-aware suggestions to boost your efficiency.
   </p>
-  <button class="cta-button" onclick="window.location.href='/pricing/'">
-    See Pricing Plans
+  <button class="cta-button" onclick="window.location.href='/accounts/github/login/'">
+    Start for free
   </button>
 </div>
 
@@ -518,8 +557,8 @@ document.addEventListener('DOMContentLoaded', function(){
   </div>
 </div>
 
-<br><br>
 
+<br><br>
 <div class="home-video">
   <video controls>
       <source src="https://res.cloudinary.com/ddyepbtzx/video/upload/v1751250279/YT_Ad_-_new_music_cjfbkv.mp4" type="video/mp4">
@@ -662,7 +701,7 @@ document.addEventListener('DOMContentLoaded', function(){
 -->
 </div>
 
-<br> <br>
+
 
 <!--
 <div class="text-center mb-20">
@@ -740,6 +779,28 @@ document.addEventListener('DOMContentLoaded', function(){
 <br><br><br>
 -->
 
+<div class="text-center mb-20 testimonials-section">
+    <h2 class="title">What Our Users Say</h2>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <p>"We tested Copilot, Cursor, ChatGPT and Claude. Kodoshin’s results were far more aligned with our repo. We saved hours of debugging and prompt building and got production-ready code in minutes."</p>
+        <div class="author">— Abdou B. - AI Startup Co-founder</div>
+      </div>
+      <div class="testimonial-card">
+        <p>"Kodoshin instantly understood my project’s structure and gave precise code solutions that blew my mind. No tool has ever been this context-aware. Kenshi is my new coding partner."</p>
+        <div class="author">— Alex C. - Full-Stack Developer/Freelancer</div>
+      </div>
+      <div class="testimonial-card">
+        <p>"Even with my custom modules and legacy code, Kenshi nailed the logic. The integration with GitHub is smooth, secure, and gave me full control."</p>
+        <div class="author">— Julien B. - Backend Engineer</div>
+      </div>
+      <div class="testimonial-card">
+        <p>"As a student, I struggled with large projects. Kodoshin didn’t just give code—it explained why, how, and where it fits in my repo. I’ve learned more in 2 weeks than in a semester."</p>
+        <div class="author">— Jordan R. - Software Engineering Student</div>
+      </div>
+    </div>
+</div>
+<br> <br>
 <div class="cta-container">
   <h2 class="cta-title">
     Ready to revolutionize the way you code ?
