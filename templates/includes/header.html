@@ -91,7 +91,7 @@ function openAuthPopup(event) {
 
             {% if not request.user.is_authenticated %}
             <div class="github-signup">
-                <a href="{% provider_login_url 'github' process='login' %}&popup=1&next=%2F%3Fpopup%3D1"
+                <a href="{% provider_login_url 'github' process='login' next='/accounts/popup/close/' %}&popup=1"
                    class="github-login-button"
                    onclick="openAuthPopup(event)">
                     <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1750585179/github-white-logo_wxdy1b.png"

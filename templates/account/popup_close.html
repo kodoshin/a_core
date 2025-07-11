@@ -1,0 +1,17 @@
+<head>
+    <title>Authenticating…</title>
+</head>
+<body style="background:#1f1e23;color:white">
+<script>
+    /* Refresh the main window then close this popup */
+    if (window.opener && !window.opener.closed) {
+        console.log('IF CONDITION')
+        window.opener.location.reload();
+        window.close();
+    } else {
+        /* fallback – just redirect */
+        console.log('ELSE CONDITION')
+        window.location.href = '/';
+    }
+</script>
+</body>

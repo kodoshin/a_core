@@ -29,7 +29,7 @@ sentry_sdk.init(
 DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 2048 * 2048  # en octets
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
-SOCIALACCOUNT_ADAPTER = "a_core.adapters.SocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = 'a_core.adapters.SocialAccountAdapter'
 
 
 django.utils.encoding.force_text = force_str
@@ -122,6 +122,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'a_core.middleware.PopupFlagMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',

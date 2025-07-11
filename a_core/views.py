@@ -1,11 +1,10 @@
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-
+from django.contrib.auth.decorators import login_required
 
 @login_required
 def popup_close(request):
     """
-    Final step of the popup authentication flow.
-    Displays a tiny HTML page that closes the popup and refreshes the opener.
+    Display a page that closes the authentication popup
+    and refreshes its opener.
     """
-    return render(request, "popup_close.html")
+    return render(request, "account/popup_close.html")

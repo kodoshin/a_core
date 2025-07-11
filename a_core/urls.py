@@ -35,7 +35,7 @@ urlpatterns = [
     path('learn-more-about-ai-models/', learn_more_about_ai_models, name='learn_more_about_ai_models'),
     path('admin/', admin.site.urls),
     path('git/', include('git_auth.urls')),
-    path('accounts/', include('allauth.urls')),
+
     path('profile/', include('a_users.urls')),
     path('projects/', include('a_projects.urls')),
     path('ai/', include('b_coding.urls')),
@@ -43,7 +43,8 @@ urlpatterns = [
     path('ai/', include('b_insights.urls')),
     path('@<username>/', profile_view, name="profile"),
     path('pricing/', include('management.urls')),
-    path("popup-close/", views.popup_close, name="popup-close"),
+    path('accounts/', include('allauth.urls')),
+    path('accounts/popup/close/', views.popup_close, name='popup-close'),
     #FOOTER PAGES
     path('privacy-policy/', TemplateView.as_view(template_name='footerpages/privacy_policy.html'), name='privacy_policy'),
     path('terms-of-service/', TemplateView.as_view(template_name='footerpages/terms_of_service.html'), name='terms_of_service'),
