@@ -3,15 +3,28 @@
 </head>
 <body style="background:#1f1e23;color:white">
 <script>
-    /* Refresh the main window then close this popup */
+/* -------------------------------------------------------------
+   Le popup vient de se charger.
+   S’il possède un opener, on lui envoie le message ‘social-auth-success’
+   ------------------------------------------------------------- */
+(function () {
+    const HOME_URL = '/';                      // redirection de la fenêtre principale
+    const MESSAGE  = 'social-auth-success';    // identifiant du message
+
     if (window.opener && !window.opener.closed) {
-        console.log('IF CONDITION')
-        window.opener.location.reload();
+        /* 1. On notifie l’opener */
+        try {
+            window.opener.postMessage(MESSAGE, window.location.origin);
+        } catch (e) {
+            /* Cross-origin fallback : on tente quand même le reload direct */
+            window.opener.location.assign(HOME_URL);
+        }
+        /* 2. On ferme ce popup */
         window.close();
     } else {
-        /* fallback – just redirect */
-        console.log('ELSE CONDITION')
-        window.location.href = '/';
+        /* 3. Aucune fenêtre parent : on reste dans ce tab et on redirige vers home */
+        window.location.assign(HOME_URL);
     }
+})();
 </script>
 </body>

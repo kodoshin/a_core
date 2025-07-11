@@ -1,22 +1,44 @@
 {% load static socialaccount %}
 
+
 <script>
+/* Ouverture du popup GitHub */
 function openAuthPopup(event) {
     event.preventDefault();
-    var url = event.currentTarget.href;
-    var width = 600, height = 700;
-    var left = (screen.width - width) / 2;
-    var top = (screen.height - height) / 2;
+    var url    = event.currentTarget.href;
+    var width  = 600,
+        height = 700;
+    var left   = (screen.width  - width)  / 2;
+    var top    = (screen.height - height) / 2;
+
     window.open(
-      url,
-      'GitHubLogin',
-      'width=' + width +
-      ',height=' + height +
-      ',top=' + top +
-      ',left=' + left
+        url,
+        'GitHubLogin',
+        'width=' + width +
+        ',height=' + height +
+        ',top=' + top +
+        ',left=' + left
     );
 }
+
+/* Listener de retour : recharge la fenêtre principale lorsque
+   le popup envoie le message « social-auth-success ». */
+(function () {
+    const EXPECTED_MESSAGE = 'social-auth-success';
+    const HOME_URL         = '/';
+
+    window.addEventListener('message', function (event) {
+        console.log('listening...')
+        /* Vérifie la provenance */
+        if (event.origin !== window.location.origin) return;
+        /* Vérifie le contenu */
+        if (event.data === EXPECTED_MESSAGE) {
+            window.location.assign(HOME_URL);
+        }
+    }, false);
+})();
 </script>
+
 
 <style>
 .github-login-button {
