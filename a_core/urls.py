@@ -22,6 +22,8 @@ from a_users.views import profile_view
 from a_home.views import home, learn_more_about_ai_models
 from django.views.generic import TemplateView
 from a_projects.views import github_webhook
+from . import views
+
 
 def trigger_error(request):
     division_by_zero = 1 / 0
@@ -41,6 +43,7 @@ urlpatterns = [
     path('ai/', include('b_insights.urls')),
     path('@<username>/', profile_view, name="profile"),
     path('pricing/', include('management.urls')),
+    path("popup-close/", views.popup_close, name="popup-close"),
     #FOOTER PAGES
     path('privacy-policy/', TemplateView.as_view(template_name='footerpages/privacy_policy.html'), name='privacy_policy'),
     path('terms-of-service/', TemplateView.as_view(template_name='footerpages/terms_of_service.html'), name='terms_of_service'),

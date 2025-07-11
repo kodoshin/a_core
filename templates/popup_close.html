@@ -1,0 +1,35 @@
+<head>
+    <title>Authentication Complete</title>
+    <script>
+        (function () {
+            if (window.opener && !window.opener.closed) {
+                try {
+                    window.opener.location.reload();
+                } catch (e) {
+                    /* Cross-origin or other issues – simple fallback */
+                    window.opener.location.href = "/";
+                }
+                window.close();
+            } else {
+                /* No opener -> behave like a normal redirect */
+                window.location.href = "/";
+            }
+        })();
+    </script>
+    <style>
+        body {
+            background: #1f1e23;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <noscript>
+        Authentication succeeded. Please close this window.
+    </noscript>
+</body>
