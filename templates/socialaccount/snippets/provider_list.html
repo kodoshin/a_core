@@ -47,10 +47,13 @@
 }
 </style>
 <ul>
-    <li>
-        <a href="{% provider_login_url provider.id %}" class="github-login-button">
-            <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1750585179/github-white-logo_wxdy1b.png" alt="GitHub Logo" class="github-logo">
-            Sign in with GitHub
-        </a>
-    </li>
+  <li>
+    <a href="{% provider_login_url provider.id process='login' %}"
+       class="github-login-button">
+      <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1750585179/github-white-logo_wxdy1b.png"
+           alt="GitHub Logo"
+           class="github-logo">
+      Sign in with GitHub
+    </a>
+  </li>
 </ul>

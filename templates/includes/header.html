@@ -1,3 +1,6 @@
+
+{% load static socialaccount %}
+
 <script>
 function openAuthPopup(event) {
     event.preventDefault();
@@ -86,6 +89,21 @@ function openAuthPopup(event) {
     </div>
     <nav class="relative h-20">
         <ul class="navitems flex items-center justify-center h-full" style="height: 100%;">
+
+            {% if not request.user.is_authenticated %}
+            <div class="github-signup">
+                <a href="/accounts/github/login/?process=login&popup=1"
+                   class="github-login-button"
+                   onclick="openAuthPopup(event)">
+                    <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1750585179/github-white-logo_wxdy1b.png"
+                         alt="GitHub Logo"
+                         class="github-logo">
+                    Sign in with GitHub
+                </a>
+            </div>
+            {% endif %}
+
+
             {% if request.user.is_authenticated %}
 
 
@@ -142,14 +160,14 @@ function openAuthPopup(event) {
             <button style="height: 2em; width: 12em; font-size: 1em; padding: 0.2em 0.5em; line-height: 1.2em; background-color: #3B82F6; border-radius: 10px;">
                 <a href="{% url 'account_login' %}" style="color: white; text-align: left;">Login with Github</a>
             </button>
-            -->
+
             <div class="github-signup">
                 <a  href="/accounts/github/login/?next=/?popup=1" class="github-login-button" onclick="openAuthPopup(event)">
                     <img src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1750585179/github-white-logo_wxdy1b.png" alt="GitHub Logo" class="github-logo">
                     Sign in with GitHub
                 </a>
             </div>
-
+            -->
             {% endif %}
         </ul>
     </nav>
