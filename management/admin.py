@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import APIKey, SubscriptionPlan, Subscription, DiscountCoupon, AIModel, CreditOffer, SubscriptionBonus
+from .models import APIKey, SubscriptionPlan, Subscription, DiscountCoupon, AIModel, CreditOffer, SubscriptionBonus, SpecialOffer
 
 
 
@@ -31,3 +31,7 @@ class DiscountCouponAdmin(admin.ModelAdmin):
 @admin.register(CreditOffer)
 class CreditOfferAdmin(admin.ModelAdmin):
     list_display = ('name', 'price', 'credits')
+
+@admin.register(SpecialOffer)
+class SpecialOfferAdmin(admin.ModelAdmin):
+    list_display = ('page','banner', 'valid_from', 'valid_until', 'is_valid')

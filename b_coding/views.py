@@ -23,6 +23,9 @@ from django.db.models import Max
 def fix_response_format(response):
     response = response.replace(", ')", ",'')")
     response = response.replace(",')", ",'')")
+    response = response.replace("&gt;", ">")
+    response = response.replace("&lt;", "<")
+    response = response.replace("&amp;", "?")
     return response
 
 async def code_chat_view(request):
@@ -154,7 +157,7 @@ async def code_chat_view(request):
 
                 # Await the AI response
                 ai_response = await response_task
-                ai_response = ai_response.replace("&gt;", ">").replace("&lt;", "<")
+                ai_response = ai_response.replace("&gt;", ">").replace("&lt;", "<").replace("&amp;", "?")
 
                 if title_task:
                     ai_title = await title_task

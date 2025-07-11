@@ -174,3 +174,12 @@ class SubscriptionBonus(models.Model):
     def __str__(self):
         return f"{self.code} ({self.credits} crédits)"
 
+
+class SpecialOffer(models.Model):
+    page = models.CharField(max_length=50, blank=True, null=True)
+    banner = models.CharField(max_length=250, blank=True, null=True)
+    valid_from = models.DateTimeField()
+    valid_until = models.DateTimeField()
+    def is_valid(self):
+        now = timezone.now()
+        return self.valid_from <= now <= self.valid_until

@@ -1,6 +1,15 @@
 {% extends 'layouts/blank.html' %}
 
 {% block content %}
+{% if request.GET.popup %}
+<script>
+  if (window.opener) {
+    window.opener.location.reload();
+    window.close();
+  }
+</script>
+{% endif %}
+
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -514,7 +523,9 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 {% if not user.is_authenticated %}
+<!--
 {% include 'newsletter/modal.html' with form=newsletter_form %}
+-->
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <br><br><br><br>
 <div class="text-center mb-20">
