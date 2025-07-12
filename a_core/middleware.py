@@ -7,5 +7,6 @@ class PopupFlagMiddleware:
 
     def __call__(self, request):
         if request.GET.get('popup') == '1':
+            print('Middleware works')
             request.session['auth_popup'] = True
         return self.get_response(request)

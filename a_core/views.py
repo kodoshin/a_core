@@ -7,4 +7,5 @@ def popup_close(request):
     Display a page that closes the authentication popup
     and refreshes its opener.
     """
+    print('Popup close')
     return render(request, "account/popup_close.html")
