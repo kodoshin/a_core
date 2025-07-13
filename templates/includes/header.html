@@ -148,6 +148,25 @@ function openAuthPopup(event) {
         <ul class="navitems flex items-center justify-center h-full" style="height: 100%;">
 
             {% if not request.user.is_authenticated %}
+
+            <li>
+                <a href="{% url 'pricing_credits' %}" class="github-login-button" style="background-color:transparent;padding:0 1rem;">
+                    Pricing
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'native_technologies' %}" class="github-login-button" style="background-color:transparent;padding:0 1rem;">
+                    Native&nbsp;Technologies
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'use_cases' %}" class="github-login-button" style="background-color:transparent;padding:0 1rem;">
+                    Use&nbsp;cases
+                </a>
+            </li>
+
+
+
             <div class="github-signup">
                 <a href="{% provider_login_url 'github' process='login' next='/accounts/popup/close/' %}&popup=1"
                    class="github-login-button"

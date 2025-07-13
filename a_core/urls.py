@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 from a_users.views import profile_view
-from a_home.views import home, learn_more_about_ai_models
+from a_home.views import home, learn_more_about_ai_models, use_cases, native_technologies
 from django.views.generic import TemplateView
 from a_projects.views import github_webhook
 from . import views
@@ -30,6 +30,8 @@ def trigger_error(request):
 
 urlpatterns = [
     path('', home, name='home'),
+    path("native-technologies/", native_technologies, name="native_technologies"),
+    path("use-cases/", use_cases, name="use_cases"),
     path('', include('newsletter.urls')),
     path('sentry-debug/', trigger_error),
     path('learn-more-about-ai-models/', learn_more_about_ai_models, name='learn_more_about_ai_models'),

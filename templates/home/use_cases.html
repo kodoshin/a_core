@@ -1,0 +1,150 @@
+{% extends "layouts/blank.html" %}
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+.feature-text {
+  line-height: 1.8; /* Valeur typique : entre 1.5 et 2 pour un bon espacement */
+}
+
+</style>
+
+<div class="text-center mb-20">
+  <p style="font-size: xx-large; margin-top: 5em; margin-left: 10%; text-align: left">
+    Who is Kodoshin made for?
+  </p>
+</div>
+
+<div class="features-grid" style="max-width:80%;margin:0 auto;">
+
+  <div class="feature-card">
+    <h3 class="feature-title">Developers</h3>
+    <p class="feature-text">
+      Level up your daily workflow.
+<br>
+🔍 Understand unfamiliar code in seconds — when you're onboarded to a new project.
+<br>
+🛠️ Refactor legacy code safely with Kenshi’s suggestions.
+<br>
+🚀 Speed up development with context-aware completions that match your patterns.
+<br>
+📦 Analyze dependencies and remove unused packages across the repo.
+<br>
+“Kodoshin helps me ship faster with more confidence. It feels like having a senior dev in my IDE.” — Mid-level backend dev
+    </p>
+  </div>
+
+  <div class="feature-card">
+    <h3 class="feature-title">Freelancers</h3>
+    <p class="feature-text">
+      Deliver smarter, charge more.
+<br>
+⏱️ Audit new client projects instantly — even before diving into code.
+<br>
+📋 Auto-generate documentation to boost professionalism.
+<br>
+⚙️ Generate custom features in seconds, tuned to your client’s stack.
+<br>
+🔒 Ensure security & best practices before handing over code.
+<br>
+“I finish weeks of work in hours. Clients think I’m magic — but it’s just Kodoshin.” — Freelance full-stack dev
+    </p>
+  </div>
+
+  <div class="feature-card">
+    <h3 class="feature-title">Startups</h3>
+    <p class="feature-text">
+      Scale your dev team — without hiring more engineers.
+<br>
+🧠 Use Kenshi to prototype ideas quickly without starting from scratch.
+<br>
+🔍 Let Hiko analyze bugs, bottlenecks, or architectural flaws.
+<br>
+📈 Onboard new devs faster with project-level insights.
+<br>
+📊 Keep technical debt under control with smart optimization reports.
+<br>
+“Kodoshin became our technical co-founder — it's like having a code strategist and auditor in one.” — Startup CTO
+    </p>
+  </div>
+
+  <div class="feature-card">
+    <h3 class="feature-title">Students & New Developers</h3>
+    <p class="feature-text">Learn faster, build better.
+    <br>
+    🧩 Ask questions about any repo and get clear explanations.
+    <br>
+    📖 Understand frameworks like Django, React, or Spring Boot by example.
+    <br>
+    🤖 Generate full working features while learning how they’re structured.
+    <br>
+    ✍️ Write cleaner code with smart suggestions based on real patterns.
+    <br>
+    “It’s not just a coding tool — it’s my mentor.” — Junior developer building a portfolio
+    </p>
+  </div>
+
+
+
+</div>
+
+
+<div class="text-center mb-20">
+  <p style="font-size: xx-large; margin-top: 2em; margin-left: 10%; text-align: left">
+    Discover how Kodoshin can help you at every stage of your software lifecycle.
+  </p>
+</div>
+
+<div class="features-grid" style="max-width:80%;margin:0 auto;">
+
+  <div class="feature-card">
+    <h3 class="feature-title">Smart Code Solutions</h3>
+    <p class="feature-text">Goal: Generate accurate, context-aware code — not just completions.<br>
+    Example: You ask Kenshi to “generate a Django view that paginates blog posts and handles filtering.” It delivers fully functional, project-aligned code — using the same ORM patterns, serializers, or conventions already in your codebase.<br>
+    Kodoshin Edge: Kenshi doesn’t guess — it writes solutions that fit your architecture, naming, and logic, like a senior engineer who knows the project inside out.</p>
+  </div>
+
+  <div class="feature-card">
+    <h3 class="feature-title">Understand an Entire Project Instantly</h3>
+    <p class="feature-text">Goal: Quickly grasp the structure and purpose of a codebase (legacy or new).<br>
+    Example: A developer joins a team and needs to understand a Django or Node.js project. Hiko analyzes the repo and provides an architectural overview, key components, and file responsibilities.<br>
+    Kodoshin Edge: No need to dig manually — gain clarity in minutes.</p>
+  </div>
+
+  <div class="feature-card">
+    <h3 class="feature-title">Smart Refactoring</h3>
+    <p class="feature-text">Goal: Restructure and clean up code safely.<br>
+    Example: Kenshi identifies repeated logic, unused code, and proposes clearer abstractions. It helps modularize your project without breaking functionality.<br>
+    Kodoshin Edge: Leverages full-project context for reliable refactors.</p>
+  </div>
+
+  <div class="feature-card">
+    <h3 class="feature-title">Automated Security Review</h3>
+    <p class="feature-text">Goal: Detect security flaws or risky practices.<br>
+    Example: Kodoshin flags hardcoded secrets, insecure headers, outdated packages, or weak auth flows in a Flask or Spring Boot app.<br>
+    Kodoshin Edge: Combines code logic + dependency analysis.</p>
+  </div>
+
+  <div class="feature-card">
+    <h3 class="feature-title">Instant Explanation Generation</h3>
+    <p class="feature-text">Goal: Create meaningful documentation without extra effort.<br>
+    Example: Hiko generates Diagrams and Insights from the code, or summarizes functions and classes with natural language.</p>
+  </div>
+
+  <div class="feature-card">
+    <h3 class="feature-title">Code Optimization Suggestions</h3>
+    <p class="feature-text">Goal: Improve performance or code quality.<br>
+    Example: Kodoshin detects SQL N+1 issues, memory-intensive functions, or redundant state updates in a frontend framework.<br>
+    Kodoshin Edge: Gives actionable advice — not vague suggestions.</p>
+  </div>
+
+  <div class="feature-card">
+    <h3 class="feature-title">Debug Complex Issues</h3>
+    <p class="feature-text">Goal: Identify root causes of bugs quickly.<br>
+    Example: An intermittent production crash occurs. Hiko traces the call stack, highlights likely culprits, and suggests safeguards or cleanup.<br>
+    Kodoshin Edge: Debugs with repository-wide awareness.</p>
+  </div>
+
+
+</div>
+{% endblock %}

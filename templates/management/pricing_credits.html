@@ -70,8 +70,8 @@
             <div class="pricing-title">{{ offer.name }} Rikos</div>
 
             {% if offer.original_price and offer.price != offer.original_price %}
-                <span class="pricing-old-price">${{ offer.original_price|floatformat:0 }}</span>
                 <span class="pricing-price-promo">${{ offer.price|floatformat:0 }}</span>
+                <span class="pricing-old-price">${{ offer.original_price|floatformat:0 }}</span>
             {% else %}
                 <span class="pricing-price">${{ offer.price|floatformat:0 }}</span>
             {% endif %}
@@ -104,8 +104,8 @@
         <div class="pricing-card-header">
           <div class="pricing-title">{{ plan.name }}</div>
           {% if plan.monthly_price and plan.monthly_price != plan.original_price %}
-            <span class="pricing-old-price">${{ plan.original_price|floatformat:0 }}</span>
             <span class="pricing-price-promo">${{ plan.monthly_price|floatformat:0 }}</span>
+            <span class="pricing-old-price">${{ plan.original_price|floatformat:0 }}</span>
           {% else %}
             <span class="pricing-price">${{ plan.monthly_price|floatformat:0 }}</span>
           {% endif %}
@@ -195,8 +195,8 @@
         <div class="pricing-card-header">
           <div class="pricing-title">{{ plan.name }}</div>
           {% if plan.monthly_price and plan.monthly_price != plan.original_price %}
-            <span class="pricing-old-price">${{ plan.original_price|floatformat:0 }}</span>
             <span class="pricing-price-promo">${{ plan.monthly_price|floatformat:0 }}</span>
+            <span class="pricing-old-price">${{ plan.original_price|floatformat:0 }}</span>
           {% else %}
             <span class="pricing-price">${{ plan.monthly_price|floatformat:0 }}</span>
           {% endif %}
@@ -281,7 +281,7 @@
 </div>
 
 <div class="max-w-4xl ml-[15%]">
-  <label>*daily Rikos are not automatic, you need to claim them by connecting to Kodoshin</label>
+  <label>*daily Rikos are not automatic, you need to claim them.</label>
 </div>
 
 <style>

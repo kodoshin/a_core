@@ -82,3 +82,20 @@ def learn_more_about_ai_models(request):
         }
     return render(request, 'home.html', context)
 
+
+def native_technologies(request):
+    """Public page that showcases every active technology."""
+    technologies = Technology.objects.exclude(name="Other").exclude(status__name="inactive")
+    context = {
+        "technologies": technologies,
+    }
+    return render(request, "home/native_technologies.html", context)
+
+
+def use_cases(request):
+    """Static / marketing page that introduces the main use-cases."""
+    personas = Persona.objects.all()
+    context = {
+        "personas": personas,
+    }
+    return render(request, "home/use_cases.html", context)

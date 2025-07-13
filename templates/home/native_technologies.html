@@ -1,0 +1,37 @@
+{% extends "layouts/blank.html" %}
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="text-center mb-20">
+
+  <p style="font-size: xx-large; margin-top: 5em; margin-left: 10%; text-align: left">
+  </p>
+</div>
+
+<section class="tech-carousel" style="width:80%;margin:0 auto;">
+  <div class="carousel-wrapper">
+    <div class="tech-list">
+      {% for tech in technologies %}
+        <div class="tech-item">
+          <img style="width: 20em" src="{{ tech.image.url }}" alt="{{ tech.name }}">
+          <p style="font-size: x-large; font-weight: bold">{{ tech.name }}:</p>
+          <p style="font-size: large">{{ tech.home_description }}</p>
+        </div>
+        <br><br><br>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const carousel = document.querySelector('.tech-carousel .tech-list');
+  document.querySelector('.tech-carousel .carousel-arrow.left').addEventListener('click', function(){
+    carousel.scrollBy({ left: -200, behavior: 'smooth' });
+  });
+  document.querySelector('.tech-carousel .carousel-arrow.right').addEventListener('click', function(){
+    carousel.scrollBy({ left: 200, behavior: 'smooth' });
+  });
+});
+</script>
+{% endblock %}

@@ -26,6 +26,7 @@ class Technology(models.Model):
     status = models.ForeignKey(Status, on_delete=models.CASCADE, null=True, blank=True)
     prompt_example = models.TextField(blank=True, null=True)
     insight_prompt_example = models.TextField(blank=True, null=True)
+    home_description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name
