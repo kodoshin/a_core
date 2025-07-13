@@ -87,19 +87,19 @@ function openAuthPopup(event) {
     border-radius: 5px;
 }
 
-.github-login-button:hover {
-    background-color: #444d56;
-    color: #ffffff;
-}
-
-.github-login-button {
+.home-menu-button{
     display: inline-flex;
     align-items: center;
     background-color: #24292e;
-    color: #ffffff !important;;
-    padding: 10px 20px;
+    color: #ffffff;
+    padding: 0 1rem;
     text-decoration: none !important;
     border-radius: 5px;
+}
+
+.github-login-button:hover {
+    background-color: #444d56;
+    color: #ffffff;
 }
 
 
@@ -128,7 +128,14 @@ function openAuthPopup(event) {
         width: 1em;
         height: auto;
     }
-
+    .home-menu-button{
+        font-size: small;
+        padding: 0 0rem;
+        border-radius: 1px;
+    }
+    .desktop-menu {            /* li holding “Pricing / Use cases / Native …” */
+        display: none !important;
+    }
   }
 </style>
 
@@ -149,18 +156,18 @@ function openAuthPopup(event) {
 
             {% if not request.user.is_authenticated %}
 
-            <li>
-                <a href="{% url 'pricing_credits' %}" class="github-login-button" style="background-color:transparent;padding:0 1rem;">
+            <li class="desktop-menu">
+                <a href="{% url 'pricing_credits' %}" class="home-menu-button" style="background-color:transparent;">
                     Pricing
                 </a>
             </li>
-            <li>
-                <a href="{% url 'native_technologies' %}" class="github-login-button" style="background-color:transparent;padding:0 1rem;">
+            <li class="desktop-menu">
+                <a href="{% url 'native_technologies' %}" class="home-menu-button" style="background-color:transparent;">
                     Native&nbsp;Technologies
                 </a>
             </li>
-            <li>
-                <a href="{% url 'use_cases' %}" class="github-login-button" style="background-color:transparent;padding:0 1rem;">
+            <li class="desktop-menu">
+                <a href="{% url 'use_cases' %}" class="home-menu-button" style="background-color:transparent;">
                     Use&nbsp;cases
                 </a>
             </li>
@@ -177,6 +184,23 @@ function openAuthPopup(event) {
                     Sign in with GitHub
                 </a>
             </div>
+
+
+            <li x-data="{ openMobile:false }" class="relative md:hidden">
+                <button @click="openMobile = !openMobile"
+                        class="github-login-button"
+                        style="margin-left:0.5rem;">
+                    &#9776;
+                </button>
+
+                <!-- Dropdown panel -->
+                <ul x-show="openMobile" x-cloak
+                    class="absolute right-0 mt-2 bg-[#1f1e23] text-white border border-gray-700 rounded shadow-lg w-40">
+                    <li><a href="{% url 'pricing_credits' %}" class="home-menu-button">Pricing</a></li>
+                    <li><a href="{% url 'native_technologies' %}" class="home-menu-button">Native&nbsp;Technologies</a></li>
+                    <li><a href="{% url 'use_cases' %}" class="home-menu-button">Use&nbsp;cases</a></li>
+                </ul>
+            </li>
             {% endif %}
 
 

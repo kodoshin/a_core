@@ -4,7 +4,7 @@
 {% load static %}
 
 {% block layout %}
-
+{% if user.is_authenticated %}
 <script src="https://js.stripe.com/v3/"></script>
 <script>
   const stripe = Stripe('{{ stripe_public_key }}');
@@ -25,6 +25,9 @@
     });
   });
 </script>
+{% endif %}
+
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const monthlyBtn = document.getElementById('monthly-btn');
@@ -63,7 +66,7 @@
   {% for offer in credit_offers %}
     <form action="{% url 'create_checkout_session' offer.id %}" method="post" style="background-color: unset;">
       {% csrf_token %}
-      <button style="background-color: unset;" type="submit" class="buy-button">
+      <button style="background-color: unset;" type="submit" class="buy-button" {% if not user.is_authenticated %}disabled{% endif %}>
         <div class="pricing-card">
           <div class="pricing-card-header">
             <img style="max-width: 30px;  display: inline;" src="https://res.cloudinary.com/ddyepbtzx/image/upload/v1749095379/bolt_j4tbpk.svg" alt="magic"  >
@@ -99,7 +102,7 @@
   <div class="feature-card monthly-plan">
   <form action="{% url 'create_checkout_session_plan' plan.id %}" method="post" style="background-color: unset;">
     {% csrf_token %}
-    <button style="background-color: unset;" type="submit" class="buy-button" {% if plan.monthly_price == 0 %} disabled style="cursor: default; opacity: 0.6;" {% endif %}>
+    <button style="background-color: unset;" type="submit" class="buy-button" {% if plan.monthly_price == 0 %} disabled style="cursor: default; opacity: 0.6;" {% endif %} {% if not user.is_authenticated %}disabled{% endif %}>
       <div class="pricing-card" style="font-weight: bold">
         <div class="pricing-card-header">
           <div class="pricing-title">{{ plan.name }}</div>
@@ -190,7 +193,7 @@
   <div class="feature-card yearly-plan hidden-plan">
   <form action="{% url 'create_checkout_session_plan' plan.id %}" method="post" style="background-color: unset;">
     {% csrf_token %}
-    <button style="background-color: unset;" type="submit" class="buy-button" {% if plan.monthly_price == 0 %} disabled style="cursor: default; opacity: 0.6;" {% endif %}>
+    <button style="background-color: unset;" type="submit" class="buy-button" {% if plan.monthly_price == 0 %} disabled style="cursor: default; opacity: 0.6;" {% endif %} {% if not user.is_authenticated %}disabled{% endif %}>
       <div class="pricing-card" style="font-weight: bold">
         <div class="pricing-card-header">
           <div class="pricing-title">{{ plan.name }}</div>
