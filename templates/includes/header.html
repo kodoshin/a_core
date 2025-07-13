@@ -21,21 +21,57 @@ function openAuthPopup(event) {
     );
 }
 
-/* Listener de retour : recharge la fenêtre principale lorsque
-   le popup envoie le message « social-auth-success ». */
 (function () {
     const EXPECTED_MESSAGE = 'social-auth-success';
     const HOME_URL         = '/';
 
-    window.addEventListener('message', function (event) {
-        console.log('listening...')
-        /* Vérifie la provenance */
-        if (event.origin !== window.location.origin) return;
-        /* Vérifie le contenu */
-        if (event.data === EXPECTED_MESSAGE) {
-            window.location.assign(HOME_URL);
-        }
-    }, false);
+    /* -------------------------------------------------------------
+       Legacy postMessage listener
+       ------------------------------------------------------------- */
+    window.addEventListener(
+        'message',
+        function (event) {
+            if (event.origin !== window.location.origin) return;
+            if (event.data === EXPECTED_MESSAGE) {
+                window.location.assign(HOME_URL);
+            }
+        },
+        false
+    );
+
+    /* -------------------------------------------------------------
+       BroadcastChannel listener – works even if window.opener = null
+       ------------------------------------------------------------- */
+    if ('BroadcastChannel' in window) {
+        const bc = new BroadcastChannel('auth_channel');
+        bc.onmessage = function (event) {
+            if (event.data === EXPECTED_MESSAGE) {
+                window.location.assign(HOME_URL);
+            }
+        };
+    }
+
+    /* -------------------------------------------------------------
+       Helper used by the “Sign in with GitHub” link
+       ------------------------------------------------------------- */
+    window.openAuthPopup = function (event) {
+        event.preventDefault();
+
+        const url = event.currentTarget.href;
+        const width  = 600;
+        const height = 700;
+        const left   = (screen.width  - width)  / 2;
+        const top    = (screen.height - height) / 2;
+
+        window.open(
+            url,
+            'GitHubLogin',
+            'width=' + width +
+            ',height=' + height +
+            ',top=' + top +
+            ',left=' + left
+        );
+    };
 })();
 </script>
 

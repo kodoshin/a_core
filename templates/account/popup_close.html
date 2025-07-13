@@ -3,28 +3,34 @@
 </head>
 <body style="background:#1f1e23;color:white">
 <script>
-/* -------------------------------------------------------------
-   Le popup vient de se charger.
-   S’il possède un opener, on lui envoie le message ‘social-auth-success’
-   ------------------------------------------------------------- */
 (function () {
-    const HOME_URL = '/';                      // redirection de la fenêtre principale
-    const MESSAGE  = 'social-auth-success';    // identifiant du message
+    const HOME_URL = '/';
+    const MESSAGE  = 'social-auth-success';
+    const ORIGIN   = window.location.origin;
 
+    /* 1. First try the classical opener channel */
     if (window.opener && !window.opener.closed) {
-        /* 1. On notifie l’opener */
         try {
-            window.opener.postMessage(MESSAGE, window.location.origin);
+            window.opener.postMessage(MESSAGE, ORIGIN);
         } catch (e) {
-            /* Cross-origin fallback : on tente quand même le reload direct */
-            window.opener.location.assign(HOME_URL);
+            /* Cross-origin → direct reload */
+            try { window.opener.location.assign(HOME_URL); } catch (_) {}
         }
-        /* 2. On ferme ce popup */
+    } else if ('BroadcastChannel' in window) {
+        /* 2. Fallback : BroadcastChannel */
+        try {
+            const bc = new BroadcastChannel('auth_channel');
+            bc.postMessage(MESSAGE);
+            bc.close();
+        } catch (_) {}
+    }
+
+    /* 3. Close the popup, or at least redirect it */
+    try {
         window.close();
-    } else {
-        /* 3. Aucune fenêtre parent : on reste dans ce tab et on redirige vers home */
+        setTimeout(function () { window.location.assign(HOME_URL); }, 100);
+    } catch (_) {
         window.location.assign(HOME_URL);
-        window.close();
     }
 })();
 </script>
