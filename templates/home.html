@@ -79,7 +79,26 @@ document.addEventListener('DOMContentLoaded', function(){
     });
 </script>
 
-
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.feature-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      /* Coordinates inside the card */
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      /* Update CSS vars for gradient centre */
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
+    });
+    /* Reset to centre on leave for smoother fade-out */
+    card.addEventListener('mouseleave', () => {
+      card.style.setProperty('--mouse-x', `50%`);
+      card.style.setProperty('--mouse-y', `50%`);
+    });
+  });
+});
+</script>
 
 <style>
 body {
@@ -264,6 +283,27 @@ body {
   background-color: #1F2937; /* bg-gray-800 */
   padding: 2rem; /* p-8 */
   border-radius: 1rem; /* rounded-xl */
+  position: relative;                    /* enable absolute ::before overlay  */
+  overflow: hidden;                      /* hide gradient overflow            */
+  --mouse-x: 10%;                        /* fallback values                   */
+  --mouse-y: 10%;
+}
+.feature-card::before{
+    content: "";
+    position: absolute;
+    inset: 0;                              /* cover the card                    */
+    pointer-events: none;                  /* keep mouse events on .feature-card*/
+    background: radial-gradient(
+                600px circle at var(--mouse-x) var(--mouse-y),
+                rgba(59,130,246,0.35),     /* blue glow centre                  */
+                rgba(37,99,235,0.15) 40%,
+                transparent 70%);
+    opacity: 0;                            /* hidden until hover                */
+    transition: opacity .25s ease-out,
+                transform .25s ease-out;
+}
+.feature-card:hover::before{
+    opacity: 1;                            /* show gradient on hover            */
 }
 
 /* Style générique pour les icônes */
