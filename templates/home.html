@@ -13,6 +13,7 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 
+
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   const carousel = document.querySelector('.tech-carousel .tech-list');
@@ -42,6 +43,59 @@ document.addEventListener('DOMContentLoaded', function(){
     });
 });
 </script>
+
+<!-- ❶--- Place this style block after the other <style> tags (or merge it) -->
+<style>
+    /* -------- Cursor trailing effect -------- */
+    .cursor-trail{
+        position:fixed;
+        top:0;left:0;
+        width:60px;height:60px;
+        border-radius:50%;
+        pointer-events:none;                /* do not block clicks  */
+        background:radial-gradient(circle at center,
+                                    rgba(59,130,246,0.7) 0%,
+                                    rgba(59,130,246,0.25) 40%,
+                                    transparent 70%);
+        transform:translate(-50%,-50%);    /* centers halo on pointer */
+        filter:blur(8px);
+        transition:top .01s linear,left .01s linear;
+        z-index:9999;                      /* always behind cursor, above page */
+    }
+</style>
+
+<!-- ❷--- Place this script block after the other <script> tags, just before </body> -->
+<script>
+    /* -------- Build & animate the cursor trail -------- */
+    document.addEventListener('DOMContentLoaded',()=>{
+        const trail=document.createElement('div');
+        trail.className='cursor-trail';
+        document.body.appendChild(trail);
+
+        window.addEventListener('mousemove',e=>{
+            trail.style.top = e.clientY + 'px';
+            trail.style.left= e.clientX + 'px';
+        });
+    });
+</script>
+
+
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  background: linear-gradient(-45deg, #1f1e23, #4e4d55, #1f1e23, #1f1e23);
+  background-size: 1600% 1600%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+</style>
 
 <style>
 
@@ -790,7 +844,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <br><br><br>
 -->
 
-<div class="text-center mb-20 testimonials-section">
+<div class="text-center mb-20 testimonials-section" style="background-color: unset">
     <h2 class="title">What Our Users Say</h2>
     <div class="testimonials-grid">
       <div class="testimonial-card">
