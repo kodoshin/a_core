@@ -1,0 +1,20 @@
+{% extends "layouts/blank.html" %}
+{% load i18n %}
+
+{#-- Force body classes: black background, white text --#}
+{% block class %}bg-black text-white{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto flex flex-col justify-center items-center py-24 space-y-8" style="background-color: unset">
+        <h1 class="text-4xl font-bold">{% trans "Sign Out" %}</h1>
+
+        <p class="text-lg">{% trans "Are you sure you want to sign out?" %}</p>
+
+        <form method="post" action="{% url 'account_logout' %}" class="text-center space-y-4">
+            {% csrf_token %}
+            <button type="submit" class="button alert">
+                {% trans "Sign Out" %}
+            </button>
+        </form>
+    </div>
+{% endblock %}
